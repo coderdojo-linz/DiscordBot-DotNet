@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot_Template", "Disc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot.Modules", "DiscordBot.Modules\DiscordBot.Modules.csproj", "{226D289A-50D2-414B-A309-84E7E6FB32BF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBot.Domain", "DiscordBot.Domain\DiscordBot.Domain.csproj", "{9288A8DF-8C50-41C8-86BE-28D931175375}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{A1D0BFCB-B984-4BC8-B1E9-E9A36970E5B0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Playground", "Misc\Playground\Playground.csproj", "{15AE844A-87C2-4160-B33D-26A966B3B8EA}"
@@ -25,6 +27,10 @@ Global
 		{226D289A-50D2-414B-A309-84E7E6FB32BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{226D289A-50D2-414B-A309-84E7E6FB32BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{226D289A-50D2-414B-A309-84E7E6FB32BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9288A8DF-8C50-41C8-86BE-28D931175375}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9288A8DF-8C50-41C8-86BE-28D931175375}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9288A8DF-8C50-41C8-86BE-28D931175375}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9288A8DF-8C50-41C8-86BE-28D931175375}.Release|Any CPU.Build.0 = Release|Any CPU
 		{15AE844A-87C2-4160-B33D-26A966B3B8EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{15AE844A-87C2-4160-B33D-26A966B3B8EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15AE844A-87C2-4160-B33D-26A966B3B8EA}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -1,6 +1,10 @@
 ﻿{
-  "Discord": {
-    "Token": "YOUR TOKEN HERE",
-    "CommandPrefix": "!"
-  } 
+    "Discord": {
+        "Token": "YOUR TOKEN HERE",
+        "CommandPrefix": "!"
+    },
+    "Imgur": {
+        "Client_ID": "get your own on https://api.imgur.com/oauth2/addclient",
+        "Client_Secret": "get your own on https://api.imgur.com/oauth2/addclient"
+    }
 }
