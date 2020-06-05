@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace CoderDojo_Discordbot.Models.Configuration
+﻿namespace DiscordBot.Domain.Configuration
 {
     public class ImgurSettings
     {

@@ -1,8 +1,8 @@
 ﻿using Discord.Commands;
 using System.Threading.Tasks;
 using System.Net.Http;
+using DiscordBot.Domain.WeatherModel;
 using Newtonsoft.Json;
-using DiscordBot.Modules.WeatherModel;
 
 namespace DiscordBot.Modules
 {

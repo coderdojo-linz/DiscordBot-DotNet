@@ -1,9 +1,6 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace DiscordBot.Modules.WeatherModel
+namespace DiscordBot.Domain.WeatherModel
 {
     public partial class SysModel
     {
