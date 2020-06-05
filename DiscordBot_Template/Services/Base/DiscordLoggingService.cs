@@ -1,12 +1,10 @@
-﻿using Discord;
+﻿using System;
+using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
-
 using Microsoft.Extensions.Logging;
 
-using System;
-using System.Threading.Tasks;
-
-namespace CoderDojo_Discordbot.Services
+namespace DiscordBot.Services.Base
 {
     public class DiscordLoggingService : IDisposable
     {

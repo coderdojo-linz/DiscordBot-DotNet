@@ -1,21 +1,18 @@
-﻿using CoderDojo_Discordbot.Services;
-
+﻿using System;
+using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-
+using DiscordBot.Domain.Configuration;
+using DiscordBot.Services.Base;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-using System;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using DiscordBot.Domain.Configuration;
-
-namespace CoderDojo_Discordbot
+namespace DiscordBot
 {
     internal class Program
     {
