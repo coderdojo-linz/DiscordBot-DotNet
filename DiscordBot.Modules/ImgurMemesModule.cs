@@ -12,23 +12,8 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Modules
 {
-    public static class Extensions
-    {
-        public static string DoubleString(this string value)
-        {
-            return value + value;
-        }
-
-        public static T getOptions<T>(this IOptions<T> value) where T : class, new()
-        {
-            return value.Value;
-        }
-    }
-
-
-
-    public class ImgurMemesModule : ModuleBase
-    {
+   public class ImgurMemesModule : ModuleBase
+   {
         private ImgurSettings _settings;
 
         private static List<string> ImageDatabase = new List<string>();
@@ -91,5 +76,5 @@ namespace DiscordBot.Modules
 
             return new List<string>();
         }
-    }
+   }
 }
