@@ -2,8 +2,9 @@
 using System.Threading.Tasks;
 using System.Net.Http;
 using Newtonsoft.Json;
+using DiscordBot.Modules.WeatherModel;
 
-namespace DiscordBot.Modules.WeatherModel
+namespace DiscordBot.Modules
 {
     public class WeatherModule : ModuleBase
     {
