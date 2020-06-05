@@ -1,5 +1,4 @@
-﻿using CoderDojo_Discordbot.Models.Configuration;
-using CoderDojo_Discordbot.Services;
+﻿using CoderDojo_Discordbot.Services;
 
 using Discord;
 using Discord.Commands;
@@ -14,6 +13,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using DiscordBot.Domain.Configuration;
 
 namespace CoderDojo_Discordbot
 {

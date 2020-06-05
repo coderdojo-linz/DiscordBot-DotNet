@@ -1,5 +1,4 @@
-﻿using CoderDojo_Discordbot.Models.Configuration;
-using Discord.Commands;
+﻿using Discord.Commands;
 using Imgur.API;
 using Imgur.API.Authentication.Impl;
 using Imgur.API.Endpoints.Impl;
@@ -9,6 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using DiscordBot.Domain.Configuration;
 
 namespace DiscordBot.Modules
 {
