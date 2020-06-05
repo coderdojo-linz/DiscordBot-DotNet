@@ -13,6 +13,9 @@ namespace DiscordBot.Modules
             await ReplyAsync("Pong!");
         }
 
+        [Command("ping2")]
+        public async Task Ping2() => await TestCommandAsync();
+
         [Command("hello")]
         public async Task HelloWorld()
         {
