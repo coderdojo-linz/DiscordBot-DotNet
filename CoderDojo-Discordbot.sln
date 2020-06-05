@@ -5,7 +5,11 @@ VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot_Template", "DiscordBot_Template\DiscordBot_Template.csproj", "{A2058284-C973-44F8-B072-8714C1076F60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBot.Modules", "DiscordBot.Modules\DiscordBot.Modules.csproj", "{226D289A-50D2-414B-A309-84E7E6FB32BF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot.Modules", "DiscordBot.Modules\DiscordBot.Modules.csproj", "{226D289A-50D2-414B-A309-84E7E6FB32BF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{A1D0BFCB-B984-4BC8-B1E9-E9A36970E5B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Playground", "Misc\Playground\Playground.csproj", "{15AE844A-87C2-4160-B33D-26A966B3B8EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +25,16 @@ Global
 		{226D289A-50D2-414B-A309-84E7E6FB32BF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{226D289A-50D2-414B-A309-84E7E6FB32BF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{226D289A-50D2-414B-A309-84E7E6FB32BF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15AE844A-87C2-4160-B33D-26A966B3B8EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15AE844A-87C2-4160-B33D-26A966B3B8EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15AE844A-87C2-4160-B33D-26A966B3B8EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15AE844A-87C2-4160-B33D-26A966B3B8EA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{15AE844A-87C2-4160-B33D-26A966B3B8EA} = {A1D0BFCB-B984-4BC8-B1E9-E9A36970E5B0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9A1E29E-BFC1-4F4B-BCF6-5A5A199E072E}
