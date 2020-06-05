@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "DiscordBot_Template": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

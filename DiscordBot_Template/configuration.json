@@ -1,0 +1,6 @@
+﻿{
+  "Discord": {
+    "Token": "YOUR TOKEN HERE",
+    "CommandPrefix": "!"
+  } 
+}
