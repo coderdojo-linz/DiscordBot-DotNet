@@ -23,6 +23,7 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
+  displayName: Publish
   inputs:
     command: publish
     publishWebProjects: True
@@ -39,4 +40,4 @@ steps:
     appType: webApp
     azureSubscription: 'CoderDojo Discord Bot .NET'
     appName: 'coderdojo-discord-bot-dotnet'
-    package: $(System.DefaultWorkingDirectory)/**/*.zip 
+    package: $(Build.ArtifactStagingDirectory)/**/*.zip 
