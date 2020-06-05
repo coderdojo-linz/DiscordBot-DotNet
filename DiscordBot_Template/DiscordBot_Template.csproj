@@ -33,11 +33,13 @@
 
 
   <ItemGroup>
+    <Folder Include="Models\" />
     <Folder Include="Modules\" />
   </ItemGroup>
 
 
   <ItemGroup>
+    <ProjectReference Include="..\DiscordBot.Domain\DiscordBot.Domain.csproj" />
     <ProjectReference Include="..\DiscordBot.Modules\DiscordBot.Modules.csproj" />
   </ItemGroup>
 

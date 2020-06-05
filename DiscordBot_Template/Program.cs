@@ -57,6 +57,7 @@ namespace CoderDojo_Discordbot
                 .AddSingleton<DiscordLoggingService>();
 
             serviceCollection.Configure<DiscordSettings>(configuration.GetSection("Discord"));
+            serviceCollection.Configure<ImgurSettings>(configuration.GetSection("Imgur"));
 
             return serviceCollection.BuildServiceProvider();
         }
