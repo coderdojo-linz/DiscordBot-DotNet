@@ -1,18 +1,15 @@
-using CoderDojo_Discordbot.Models.Configuration;
-
-using Discord;
-using Discord.Commands;
-using Discord.WebSocket;
-
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-
 using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Discord;
+using Discord.Commands;
+using Discord.WebSocket;
+using DiscordBot.Domain.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
-namespace CoderDojo_Discordbot.Services
+namespace DiscordBot.Services.Base
 {
     public class CommandHandlingService
     {

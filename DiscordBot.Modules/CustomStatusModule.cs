@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Modules
 {
-    public class PingModule : ModuleBase
+    public class CustomStatusModule : ModuleBase
     {
-        [Command("ping")]
+        [Command("status update")]
         public async Task TestCommandAsync()
         {
             await ReplyAsync("Pong!");
