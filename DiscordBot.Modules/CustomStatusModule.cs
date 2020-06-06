@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Modules
 {
-    public class StatusModule : ModuleBase<SocketCommandContext>
+    public class CustomStatusModule : ModuleBase<SocketCommandContext>
     {
         private Timer _timer;
         private int _statusIndex = 0;
@@ -20,7 +20,7 @@ namespace DiscordBot.Modules
         static List<string> _statusList = new List<string>() { "CoderDojoBot!", "den Code der Coder an" };
         static List<ActivityType> _activityList = new List<ActivityType>() { ActivityType.Playing, ActivityType.Watching };
 
-        public StatusModule(AuthorizationService authorizationService)
+        public CustomStatusModule(AuthorizationService authorizationService)
         {
             _authorizationService = authorizationService;
         }
