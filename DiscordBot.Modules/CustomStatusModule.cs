@@ -117,20 +117,3 @@ namespace DiscordBot.Modules
         }
     }
 }
-//[Command("update-status")]
-//public async Task Status(ActivityType activity, [Remainder] string input)
-//{
-//    if (_authorizationService.IsUserTrusted(base.Context.User.Username + "#" + base.Context.User.DiscriminatorValue))
-//    {
-//        await base.Context.Client.SetActivityAsync(new Game(input, type: activity));
-//        await ReplyAsync($"Der Status wurde auf **{activity} {input}** gesetzt!");
-//    }
-//    else if (!_authorizationService.IsUserTrusted(base.Context.User.Username + "#" + base.Context.User.DiscriminatorValue))
-//    {
-//        await ReplyAsync($"Du bist nicht getrustet, {base.Context.User.Mention}");
-//    }
-//    else
-//    {
-//        await ReplyAsync("Ein Fehler ist aufgetreten! Bitte informiere die Admins darüber!");
-//    }
-//}
