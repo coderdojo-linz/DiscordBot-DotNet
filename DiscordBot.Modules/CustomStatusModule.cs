@@ -3,7 +3,6 @@ using Discord.Commands;
 using DiscordBot.Modules.Services;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,10 +11,10 @@ namespace DiscordBot.Modules
 {
     public class CustomStatusModule : ModuleBase<SocketCommandContext>
     {
-        private Timer _timer;
-        private int _statusIndex = 0;
+        static private Timer _timer;
+        static private int _statusIndex = 0;
         private AuthorizationService _authorizationService;
-        public int abort = 0;
+        static public int _abort = 1;
 
         static List<string> _statusList = new List<string>() { "CoderDojoBot!", "den Code der Coder an" };
         static List<ActivityType> _activityList = new List<ActivityType>() { ActivityType.Playing, ActivityType.Watching };
@@ -30,11 +29,10 @@ namespace DiscordBot.Modules
         {
             if (_authorizationService.IsUserTrusted(base.Context.User.Username + "#" + base.Context.User.DiscriminatorValue))
             {
-                //await base.Context.Client.SetActivityAsync(new Game(input, type: activity));
+                await base.Context.Client.SetActivityAsync(new Game(input, type: activity));
                 await ReplyAsync($"Der Status1 wurde auf **{activity} {input}** gesetzt!");
                 _statusList[1] = input;
                 _activityList[1] = activity;
-
             }
             else if (!_authorizationService.IsUserTrusted(base.Context.User.Username + "#" + base.Context.User.DiscriminatorValue))
             {
@@ -90,30 +88,50 @@ namespace DiscordBot.Modules
                 await ReplyAsync("Ein Fehler ist aufgetreten! Bitte informiere die Admins darüber!");
             }
         }
-        [Command("startstatus")]
-        public async Task Startstatus()
+        [Command("startstatusupdater")]
+        public async Task StatusUpdater()
         {
-            if (abort >= 0) {
-                _timer = new Timer(async _ =>
-                {
-                    await base.Context.Client.SetActivityAsync(new Game(_statusList.ElementAtOrDefault(_statusIndex), type: _activityList.ElementAtOrDefault(_statusIndex)));
-                    _statusIndex = _statusIndex + 1 == _statusList.Count ? 0 : _statusIndex + 1;
-                },
-                null,
-                TimeSpan.FromSeconds(1),
-                TimeSpan.FromSeconds(10));
-            }
-            else
+            await ReplyAsync("Der Statusupdater wurde gestartet!");
+            while (true)
             {
-                abort = 0;
-                await base.Context.Client.SetActivityAsync(null);
+                if (_abort == 1)
+                {
+                    await base.Context.Client.SetActivityAsync(null);
+                    await Task.Delay(TimeSpan.FromSeconds(1));
+                }
+                else if (_abort == 0)
+                {
+                    while (_abort == 0)
+                    {
+                        _timer = new Timer(async _ =>
+                        {
+                            await base.Context.Client.SetActivityAsync(new Game(_statusList.ElementAtOrDefault(_statusIndex), type: _activityList.ElementAtOrDefault(_statusIndex)));
+                            _statusIndex = _statusIndex + 1 == _statusList.Count ? 0 : _statusIndex + 1;
+                        },
+                        null,
+                        TimeSpan.FromSeconds(1),
+                        TimeSpan.FromSeconds(10));
+                    }
+                }
+                else
+                {
+                    await ReplyAsync("Ein Fehler ist aufgetreten! Bitte informiere die Admins darüber!");
+                }
             }
         }
 
         [Command("stopstatus")]
         public async Task Stopstatus()
         {
-           abort = 1;
+            await ReplyAsync("Der Status wurde gestoppt!");
+            _abort = 1;
+        }
+
+        [Command("startstatus")]
+        public async Task Startstatus()
+        {
+            await ReplyAsync("Der Status wurde gestartet!");
+            _abort = 0;
         }
     }
 }

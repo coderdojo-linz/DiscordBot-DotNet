@@ -10,7 +10,8 @@
     "Modules": {
         "Permissions": {
             "banned_users": [],
-            "trusted_users": ["El'Capitano#1337", "_SIM_#4604", "Rainer#6623"]
+            "trusted_users": [ "El'Capitano#1337", "_SIM_#4604", "Rainer#6623" ],
+            "admin_users": [ "El'Capitano#1337", "_SIM_#4604", "Rainer#6623" ]
         }
     }
 }

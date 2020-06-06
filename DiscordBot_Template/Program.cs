@@ -53,7 +53,7 @@ namespace DiscordBot
                 .AddOptions()
                 .AddSingleton<HttpClient>()
                 .AddSingleton<DiscordSocketClient>()
-                .AddSingleton<CommandService>()
+                .AddSingleton<CommandService>(x => new CommandService(new CommandServiceConfig { DefaultRunMode = RunMode.Async, LogLevel = LogSeverity.Info }))
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<DiscordLoggingService>()
                 .AddTransient<AuthorizationService>();

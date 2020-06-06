@@ -22,5 +22,10 @@ namespace DiscordBot.Modules.Services
         {
             return _settings.trusted_users.Contains(username);
         }
+
+        public bool IsUserAdmin(string username)
+        {
+            return _settings.trusted_users.Contains(username);
+        }
     }
 }

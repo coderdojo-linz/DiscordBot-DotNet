@@ -88,8 +88,6 @@ namespace DiscordBot.Services.Base
 
                 _logger.Log(LogLevel.Information, $"Added {modules.Count} modules. ({string.Join('|', modules.Select(m => m.Name))})");
             }
-
-            _logger.Log(LogLevel.Information, $"Modules initialized");
         }
 
         public async Task MessageReceivedAsync(SocketMessage rawMessage)
