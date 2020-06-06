@@ -6,5 +6,11 @@
     "Imgur": {
         "Client_ID": "get your own on https://api.imgur.com/oauth2/addclient",
         "Client_Secret": "get your own on https://api.imgur.com/oauth2/addclient"
+    },
+    "Modules": {
+        "Permissions": {
+            "banned_users": [],
+            "trusted_users": ["El'Capitano#1337", "_SIM_#4604", "Rainer#6623"]
+        }
     }
 }

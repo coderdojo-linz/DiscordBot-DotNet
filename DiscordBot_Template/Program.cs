@@ -6,6 +6,8 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using DiscordBot.Domain.Configuration;
+using DiscordBot.Modules;
+using DiscordBot.Modules.Services;
 using DiscordBot.Services.Base;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,6 +41,8 @@ namespace DiscordBot
             // Here we initialize the logic required to register our commands.
             await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
             await Task.Delay(-1);
+            
+            
         }
 
         private static IServiceProvider ConfigureServices(IConfiguration configuration)
@@ -51,10 +55,12 @@ namespace DiscordBot
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
-                .AddSingleton<DiscordLoggingService>();
+                .AddSingleton<DiscordLoggingService>()
+                .AddTransient<AuthorizationService>();
 
             serviceCollection.Configure<DiscordSettings>(configuration.GetSection("Discord"));
             serviceCollection.Configure<ImgurSettings>(configuration.GetSection("Imgur"));
+            serviceCollection.Configure<Permissions>(configuration.GetSection("Modules:Permissions"));
 
             return serviceCollection.BuildServiceProvider();
         }
