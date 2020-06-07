@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30114.105
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot", "DiscordBot_Template\DiscordBot.csproj", "{A2058284-C973-44F8-B072-8714C1076F60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot", "DiscordBot\DiscordBot.csproj", "{A2058284-C973-44F8-B072-8714C1076F60}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot.Modules", "DiscordBot.Modules\DiscordBot.Modules.csproj", "{226D289A-50D2-414B-A309-84E7E6FB32BF}"
 EndProject
