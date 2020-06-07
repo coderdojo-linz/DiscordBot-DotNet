@@ -1,0 +1,8 @@
+bin
+obj
+.gitignore
+.dockerignore
+Dockerfile
+LICENSE
+readme.md
+azure-pipelines.yml
