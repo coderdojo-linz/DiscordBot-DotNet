@@ -6,7 +6,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  imageName: 'coderdojo.azurecr.io/discord-bot-dotnet'
+  imageName: 'discord-bot-dotnet'
 
 stages:
 - stage: Build
@@ -14,20 +14,20 @@ stages:
   - job: BuildJob
     steps:
     - task: Docker@2
-      displayName: Build an image
+      displayName: Login to ACR
       inputs:
-        repository: $(imageName)
-        command: build
-        Dockerfile: Dockerfile
+        command: login
+        containerRegistry: 'CoderDojo Container Registry'
 
     - task: Docker@2
       displayName: Build and push an image to container registry
       inputs:
-        command: push
+        command: buildAndPush
         repository: $(imageName)
         containerRegistry: 'CoderDojo Container Registry'
         tags: |
           $(BuildID)
+          latest
 
     - task: AzureCLI@2
       displayName: Azure CLI
