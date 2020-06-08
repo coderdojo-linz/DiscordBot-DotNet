@@ -7,7 +7,6 @@ pool:
 
 variables:
   imageName: 'discord-bot-dotnet'
-  AcrSecret: $(ACR_SECRET)
 
 stages:
 - stage: Build
@@ -32,6 +31,8 @@ stages:
 
     - task: AzureCLI@2
       displayName: Azure CLI
+      env:
+        ACR_SECRET: $(ACR_SECRET)
       inputs:
         azureSubscription: 'CoderDojo Containers'
         scriptType: bash
@@ -40,4 +41,4 @@ stages:
           echo $ACR_USER
           echo $ACR_SECRET
           az container create --resource-group Containers --name $(imageName) --image coderdojo.azurecr.io/$(imageName):latest \
-            --dns-name-label $(imageName) --registry-login-server coderdojo.azurecr.io --registry-username $ACR_USER --registry-password $AcrSecret
+            --dns-name-label $(imageName) --registry-login-server coderdojo.azurecr.io --registry-username $ACR_USER --registry-password $ACR_SECRET
