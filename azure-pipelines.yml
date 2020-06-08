@@ -1,0 +1,47 @@
+trigger:
+- master
+- build-automation
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageName: 'discord-bot-dotnet'
+
+stages:
+- stage: Build
+  jobs:
+  - job: BuildJob
+    steps:
+    - task: Docker@2
+      displayName: Login to ACR
+      inputs:
+        command: login
+        containerRegistry: 'CoderDojo Container Registry'
+
+    - task: Docker@2
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(imageName)
+        containerRegistry: 'CoderDojo Container Registry'
+        tags: |
+          latest
+
+    - task: AzureCLI@2
+      displayName: Azure CLI
+      env:
+        ACR_SECRET: $(ACR_SECRET)
+        DISCORD_TOKEN: $(DISCORD_TOKEN)
+        IMGUR_SECRET: $(IMGUR_SECRET)
+      inputs:
+        azureSubscription: 'CoderDojo Containers'
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          az provider register --namespace 'Microsoft.ContainerInstance'
+          az container create --resource-group Containers --name $(imageName) --image coderdojo.azurecr.io/$(imageName):latest \
+            --dns-name-label $(imageName) --registry-login-server coderdojo.azurecr.io --registry-username $ACR_USER --registry-password $ACR_SECRET \
+            --secure-environment-variables Discord__Token=$DISCORD_TOKEN Imgur__Client_ID=$IMGUR_CLIENT_ID Imgur__Client_Secret=$IMGUR_SECRET
+          az container restart  --resource-group Containers --name $(imageName)
+          
