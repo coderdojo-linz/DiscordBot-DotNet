@@ -36,5 +36,5 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
-          az acr login
+          az acr login --name coderdojo.azurecr.io
           az container create --resource-group Containers --name $(imageName) --image coderdojo.azurecr.io/$(imageName):latest --dns-name-label $(imageName)
