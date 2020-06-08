@@ -33,6 +33,8 @@ stages:
       displayName: Azure CLI
       env:
         ACR_SECRET: $(ACR_SECRET)
+        DISCORD_TOKEN: $(DISCORD_TOKEN)
+        IMGUR_SECRET: $(IMGUR_SECRET)
       inputs:
         azureSubscription: 'CoderDojo Containers'
         scriptType: bash
@@ -40,4 +42,5 @@ stages:
         inlineScript: |
           az provider register --namespace 'Microsoft.ContainerInstance'
           az container create --resource-group Containers --name $(imageName) --image coderdojo.azurecr.io/$(imageName):latest \
-            --dns-name-label $(imageName) --registry-login-server coderdojo.azurecr.io --registry-username $ACR_USER --registry-password $ACR_SECRET
+            --dns-name-label $(imageName) --registry-login-server coderdojo.azurecr.io --registry-username $ACR_USER --registry-password $ACR_SECRET \
+            --environment-variables Discord__Token=$DISCORD_TOKEN Imgur__Client_ID=$IMGUR_CLIENT_ID Imgur__Client_Secret=$IMGUR_SECRET
