@@ -26,7 +26,6 @@ stages:
         repository: $(imageName)
         containerRegistry: 'CoderDojo Container Registry'
         tags: |
-          $(BuildID)
           latest
 
     - task: AzureCLI@2
