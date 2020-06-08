@@ -35,5 +35,4 @@ stages:
         scriptType: bash
         scriptLocation: inlineScript
         inlineScript: |
-          az --version
-          az account show
+          az container create --resource-group Containers --name $(imageName) --image coderdojo.azurecr.io/$(imageName):latest --dns-name-label $(discord-bot-dotnet)
