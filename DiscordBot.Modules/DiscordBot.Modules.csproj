@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DiscordBot.Domain\DiscordBot.Domain.csproj" />
+    <ProjectReference Include="..\Includes\lib-rcon\lib-rcon.csproj" />
   </ItemGroup>
 
 </Project>

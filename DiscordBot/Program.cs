@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using DiscordBot.Domain.Abstractions;
 using DiscordBot.Domain.Configuration;
+using DiscordBot.Modules.Services;
 using DiscordBot.Services.Base;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,11 +49,17 @@ namespace DiscordBot
                 .AddSingleton(configuration)
                 .AddLogging(builder => builder.AddConsole())
                 .AddOptions()
-                .AddSingleton<HttpClient>()
+                .AddHttpClient()
+                .AddTransient(x => x.GetService<IHttpClientFactory>().CreateClient("Default"))
+
+                .AddScoped<IWeatherService, WeatherService>()
+                .AddScoped<ICatService, CatService>()
+
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<CommandHandlingService>()
-                .AddSingleton<DiscordLoggingService>();
+                .AddSingleton<DiscordLoggingService>()
+                ;
 
             serviceCollection.Configure<DiscordSettings>(configuration.GetSection("Discord"));
             serviceCollection.Configure<ImgurSettings>(configuration.GetSection("Imgur"));
