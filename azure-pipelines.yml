@@ -6,7 +6,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  imageName: 'discord-bot-dotnet'
+  imageName: 'coderdojo.azurecr.io/discord-bot-dotnet'
 
 stages:
 - stage: Build
