@@ -19,7 +19,7 @@ namespace DiscordBot.Modules
             var players = MCHelper.LoadPlayers(rcon, errsb);
 
 
-            rcon.ExecuteCmd("");
+          
 
             rcon.StopComms();
             await base.Context.Channel.SendMessageAsync(string.Join("\n", players));

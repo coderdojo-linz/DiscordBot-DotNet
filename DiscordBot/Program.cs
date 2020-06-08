@@ -1,18 +1,21 @@
-﻿using System;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+
 using DiscordBot.Domain.Abstractions;
 using DiscordBot.Domain.Configuration;
 using DiscordBot.Modules.Services;
 using DiscordBot.Services.Base;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
+using System;
+using System.IO;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace DiscordBot
 {
