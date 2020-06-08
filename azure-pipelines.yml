@@ -43,3 +43,5 @@ stages:
           az container create --resource-group Containers --name $(imageName) --image coderdojo.azurecr.io/$(imageName):latest \
             --dns-name-label $(imageName) --registry-login-server coderdojo.azurecr.io --registry-username $ACR_USER --registry-password $ACR_SECRET \
             --environment-variables Discord__Token=$DISCORD_TOKEN Imgur__Client_ID=$IMGUR_CLIENT_ID Imgur__Client_Secret=$IMGUR_SECRET
+          az container restart  --resource-group Containers --name $(imageName)
+          
