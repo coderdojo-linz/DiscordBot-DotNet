@@ -1,3 +1,36 @@
 trigger:
 - master
 - build-automation
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageName: 'discord-bot-dotnet'
+
+steps:
+- task: Docker@2
+  displayName: Build an image
+  inputs:
+    repository: $(imageName)
+    command: build
+    Dockerfile: Dockerfile
+
+- task: Docker@2
+  displayName: Build and push an image to container registry
+  inputs:
+    command: push
+    repository: $(imageName)
+    containerRegistry: 'CoderDojo Container Registry'
+    tags: |
+      $(BuildID)
+
+- task: AzureCLI@2
+  displayName: Azure CLI
+  inputs:
+    azureSubscription: 'CoderDojo Containers'
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      az --version
+      az account show
