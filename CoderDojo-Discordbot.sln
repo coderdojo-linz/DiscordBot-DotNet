@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{A1D0BFCB-B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Playground", "Misc\Playground\Playground.csproj", "{15AE844A-87C2-4160-B33D-26A966B3B8EA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lib-rcon", "Includes\lib-rcon\lib-rcon.csproj", "{08D4F035-0488-4348-B8D5-3F38D7F757A3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,12 +37,17 @@ Global
 		{15AE844A-87C2-4160-B33D-26A966B3B8EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15AE844A-87C2-4160-B33D-26A966B3B8EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15AE844A-87C2-4160-B33D-26A966B3B8EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08D4F035-0488-4348-B8D5-3F38D7F757A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08D4F035-0488-4348-B8D5-3F38D7F757A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08D4F035-0488-4348-B8D5-3F38D7F757A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08D4F035-0488-4348-B8D5-3F38D7F757A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{15AE844A-87C2-4160-B33D-26A966B3B8EA} = {A1D0BFCB-B984-4BC8-B1E9-E9A36970E5B0}
+		{08D4F035-0488-4348-B8D5-3F38D7F757A3} = {A1D0BFCB-B984-4BC8-B1E9-E9A36970E5B0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9A1E29E-BFC1-4F4B-BCF6-5A5A199E072E}
