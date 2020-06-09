@@ -41,9 +41,37 @@ namespace DiscordBot
             await client.LoginAsync(TokenType.Bot, discordSettings.Token);
             await client.StartAsync();
 
+            while (client.ConnectionState != ConnectionState.Connected)
+            {
+                Console.WriteLine("!Connected");
+                await Task.Delay(500);
+            }
+
+            await SendStartMessage(client);
+
             // Here we initialize the logic required to register our commands.
             await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
+
             await Task.Delay(-1);
+        }
+
+        //Warning: Hack
+        private static async Task SendStartMessage(DiscordSocketClient client)
+        {
+            try
+            {
+                var guild = client.GetGuild(704990064039559238);
+                var channel = guild.GetChannel(719867879054377092);
+
+                if (channel is IMessageChannel messageChannel)
+                {
+                    await messageChannel.SendMessageAsync("Bot started.");
+                }
+            }
+            catch (Exception e)
+            {
+                //
+            }
         }
 
         private static IServiceProvider ConfigureServices(IConfiguration configuration)
