@@ -9,7 +9,7 @@ namespace DiscordBot.Modules
         [Command("ping")]
         public async Task TestCommandAsync()
         {
-            await ReplyAsync("Pongedy Pong!");
+            await ReplyAsync("Pong!");
         }
     }
 }
