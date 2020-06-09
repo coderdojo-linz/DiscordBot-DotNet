@@ -47,7 +47,10 @@ namespace DiscordBot
                 await Task.Delay(500);
             }
 
-            await SendStartMessage(client);
+            _ = Task.Run(async () =>
+              {
+                  await SendStartMessage(client);
+              });
 
             // Here we initialize the logic required to register our commands.
             await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
