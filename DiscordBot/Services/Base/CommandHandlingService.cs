@@ -1,13 +1,18 @@
-using System;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+
 using DiscordBot.Domain.Configuration;
+
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
+using System;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace DiscordBot.Services.Base
 {
@@ -20,6 +25,8 @@ namespace DiscordBot.Services.Base
         private readonly IServiceProvider _services;
 
         private char? _messagePrefix = null;
+
+        private ConcurrentDictionary<ulong, IServiceScope> _scopes = new ConcurrentDictionary<ulong, IServiceScope>();
 
         public CommandHandlingService
         (
@@ -117,16 +124,26 @@ namespace DiscordBot.Services.Base
             }
 
             var context = new SocketCommandContext(_discord, message);
+
+            //The discordNET client doesnt create a scope for us, so we have to care about it
+            var scope = _services.CreateScope();
+            _scopes[message.Id] = scope;
+
             // Perform the execution of the command. In this method,
             // the command service will perform precondition and parsing check
             // then execute the command if one is matched.
-            await _commands.ExecuteAsync(context, argPos, _services);
+            await _commands.ExecuteAsync(context, argPos, scope.ServiceProvider);
             // Note that normally a result will be returned by this format, but here
             // we will handle the result in CommandExecutedAsync,
         }
 
         public async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
+            if (_scopes.TryRemove(context.Message.Id, out var scopeToDispose))
+            {
+                scopeToDispose.Dispose();
+            }
+
             // command is unspecified when there was a search failure (command not found); we don't care about these errors
             if (!command.IsSpecified)
                 return;

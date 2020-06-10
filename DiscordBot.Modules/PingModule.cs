@@ -1,4 +1,5 @@
-﻿using Discord.Commands;
+﻿using System;
+using Discord.Commands;
 
 using System.Threading.Tasks;
 
@@ -9,7 +10,7 @@ namespace DiscordBot.Modules
         [Command("ping")]
         public async Task TestCommandAsync()
         {
-            await ReplyAsync("Pongedy Pong YOLOOOO!");
+            await ReplyAsync("Pongedy Ping!");
         }
     }
 }
