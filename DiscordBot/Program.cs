@@ -29,6 +29,15 @@ namespace DiscordBot
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration(builder =>
+                {
+                    var environmentName = Environment.GetEnvironmentVariable("Environment");
+
+                    builder.SetBasePath(Directory.GetCurrentDirectory())
+                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                        .AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: true)
+                        .AddEnvironmentVariables();
+                })
                 .ConfigureServices((hostContext, services) =>
                 {
                     services
@@ -43,6 +52,7 @@ namespace DiscordBot
                         .AddSingleton<CommandHandlingService>()
                         .AddSingleton<DiscordLoggingService>()
                         ;
+
                     services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
                     services.Configure<ImgurSettings>(hostContext.Configuration.GetSection("Imgur"));
 

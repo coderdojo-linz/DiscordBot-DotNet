@@ -1,13 +1,15 @@
 ﻿using Discord;
 using Discord.WebSocket;
+
 using DiscordBot.Domain.Configuration;
 using DiscordBot.Services.Base;
+
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,7 +38,7 @@ namespace DiscordBot
 
             while (client.ConnectionState != ConnectionState.Connected)
             {
-                Console.WriteLine("!Connected");
+                _logger.LogInformation("!Connected");
                 await Task.Delay(500);
             }
 
@@ -52,21 +54,34 @@ namespace DiscordBot
         }
 
         //Warning: Hack
-        private static async Task SendStartMessage(DiscordSocketClient client)
+        private async Task SendStartMessage(DiscordSocketClient client)
         {
             try
             {
-                var guild = client.GetGuild(718465629656449125);
-                var channel = guild.GetChannel(718465629656449128);
-
-                if (channel is IMessageChannel messageChannel)
+                var dojo = client.Guilds.FirstOrDefault(x => x.Name?.Contains("CoderDojo Austria") ?? false);
+                if (dojo == null)
                 {
+                    _logger.LogInformation("Cannot send enter msg: Dojo server not found!");
+                    return;
+                }
+                var spamChannel = dojo.Channels.FirstOrDefault(x => x.Name == "bot-spam");
+                if (spamChannel == null)
+                {
+                    _logger.LogInformation("Cannot send enter msg: Spam channel not found!");
+                    return;
+                }
+
+                if (spamChannel is IMessageChannel messageChannel)
+                {
+                    _logger.LogInformation($"Sending msg to {dojo.Name} - {spamChannel.Name}");
+
                     await messageChannel.SendMessageAsync("Bot started.");
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Guess we dont have this channel anymore ¯\_(ツ)_/¯
+                _logger.LogInformation(ex, "Cannot send enter msg");
             }
         }
 
