@@ -14,9 +14,9 @@ namespace DiscordBot.Modules.Services
     {
         private readonly HttpClient _httpClient;
 
-        public WeatherService(HttpClient httpClient)
+        public WeatherService(IHttpClientFactory httpClient)
         {
-            _httpClient = httpClient;
+            _httpClient = httpClient.CreateClient();
         }
 
 
