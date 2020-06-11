@@ -16,6 +16,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using DiscordBot.Services;
 using LibMCRcon.RCon;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -52,7 +53,7 @@ namespace DiscordBot
                         .AddSingleton<MinecraftService>()
 
                         .AddSingleton<DiscordSocketClient>()
-                        .AddSingleton<CommandService>()
+                        .AddSingleton<CommandService, InjectableCommandService>()
                         .AddSingleton<CommandHandlingService>()
                         .AddSingleton<DiscordLoggingService>()
                         ;
@@ -62,6 +63,8 @@ namespace DiscordBot
                     services.Configure<MinecraftSettings>(hostContext.Configuration.GetSection("Minecraft"));
 
                     services.AddApplicationInsightsTelemetryWorkerService();
+
+                    services.Configure<CommandServiceConfig>(hostContext.Configuration.GetSection("Discord:CommandService"));
 
                     services.AddHostedService<BotService>();
                 });
