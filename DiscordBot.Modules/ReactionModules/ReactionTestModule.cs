@@ -1,5 +1,6 @@
-﻿using System.Threading.Tasks;
-using DiscordBot.Modules.Utils.ReactionBase;
+﻿using DiscordBot.Modules.Utils.ReactionBase;
+
+using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.ReactionModules
 {
