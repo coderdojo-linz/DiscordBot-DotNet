@@ -46,8 +46,8 @@ namespace DiscordBot
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
-                    var reactionRegistry = new ReactionModuleRegistry(services)
-                        .Register<ReactionTestModule>();
+                    var reactionRegistry = new ReactionModuleRegistry(services);
+                    //.Register<ReactionTestModule>();
 
                     services
                         .AddOptions()
