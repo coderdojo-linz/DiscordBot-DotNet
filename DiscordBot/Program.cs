@@ -1,83 +1,70 @@
-﻿using System;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
+﻿using Discord.Commands;
 using Discord.WebSocket;
+
 using DiscordBot.Domain.Abstractions;
 using DiscordBot.Domain.Configuration;
+using DiscordBot.Modules.ReactionModules;
 using DiscordBot.Modules.Services;
+using DiscordBot.Modules.Utils.ReactionBase;
+using DiscordBot.Services;
 using DiscordBot.Services.Base;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Hosting;
+
+using System;
+using System.IO;
 
 namespace DiscordBot
 {
     internal class Program
     {
-        private static async Task Main(string[] args)
+        public static void Main(string[] args)
         {
-            var configuration = GetConfiguration();
-            var services = ConfigureServices(configuration);
-
-            await RunBotAsync(services);
-            Console.WriteLine("Bot Stopped. Bye :)");
+            CreateHostBuilder(args).Build().Run();
         }
 
-        private static async Task RunBotAsync(IServiceProvider services)
-        {
-            //Ensure that the logger is running
-            services.GetService<DiscordLoggingService>();
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration(builder =>
+                {
+                    var environmentName = Environment.GetEnvironmentVariable("Environment");
 
-            var discordSettings = services.GetService<IOptions<DiscordSettings>>().Value;
-            var client = services.GetRequiredService<DiscordSocketClient>();
+                    builder.SetBasePath(Directory.GetCurrentDirectory())
+                        .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                        .AddJsonFile($"appsettings.{environmentName}.json", optional: true, reloadOnChange: true)
+                        .AddEnvironmentVariables();
+                })
+                .ConfigureServices((hostContext, services) =>
+                {
+                    var reactionRegistry = new ReactionModuleRegistry(services);
+                    // .Register<ReactionTestModule>();
 
-            await client.LoginAsync(TokenType.Bot, discordSettings.Token);
-            await client.StartAsync();
+                    services
+                        .AddOptions()
+                        .AddHttpClient()
 
-            // Here we initialize the logic required to register our commands.
-            await services.GetRequiredService<CommandHandlingService>().InitializeAsync();
-            await Task.Delay(-1);
-        }
+                        .AddSingleton<DiscordSocketClient>()
+                        .AddSingleton<CommandService, InjectableCommandService>()
+                        .AddSingleton<CommandHandlingService>()
+                        .AddSingleton<DiscordLoggingService>()
+                        .AddSingleton<ReactionModuleRegistry>(reactionRegistry)
+                        .AddScoped<IWeatherService, WeatherService>()
+                        .AddScoped<ICatService, CatService>()
+                        .AddSingleton<MinecraftService>()
+                        .AddScoped<ReactionTestModule>()
+                        ;
 
-        private static IServiceProvider ConfigureServices(IConfiguration configuration)
-        {
-            var serviceCollection = new ServiceCollection()
-                .AddSingleton(configuration)
-                .AddLogging(builder => builder.AddConsole())
-                .AddOptions()
-                .AddHttpClient()
-                .AddTransient(x => x.GetService<IHttpClientFactory>().CreateClient("Default"))
+                    services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
+                    services.Configure<ImgurSettings>(hostContext.Configuration.GetSection("Imgur"));
+                    services.Configure<MinecraftSettings>(hostContext.Configuration.GetSection("Minecraft"));
 
-                .AddScoped<IWeatherService, WeatherService>()
-                .AddScoped<ICatService, CatService>()
+                    services.AddApplicationInsightsTelemetryWorkerService();
 
-                .AddSingleton<DiscordSocketClient>()
-                .AddSingleton<CommandService>()
-                .AddSingleton<CommandHandlingService>()
-                .AddSingleton<DiscordLoggingService>()
-                ;
+                    services.Configure<CommandServiceConfig>(hostContext.Configuration.GetSection("Discord:CommandService"));
 
-            serviceCollection.Configure<DiscordSettings>(configuration.GetSection("Discord"));
-            serviceCollection.Configure<ImgurSettings>(configuration.GetSection("Imgur"));
-
-            return serviceCollection.BuildServiceProvider();
-        }
-
-        private static IConfiguration GetConfiguration()
-        {
-            var environmentName = Environment.GetEnvironmentVariable("Environment");
-
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("configuration.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"configuration.{environmentName}.json", optional: true, reloadOnChange: true)
-                .AddEnvironmentVariables();
-
-            return builder.Build();
-        }
+                    services.AddHostedService<BotService>();
+                });
     }
 }

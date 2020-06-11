@@ -12,9 +12,9 @@ namespace DiscordBot.Modules.Services
     {
         private readonly HttpClient _client;
 
-        public CatService(HttpClient client)
+        public CatService(IHttpClientFactory client)
         {
-            _client = client;
+            _client = client.CreateClient();
         }
 
         public async Task<Stream> GetCatAsync()

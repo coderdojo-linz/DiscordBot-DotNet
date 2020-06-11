@@ -1,21 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using LibMCRcon.WorldData;
-using LibMCRcon.Remote;
 
 namespace LibMCRcon.Rendering
 {
-
     public class BitChunker : List<int>
     {
-
         public BitChunker(Int64[] Source)
         {
-
             BitBlitz(Source, (Source.Length * 64) / 4096);
         }
+
         public BitChunker(Int64[] Source, int BitSizeOverride)
         {
             BitBlitz(Source, BitSizeOverride);
@@ -23,7 +18,6 @@ namespace LibMCRcon.Rendering
 
         public void BitBlitz(Int64[] Source, int BitSize)
         {
-
             int block_index = 0;
             int bits_remaining = 64;
             int bits_left_over = 0;
@@ -32,7 +26,6 @@ namespace LibMCRcon.Rendering
 
             ulong working = 0;
             ulong split_left_over = 0;
-
 
             Clear();
 
@@ -44,7 +37,6 @@ namespace LibMCRcon.Rendering
 
             while (true)
             {
-
                 while (bits_remaining >= BitSize)
                 {
                     block_index = (int)(working & mask);
@@ -56,15 +48,12 @@ namespace LibMCRcon.Rendering
 
                 if (bits_left_over > 0)
                 {
-
                     working |= (split_left_over << bits_remaining);
                     bits_remaining += bits_left_over;
                     bits_left_over = 0;
                 }
                 else if (bitsource_idx < bitsource_max)
                 {
-
-
                     split_left_over = (ulong)Source[bitsource_idx];
 
                     split_left_over <<= bits_remaining;
@@ -73,18 +62,12 @@ namespace LibMCRcon.Rendering
                     split_left_over = (ulong)Source[bitsource_idx] >> (64 - bits_left_over);
                     bits_remaining = 64;
                     bitsource_idx++;
-
-
                 }
                 else
                     break;
-
-
             };
-
-
-
         }
+
         public int Max()
         {
             var idx_max = int.MinValue;
@@ -95,15 +78,15 @@ namespace LibMCRcon.Rendering
 
             return idx_max;
         }
-
     }
+
     public class RegionMasterPaletteWithBlocks
     {
         public List<string> MasterPalette { get; private set; } = new List<string>();
         public int[] RegionBlockStates { get; private set; } = new int[512 * 512];
 
-        int rbs_idx = 0;
-        int rbs_next = 0;
+        private int rbs_idx = 0;
+        private int rbs_next = 0;
 
         public void PrimeNextBlock(string block)
         {
@@ -116,6 +99,7 @@ namespace LibMCRcon.Rendering
             else
                 rbs_idx = MasterPalette.FindIndex((x) => x.Equals(block));
         }
+
         public void SetBlock(int ridx, string block)
         {
             PrimeNextBlock(block);
@@ -131,6 +115,7 @@ namespace LibMCRcon.Rendering
             yield break;
         }
     }
+
     public class BlockColors
     {
         public List<KeyValuePair<string, Color>> BlockPalettes { get; set; } = new List<KeyValuePair<string, Color>>();
@@ -147,9 +132,8 @@ namespace LibMCRcon.Rendering
                 var block = BlockList[lst_idx].Split(':')[1];
 
                 Color SelectColor()
-                { 
-                  
-                    foreach(var kv in BlockPalettes)
+                {
+                    foreach (var kv in BlockPalettes)
                     {
                         if (block.Contains(kv.Key))
                             return kv.Value;
@@ -162,7 +146,6 @@ namespace LibMCRcon.Rendering
                 }
 
                 Rainbow[lst_idx] = SelectColor();
-
             }
 
             return Rainbow;
@@ -255,480 +238,16 @@ namespace LibMCRcon.Rendering
             BlockPalettes.Add(new KeyValuePair<string, Color>("ice", Color.DodgerBlue));
             BlockPalettes.Add(new KeyValuePair<string, Color>("log", Color.Tan));
         }
+
         public void ResetBlockColors()
         {
             BlockPalettes.Clear();
             InitBlockColors();
-            
         }
 
-        public static BlockColors Create() { var bc = new BlockColors(); bc.InitBlockColors(); return bc; }
-
+        public static BlockColors Create()
+        {
+            var bc = new BlockColors(); bc.InitBlockColors(); return bc;
+        }
     }
-
-    public static class MCRegionMaps
-    {
-              
-        public static Color[][] Palettes()
-        {
-
-            Color[] Water;
-            Color[] Topo;
-
-            List<ColorStep> cList = new List<ColorStep>
-            {
-                Color.Black.ColorStep(20),
-                Color.Pink.ColorStep(20),
-                Color.Blue.ColorStep(20),
-                Color.FromArgb(0xDF, 0xC7, 0x00).ColorStep(20),
-                Color.DarkGreen.ColorStep(20),
-                Color.Orange.ColorStep(20),
-                Color.Brown.ColorStep(20),
-                Color.Plum.ColorStep(20),
-                Color.Magenta.ColorStep(20),
-                Color.Coral.ColorStep(20),
-                Color.Aqua.ColorStep(20),
-                Color.LightCyan.ColorStep(20),
-                Color.Yellow.ColorStep(15)
-            };
-            Topo = ColorStep.CreatePallet(cList);
-
-
-            cList.Clear();
-            cList.Add(Color.Blue.ColorStep(50));
-            cList.Add(Color.Aqua.ColorStep(50));
-            cList.Add(Color.Teal.ColorStep(50));
-            cList.Add(Color.Cyan.ColorStep(50));
-            cList.Add(Color.SkyBlue.ColorStep(25));
-            cList.Add(Color.Turquoise.ColorStep(25));
-
-            Water = ColorStep.CreatePallet(cList);
-
-
-
-
-
-
-            return new Color[][] { Topo, Water };
-        }
-
-        public static void RenderBlockPngFromRegion(byte[][] TopoData, Color[] BlockData, string ImgPath, int Xs, int Zs)
-        {
-            byte[] hMap = TopoData[0];
-            byte[] wMap = TopoData[1];
-
-            Bitmap bit = new Bitmap(512, 512);
-
-            Color[][] pal = Palettes();
-            Color[] tRGB = pal[0];
-            Color[] wRGB = pal[1];
-
-            for (int zz = 0; zz < 512; zz++)
-            {
-
-                for (int xx = 0; xx < 512; xx++)
-                {
-
-                    int gI = (zz * 512) + xx;
-
-                    if (wMap[gI] < 255)
-                    {
-
-                        if (zz > 1)
-                        {
-                            int cI = ((zz - 1) * 512) + xx;
-
-                            if (hMap[cI] > hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(10, BlockData[gI], Color.FromArgb(25, 25, 175), 0));
-                            else if (hMap[cI] < hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(10, BlockData[gI], Color.FromArgb(75, 75, 255), 0));
-                            else
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(10, BlockData[gI], Color.FromArgb(50, 50, 200), 0));
-                        }
-                        else
-                        {
-                            int cI = ((zz + 1) * 512) + xx;
-
-                            if (hMap[cI] > hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(10, BlockData[gI], Color.FromArgb(75, 75, 255), 0));
-                            else if (hMap[cI] < hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(10, BlockData[gI], Color.FromArgb(25, 25, 175), 0));
-                            else
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(10, BlockData[gI], Color.FromArgb(50, 50, 200), 0));
-                        }
-                    }
-                    //if (xx > 1 && xx < 511 && zz > 1 && zz < 511)
-                    //{
-                    //    int cI = ((zz - 1) * 512) + xx - 1;
-
-                    //     if (hMap[cI] > hMap[gI])
-                    //        bit.SetPixel(xx, zz, ColorStep.MixColors(10, BlockData[gI], Color.FromArgb(25, 25, 175), 0));
-                    //    else if (hMap[cI] < hMap[gI])
-                    //        bit.SetPixel(xx, zz, ColorStep.MixColors(10, BlockData[gI], Color.FromArgb(75, 75, 255), 0));
-                    //    else
-                    //        bit.SetPixel(xx, zz, ColorStep.MixColors(10, BlockData[gI], Color.FromArgb(50, 50, 200), 0));
-                    //}
-                    //else
-                    //    bit.SetPixel(xx, zz, ColorStep.MixColors(10, BlockData[gI], Color.FromArgb(50, 50, 200), 0));
-                    else
-                    {
-
-                        if (zz > 1)
-                        {
-                            int cI = ((zz - 1) * 512) + xx;
-
-                            if (hMap[cI] > hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(0, BlockData[gI], Color.FromArgb(80, 80, 80), 0));
-                            else if (hMap[cI] < hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(0, BlockData[gI], Color.FromArgb(200, 200, 200), 0));
-                            else
-                                bit.SetPixel(xx, zz, BlockData[gI]);
-                        }
-                        else
-                        {
-                            int cI = ((zz + 1) * 512) + xx;
-
-                            if (hMap[cI] > hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(0, BlockData[gI], Color.FromArgb(80, 80, 80), 0));
-                            else if (hMap[cI] < hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(0, BlockData[gI], Color.FromArgb(200, 200, 200), 0));
-                            else
-                                bit.SetPixel(xx, zz, BlockData[gI]);
-                        }
-                    }
-                }
-
-            }
-
-
-
-            DirectoryInfo imgDir = new DirectoryInfo(ImgPath);
-            string SaveBitMap  = string.Format(Path.Combine(imgDir.FullName, string.Format("tile.{0}.{1}.png", Xs, Zs)));
-            bit.Save(SaveBitMap, System.Drawing.Imaging.ImageFormat.Png);
-            bit.Dispose();
-
-        }
-        public static void RenderTopoPngFromRegion(byte[][] HeightData, string ImgPath, int Xs, int Zs)
-        {
-            byte[] hMap = HeightData[0];
-            byte[] hWMap = HeightData[1];
-
-            Bitmap bit = new Bitmap(512, 512);
-
-            Color[][] pal = Palettes();
-            Color[] tRGB = pal[0];
-            Color[] wRGB = pal[1];
-
-            for (int zz = 0; zz < 512; zz++)
-            {
-
-                for (int xx = 0; xx < 512; xx++)
-                {
-
-                    int gI = (zz * 512) + xx;
-
-                    if (hWMap[gI] < 255)
-                    {
-                        if (zz > 1)
-                        {
-                            int cI = ((zz - 1) * 512) + xx;
-                            if (hMap[cI] > hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(0, wRGB[hMap[gI]], Color.White, 0));
-                            else if (hMap[cI] < hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(0, wRGB[hMap[gI]], Color.DarkGray, 0));
-                            else
-                                bit.SetPixel(xx, zz, wRGB[hMap[gI]]);
-                        }
-                        else
-                        {
-                            int cI = ((zz + 1) * 512) + xx;
-                            if (hMap[cI] > hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(0, wRGB[hMap[gI]], Color.White, 0));
-                            else if (hMap[cI] < hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(0, wRGB[hMap[gI]], Color.DarkGray, 0));
-                            else
-                                bit.SetPixel(xx, zz, wRGB[hMap[gI]]);
-                        }
-                    }
-                    else
-                    {
-
-                        if (zz > 1)
-                        {
-                            int cI = ((zz - 1) * 512) + xx;
-
-                            if (hMap[cI] > hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(0, tRGB[hMap[gI]], Color.White, 0));
-                            else if (hMap[cI] < hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(0, tRGB[hMap[gI]], Color.DarkGray, 0));
-                            else
-                                bit.SetPixel(xx, zz, tRGB[hMap[gI]]);
-                        }
-                        else
-                        {
-                            int cI = ((zz + 1) * 512) + xx;
-
-                            if (hMap[cI] > hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(0, tRGB[hMap[gI]], Color.White, 0));
-                            else if (hMap[cI] < hMap[gI])
-                                bit.SetPixel(xx, zz, ColorStep.MixColors(0, tRGB[hMap[gI]], Color.DarkGray, 0));
-                            else
-                                bit.SetPixel(xx, zz, tRGB[hMap[gI]]);
-                        }
-
-                    }
-                }
-            }
-
-
-
-            DirectoryInfo imgDir = new DirectoryInfo(ImgPath);
-            string SaveBitMap = string.Format(Path.Combine(imgDir.FullName, string.Format("topo.{0}.{1}.png", Xs, Zs)));
-
-            bit.Save(SaveBitMap, System.Drawing.Imaging.ImageFormat.Png);
-            bit.Dispose();
-
-        }
-        public static void RenderLegend(string ImgPath)
-        {
-
-            FileInfo legend = new FileInfo(Path.Combine(ImgPath, "legend.png"));
-            if (legend.Exists == false)
-            {
-
-                Bitmap bit = new Bitmap(20, 512);
-
-                Color[][] pal = Palettes();
-
-                Color[] tRGB = pal[0];
-                Color[] wRGB = pal[1];
-
-
-                Graphics gBit = Graphics.FromImage(bit);
-
-                for (int z = 0; z < 256; z++)
-                {
-                    gBit.DrawLine(new Pen(tRGB[z]), 0, 255 - z, 15, 255 - z);
-                    gBit.DrawLine(new Pen(wRGB[z]), 0, 511 - z, 15, 511 - z);
-
-                    if (z % 10 == 0)
-                    {
-                        gBit.DrawLine(new Pen(Color.Black), 16, 255 - z, 19, 255 - z);
-                        gBit.DrawLine(new Pen(Color.Black), 16, 511 - z, 19, 511 - z);
-                    }
-                }
-
-                gBit.Dispose();
-
-                DirectoryInfo imgDir = new DirectoryInfo(ImgPath);
-                string SaveBitMap = string.Format(Path.Combine(imgDir.FullName, "legend.png"));
-                bit.Save(SaveBitMap, System.Drawing.Imaging.ImageFormat.Png);
-                bit.Dispose();
-            }
-        }
-
-        public static void RenderDataFromRegion(BlockColors bc, RegionMCA mca, byte[][] TopoData, Color[] Blocks = null)
-        {
-
-            byte[] hMap = TopoData[0];
-            byte[] hWMap = TopoData[1];
-            
-            Voxel Chunk;
-
-            RegionMasterPaletteWithBlocks RegionBlocks = new RegionMasterPaletteWithBlocks();
-
-
-
-            if (mca.IsLoaded)
-            {
-
-                for (int zz = 0; zz < 32; zz++)
-                    for (int xx = 0; xx < 32; xx++)
-                    {
-                        var ridx = (zz * 16 * 512) + (xx * 16);
-
-
-                        mca.SetOffset(65, xx * 16, zz * 16);
-                        mca.RefreshChunk();
-
-                        Chunk = mca.Chunk;
-
-                        NbtChunk c = null;
-
-                        c = mca.NbtChunk(mca);
-                  
-                        int[,] cGround = new int[16, 16];
-
-                        if (c.IsLoaded && c.sections != null)
-                        {
-                            var sc = c.sections.tagvalue.Count;
-                            var bb = new List<BitChunker>();
-                            var bp = new List<List<string>>();
-
-
-                            if (sc > 0)
-                            {
-                                foreach (var sect in c.sections.tagvalue)
-                                {
-                                    var sdata = ((Nbt.NbtLongArray)sect["BlockStates"]).tagvalue;
-                                    var yidx = ((Nbt.NbtByte)sect["Y"]).tagvalue;
-                                    if (sdata.Length > 256)
-                                    {
-
-                                    }
-                                    var pal = ((Nbt.NbtList)sect["Palette"]).tagvalue;
-                                    var bl = new BitChunker(sdata);
-
-                                    bb.Add(bl);
-                                    var bp_block = new List<string>();
-
-
-                                    foreach (var p in pal)
-                                        bp_block.Add(((Nbt.NbtString)p["Name"]).tagvalue);
-
-                                    bp.Add(bp_block);
-                                }
-
-
-                            }
-                            sc--;
-                            var cidx = 0;
-                            RenderBlocks();
-
-                            void RenderBlocks()
-                            {
-                                var blocksleft = 256;
-
-                                for (var iB = sc; iB > 0; iB--)
-                                {
-                                    var bl = bb[iB];
-                                    var blp = bp[iB];
-
-                                    for (var iC = 15; iC > 0; iC--)
-                                    {
-                                        cidx = iC * 256;
-                                        var h = (iB * 16) + iC;
-
-
-
-                                        for (var cz = 0; cz < 16; cz++)
-                                            for (var cx = 0; cx < 16; cx++, cidx++)
-                                            {
-
-                                                if (cGround[cx, cz] == 0)
-                                                {
-
-                                                    var bidx = bl[cidx];
-                                                    var midx = ridx + ((cz * 512) + cx);
-
-                                                    if (bidx < blp.Count)
-                                                    {
-
-
-                                                        var block = blp[bidx];
-
-
-
-
-                                                        if (block.Contains(":water"))
-                                                        {
-                                                            if (hWMap[midx] == 255)
-                                                                hWMap[midx] = (byte)h;
-                                                        }
-                                                        else if (block.Contains(":air"))
-                                                        {
-                                                            hWMap[midx] = 255;
-                                                            hMap[midx] = 0;
-                                                        }
-                                                        else
-                                                        {
-
-                                                            RegionBlocks.SetBlock(midx, block);
-
-                                                            cGround[cx, cz] = h;
-                                                            hMap[midx] = (byte)h;
-
-                                                            if (hWMap[midx] == 0)
-                                                                hWMap[midx] = 255;
-
-                                                            --blocksleft;
-                                                            if (blocksleft == 0)
-                                                                return;
-
-                                                        }
-
-                                                    }
-                                                    else
-                                                    {
-                                                        //can't do this... why have index not in palette?
-                                                        cGround[cx, cz] = h;
-                                                        hMap[midx] = (byte)h;
-
-                                                        if (hWMap[midx] == 0)
-                                                            hWMap[midx] = 255;
-
-                                                        --blocksleft;
-                                                        if (blocksleft == 0)
-                                                            return;
-                                                    }
-                                                }
-
-                                            }
-
-                                    }
-
-                                }
-                            }
-                        }
-                        else
-                        {
-                            for (var cz = 0; cz < 16; cz++)
-                                for (var cx = 0; cx < 16; cx++)
-                                {
-                                    var midx = ridx + ((cz * 512) + cx);
-                                    hWMap[midx] = 255;
-                                    hMap[midx] = 0;
-                                    RegionBlocks.SetBlock(midx, "minecraft:void_air");
-                                }
-                        }
-                    }
-
-                if (Blocks != null)
-                {
-                    Color[] Pal = bc.GetPalette(RegionBlocks.MasterPalette);
-                    var idx_max = 512 * 512;
-
-                    for (var idx = 0; idx < idx_max; idx++)
-                    {
-                        Blocks[idx] = Pal[RegionBlocks.RegionBlockStates[idx]];
-                    }
-                }
-
-            }
-        }
-
-
-        public static byte[][] RetrieveHDT(Voxel RV, string RegionPath)
-        {
-            byte[][] MapData = new byte[][] { new byte[512 * 512], new byte[512 * 512] };
-
-            FileInfo mcaF = new FileInfo(Path.Combine(RegionPath, string.Format("r.{0}.{1}.hdt", RV.Xs, RV.Zs)));
-            if (mcaF.Exists == true)
-            {
-                FileStream tempFS = mcaF.Open(FileMode.Open, FileAccess.Read);
-                tempFS.Read(MapData[0], 0, 512 * 512);
-                tempFS.Read(MapData[1], 0, 512 * 512);
-                tempFS.Close();
-            }
-
-            return MapData;
-        }
-
-
-
-
-    }
-   
-   
-
 }

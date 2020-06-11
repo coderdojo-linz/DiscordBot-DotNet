@@ -1,14 +1,16 @@
-﻿using LibMCRcon.RCon;
+﻿using DiscordBot.Domain.Configuration;
+
+using LibMCRcon.RCon;
+
+using Microsoft.Extensions.Options;
+
 using System;
 using System.Collections.Generic;
-using System.Text;
-using DiscordBot.Domain.Configuration;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 
 namespace DiscordBot.Modules.Services
 {
-    public class MinecraftService : IMinecraftService
+    public class MinecraftService : IDisposable
     {
         private TCPRcon rcon;
         private MinecraftSettings settings;
@@ -16,12 +18,6 @@ namespace DiscordBot.Modules.Services
         public MinecraftService(IOptions<MinecraftSettings> s)
         {
             settings = s.Value;
-            EnsureConnectedAsync();
-        }
-
-        public void Dispose()
-        {
-            rcon.StopComms();
         }
 
         public async Task<string> ExecuteCommandAsync(string command)
@@ -35,8 +31,30 @@ namespace DiscordBot.Modules.Services
             return await rcon.ExecuteCmdAsync(command);
         }
 
+        public async Task<bool> EnqueueCommandsAsync(IEnumerable<string> commands)
+        {
+            await EnsureConnectedAsync();
+            if (!rcon.IsConnected)
+            {
+                return false;
+            }
+
+            foreach (var command in commands)
+            {
+                rcon.QueCommand(command);
+            }
+
+            return true;
+        }
+
         private async ValueTask EnsureConnectedAsync()
         {
+            if (rcon == null)
+            {
+                StartRcon();
+                await Task.Delay(100);
+            }
+
             if (rcon != null && rcon.IsConnected)
             {
                 return;
@@ -49,12 +67,22 @@ namespace DiscordBot.Modules.Services
                     return;
                 }
 
-                rcon = new TCPRcon(settings.IP, settings.Port, settings.Password);
-                rcon.StartComms();
+                StartRcon();
                 await Task.Delay(5000);
             }
 
             return;
+        }
+
+        private void StartRcon()
+        {
+            rcon = new TCPRcon(settings.IP, settings.Port, settings.Password);
+            rcon.StartComms();
+        }
+
+        public void Dispose()
+        {
+            rcon.StopComms();
         }
     }
 }
