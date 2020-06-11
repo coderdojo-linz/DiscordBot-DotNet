@@ -17,8 +17,8 @@ namespace DiscordBot.Modules.CommandModules
         [Command("log-failure")]
         public async Task LogFailureAsync()
         {
-          logger.LogError("Something bad happened...");
-          await ReplyAsync("Ups, something bad happened...");
+          logger.LogError("Something bad happened....");
+          await ReplyAsync("Ups, something bad happened....");
         }
 
         [Command("throw")]
