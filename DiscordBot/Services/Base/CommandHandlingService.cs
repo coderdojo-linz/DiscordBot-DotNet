@@ -3,7 +3,9 @@ using Discord.Commands;
 using Discord.WebSocket;
 
 using DiscordBot.Domain.Configuration;
-
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -22,11 +24,12 @@ namespace DiscordBot.Services.Base
         private readonly DiscordSocketClient _discord;
         private readonly IOptionsMonitor<DiscordSettings> _discordSettings;
         private readonly ILogger<CommandHandlingService> _logger;
+        private readonly TelemetryClient _telemetryClient;
         private readonly IServiceProvider _services;
 
         private char? _messagePrefix = null;
 
-        private ConcurrentDictionary<ulong, IServiceScope> _scopes = new ConcurrentDictionary<ulong, IServiceScope>();
+        private readonly ConcurrentDictionary<ulong, IServiceScope> _scopes = new ConcurrentDictionary<ulong, IServiceScope>();
 
         public CommandHandlingService
         (
@@ -34,7 +37,8 @@ namespace DiscordBot.Services.Base
             CommandService commandService,
             DiscordSocketClient discordSocketClient,
             IOptionsMonitor<DiscordSettings> configurationMonitor,
-            ILogger<CommandHandlingService> logger
+            ILogger<CommandHandlingService> logger,
+            TelemetryClient telemetryClient
         )
         {
             _services = services;
@@ -43,7 +47,7 @@ namespace DiscordBot.Services.Base
 
             _discordSettings = configurationMonitor;
             _logger = logger;
-
+            _telemetryClient = telemetryClient;
             InitializePrefix();
 
             // Hook CommandExecuted to handle post-command-execution logic.
@@ -129,12 +133,18 @@ namespace DiscordBot.Services.Base
             var scope = _services.CreateScope();
             _scopes[message.Id] = scope;
 
+            using var operation = _telemetryClient.StartOperation<RequestTelemetry>(context.Message.Content);
+            operation.Telemetry.Properties.Add("User", context.User.Username);
+
             // Perform the execution of the command. In this method,
             // the command service will perform precondition and parsing check
             // then execute the command if one is matched.
-            await _commands.ExecuteAsync(context, argPos, scope.ServiceProvider);
+            var result = await _commands.ExecuteAsync(context, argPos, scope.ServiceProvider);
             // Note that normally a result will be returned by this format, but here
             // we will handle the result in CommandExecutedAsync,
+
+            operation.Telemetry.Success = result.IsSuccess;
+            _telemetryClient.StopOperation(operation);
         }
 
         public async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
@@ -153,6 +163,11 @@ namespace DiscordBot.Services.Base
                 return;
 
             // the command failed, let's notify the user that something happened.
+            if (result is ExecuteResult executeResult && executeResult.Exception != null)
+            {
+                _logger.LogError(executeResult.Exception, executeResult.Exception.Message);
+            }
+
             await context.Channel.SendMessageAsync($"error: {result}");
         }
     }
