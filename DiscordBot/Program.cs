@@ -17,6 +17,9 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using LibMCRcon.RCon;
+using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.WorkerService;
 
 namespace DiscordBot
 {
@@ -46,7 +49,7 @@ namespace DiscordBot
 
                         .AddScoped<IWeatherService, WeatherService>()
                         .AddScoped<ICatService, CatService>()
-                         .AddSingleton<MinecraftService>()
+                        .AddSingleton<MinecraftService>()
 
                         .AddSingleton<DiscordSocketClient>()
                         .AddSingleton<CommandService>()
@@ -57,6 +60,8 @@ namespace DiscordBot
                     services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
                     services.Configure<ImgurSettings>(hostContext.Configuration.GetSection("Imgur"));
                     services.Configure<MinecraftSettings>(hostContext.Configuration.GetSection("Minecraft"));
+
+                    services.AddApplicationInsightsTelemetryWorkerService();
 
                     services.AddHostedService<BotService>();
                 });
