@@ -31,7 +31,7 @@ namespace DiscordBot.Modules.CommandModules
                 output.Title = "Dojo Bot - help";
                 foreach (var mod in _commands.Modules.Where(m => m.Parent == null))
                 {
-                    AddHelp(mod, ref output);
+                    AddHelp(mod, output);
                 }
 
                 output.Footer = new EmbedFooterBuilder
@@ -42,29 +42,57 @@ namespace DiscordBot.Modules.CommandModules
             else
             {
                 var mod = _commands.Modules.FirstOrDefault(m => string.Equals(m.Group, path, StringComparison.OrdinalIgnoreCase));
-                // var mod = _commands.Modules.FirstOrDefault(m => m.FriendlyName().ToLower() == path.ToLower());
-                if (mod == null)
+                if (mod != null)
                 {
-                    await ReplyAsync("No module could be found with that name.");
-                    return;
+                    output.Title = mod.FriendlyName();
+                    output.Description = $"{mod.Summary}\n" +
+                                         (!string.IsNullOrEmpty(mod.Remarks) ? $"({mod.Remarks})\n" : "") +
+                                         (mod.Aliases.Any() ? $"Prefix(es): {string.Join(",", mod.Aliases)}\n" : "") +
+                                         (mod.Submodules.Any() ? $"Submodules: {mod.Submodules.Select(m => m)}\n" : "") + " ";
+                    AddCommands(mod, output);
                 }
 
-                output.Title = mod.FriendlyName();
-                output.Description = $"{mod.Summary}\n" +
-                (!string.IsNullOrEmpty(mod.Remarks) ? $"({mod.Remarks})\n" : "") +
-                (mod.Aliases.Any() ? $"Prefix(es): {string.Join(",", mod.Aliases)}\n" : "") +
-                (mod.Submodules.Any() ? $"Submodules: {mod.Submodules.Select(m => m)}\n" : "") + " ";
-                AddCommands(mod, ref output);
+                var command = mod != null ? null : _commands.Modules
+                    .Where(x => string.IsNullOrEmpty(x.Group) && !x.IsSubmodule)
+                    .SelectMany(x => x.Commands)
+                    .FirstOrDefault(x => string.Equals(x.Name, path, StringComparison.InvariantCultureIgnoreCase));
+
+                if (command != null)
+                {
+                    AddCommand(command, output);
+                    //var sb = new StringBuilder();
+                    //if (command.Aliases.Any())
+                    //{
+                    //    sb.AppendLine($"Aliases: {string.Join(", ", command.Aliases)}");
+                    //}
+
+                    //if (!string.IsNullOrEmpty(command.Summary))
+                    //{
+                    //    sb.AppendLine($"Summary: {command.Summary}");
+                    //}
+
+                    //output.AddField(f =>
+                    //{
+                    //    f.Name = $"**{command.Name}**";
+                    //    f.Value = sb.ToString();
+                    //});
+                }
+
+                if (mod == null && command == null)
+                {
+                    await ReplyAsync("No module or command could be found with that name.");
+                    return;
+                }
             }
 
             await ReplyAsync("", embed: output.Build());
         }
 
-        public void AddHelp(ModuleInfo module, ref EmbedBuilder builder)
+        public void AddHelp(ModuleInfo module, EmbedBuilder builder)
         {
             foreach (var sub in module.Submodules)
             {
-                AddHelp(sub, ref builder);
+                AddHelp(sub, builder);
             }
 
             var sb = new StringBuilder();
@@ -98,24 +126,28 @@ namespace DiscordBot.Modules.CommandModules
             });
         }
 
-        public void AddCommands(ModuleInfo module, ref EmbedBuilder builder)
+        public void AddCommands(ModuleInfo module, EmbedBuilder builder)
         {
             foreach (var command in module.Commands)
             {
                 command.CheckPreconditionsAsync(Context, _map).GetAwaiter().GetResult();
-                AddCommand(command, ref builder);
+                AddCommand(command, builder);
             }
         }
 
-        public void AddCommand(CommandInfo command, ref EmbedBuilder builder)
+        public void AddCommand(CommandInfo command, EmbedBuilder builder)
         {
+            var prefix = GetPrefix(command);
+            var aliases = GetAliases(command);
+            var usage = string.Join(" ", prefix, aliases).Replace(" ", "");
+
             builder.AddField(f =>
             {
                 f.Name = $"**{command.Name}**";
                 f.Value = $"{command.Summary}\n" +
                 (!string.IsNullOrEmpty(command.Remarks) ? $"({command.Remarks})\n" : "") +
                 (command.Aliases.Any() ? $"**Aliases:** {string.Join(", ", command.Aliases.Select(x => $"`{x}`"))}\n" : "") +
-                $"**Usage:** `{GetPrefix(command)} {GetAliases(command)}`";
+                $"**Usage:** `{usage}`";
             });
         }
 

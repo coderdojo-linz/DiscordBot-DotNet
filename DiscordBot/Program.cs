@@ -1,28 +1,20 @@
-﻿using Discord;
-using Discord.Commands;
+﻿using Discord.Commands;
 using Discord.WebSocket;
 
 using DiscordBot.Domain.Abstractions;
 using DiscordBot.Domain.Configuration;
+using DiscordBot.Modules.ReactionModules;
 using DiscordBot.Modules.Services;
+using DiscordBot.Modules.Utils.ReactionBase;
+using DiscordBot.Services;
 using DiscordBot.Services.Base;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+
 using System;
 using System.IO;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-using DiscordBot.Modules.ReactionModules;
-using DiscordBot.Modules.Utils.ReactionBase;
-using DiscordBot.Services;
-using LibMCRcon.RCon;
-using Microsoft.ApplicationInsights.Channel;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.ApplicationInsights.WorkerService;
 
 namespace DiscordBot
 {
@@ -47,7 +39,7 @@ namespace DiscordBot
                 .ConfigureServices((hostContext, services) =>
                 {
                     var reactionRegistry = new ReactionModuleRegistry(services);
-                    //.Register<ReactionTestModule>();
+                    // .Register<ReactionTestModule>();
 
                     services
                         .AddOptions()

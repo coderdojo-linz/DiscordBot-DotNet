@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
-using Discord.Commands;
+﻿using Discord.Commands;
+
 using DiscordBot.Modules.Services;
+
+using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.CommandModules
 {
@@ -10,8 +12,10 @@ namespace DiscordBot.Modules.CommandModules
 
         public CatModule(ICatService catService) => _catService = catService;
 
-        [Command("cat")]
-        public async Task OldCat() => await base.Context.Channel.SendFileAsync(await _catService.GetCatAsync(), "cat.jpg");
-    }
+        [Command("cat"), Summary("Shows us cats")]
+        public async Task Cat() => await base.Context.Channel.SendFileAsync(await _catService.GetCatAsync(), "cat.jpg");
 
+        [Command("more-cat"), Summary("Shows us more cats")]
+        public async Task MoreCat() => await base.Context.Channel.SendFileAsync(await _catService.GetCatAsync(), "cat.jpg");
+    }
 }
