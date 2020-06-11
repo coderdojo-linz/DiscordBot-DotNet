@@ -1,13 +1,20 @@
-using System;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+
 using DiscordBot.Domain.Configuration;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+
+using System;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using DiscordBot.Modules.Utils.ReactionBase;
 
 namespace DiscordBot.Services.Base
 {
@@ -17,9 +24,12 @@ namespace DiscordBot.Services.Base
         private readonly DiscordSocketClient _discord;
         private readonly IOptionsMonitor<DiscordSettings> _discordSettings;
         private readonly ILogger<CommandHandlingService> _logger;
+        private readonly TelemetryClient _telemetryClient;
         private readonly IServiceProvider _services;
 
         private char? _messagePrefix = null;
+
+        private readonly ConcurrentDictionary<ulong, IServiceScope> _scopes = new ConcurrentDictionary<ulong, IServiceScope>();
 
         public CommandHandlingService
         (
@@ -27,7 +37,8 @@ namespace DiscordBot.Services.Base
             CommandService commandService,
             DiscordSocketClient discordSocketClient,
             IOptionsMonitor<DiscordSettings> configurationMonitor,
-            ILogger<CommandHandlingService> logger
+            ILogger<CommandHandlingService> logger,
+            TelemetryClient telemetryClient
         )
         {
             _services = services;
@@ -36,7 +47,7 @@ namespace DiscordBot.Services.Base
 
             _discordSettings = configurationMonitor;
             _logger = logger;
-
+            _telemetryClient = telemetryClient;
             InitializePrefix();
 
             // Hook CommandExecuted to handle post-command-execution logic.
@@ -44,6 +55,45 @@ namespace DiscordBot.Services.Base
             // Hook MessageReceived so we can process each message to see
             // if it qualifies as a command.
             _discord.MessageReceived += MessageReceivedAsync;
+
+            _discord.ReactionAdded += ReactionAdded;
+        }
+
+        private async Task ReactionAdded(Cacheable<IUserMessage, ulong> userMessage, ISocketMessageChannel messageChannel, SocketReaction reaction)
+        {
+            using (var scope = _services.CreateScope())
+            {
+                var registry = scope.ServiceProvider.GetService<ReactionModuleRegistry>();
+                if (registry == null)
+                {
+                    _logger.LogWarning($"The {nameof(ReactionModuleRegistry)} is unconfigured");
+                    return;
+                }
+
+                var types = registry.GetRegisteredTypes(reaction.Emote.Name);
+                if (!types.Any())
+                {
+                    return;
+                }
+
+                var context = new ReactionContext(userMessage, messageChannel, reaction);
+
+                foreach (var type in types)
+                {
+                    if (!(scope.ServiceProvider.GetService(type) is ReactionModuleBase module))
+                    {
+                        _logger.LogWarning($"Invalid type in {nameof(ReactionModuleRegistry)} found: '{type.FullName}'");
+                        continue;
+                    }
+
+                    module.Context = context;
+
+                    if (await module.ExecuteAsync())
+                    {
+                        return;
+                    }
+                }
+            }
         }
 
         private void InitializePrefix()
@@ -78,7 +128,7 @@ namespace DiscordBot.Services.Base
         {
             // Register modules that are public and inherit ModuleBase<T>.
 
-            foreach (var item in AppDomain.CurrentDomain.GetAssemblies().Append(Assembly.Load("DiscordBot.Modules")))
+            foreach (var item in AppDomain.CurrentDomain.GetAssemblies().Append(Assembly.Load("DiscordBot.Modules")).Distinct())
             {
                 var modules = (await _commands.AddModulesAsync(item, _services)).ToList();
                 if (modules.Count == 0)
@@ -117,25 +167,49 @@ namespace DiscordBot.Services.Base
             }
 
             var context = new SocketCommandContext(_discord, message);
+
+            //The discordNET client doesnt create a scope for us, so we have to care about it
+            var scope = _services.CreateScope();
+            _scopes[message.Id] = scope;
+
+            using var operation = _telemetryClient.StartOperation<RequestTelemetry>(context.Message.Content);
+            operation.Telemetry.Properties.Add("User", context.User.Username);
+
             // Perform the execution of the command. In this method,
             // the command service will perform precondition and parsing check
             // then execute the command if one is matched.
-            await _commands.ExecuteAsync(context, argPos, _services);
+            var result = await _commands.ExecuteAsync(context, argPos, scope.ServiceProvider);
             // Note that normally a result will be returned by this format, but here
             // we will handle the result in CommandExecutedAsync,
+
+            operation.Telemetry.Success = result.IsSuccess;
+            _telemetryClient.StopOperation(operation);
         }
 
         public async Task CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
+            if (_scopes.TryRemove(context.Message.Id, out var scopeToDispose))
+            {
+                scopeToDispose.Dispose();
+            }
+
             // command is unspecified when there was a search failure (command not found); we don't care about these errors
             if (!command.IsSpecified)
+            {
+                _logger.LogInformation($"Command not recognized: {context?.Message?.Content ?? "[NOT_FOUND]" }");
                 return;
+            }
 
             // the command was successful, we don't care about this result, unless we want to log that a command succeeded.
             if (result.IsSuccess)
                 return;
 
             // the command failed, let's notify the user that something happened.
+            if (result is ExecuteResult executeResult && executeResult.Exception != null)
+            {
+                _logger.LogError(executeResult.Exception, executeResult.Exception.Message);
+            }
+
             await context.Channel.SendMessageAsync($"error: {result}");
         }
     }

@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Net.Sockets;
 using System.Threading.Tasks;
-
-
 
 //!Classes directly related to the minecraft server.
 namespace LibMCRcon.RCon
@@ -16,10 +13,10 @@ namespace LibMCRcon.RCon
     /// </summary>
     public class TCPRcon : Queue<RconPacket>
     {
-
-
         public enum TCPState { IDLE, CONNECTING, CONNECTED, CLOSING, CLOSED, ABORTED };
+
         public enum RConState { IDLE, AUTHENTICATE, READY, NETWORK_FAIL, AUTHENTICATE_FAIL };
+
         public string LastTCPError { get; set; }
 
         public string RConHost { get; set; }
@@ -31,20 +28,19 @@ namespace LibMCRcon.RCon
 
         protected bool AbortTCP { get; set; }
 
-        Thread bgCommThread;
-        Queue<RconPacket> cmdQue = new Queue<RconPacket>();
+        private Thread bgCommThread;
+        private Queue<RconPacket> cmdQue = new Queue<RconPacket>();
 
-        int sessionID = -1;
+        private int sessionID = -1;
+
         /// <summary>
         /// Default constructor, will still need RCon server url, password and port.
         /// </summary>
         public TCPRcon()
             : base()
         {
-          
-
-
         }
+
         /// <summary>
         /// Create a TCPRcon connection.  Does not open on creation.
         /// </summary>
@@ -57,7 +53,6 @@ namespace LibMCRcon.RCon
             RConHost = host;
             RConPort = port;
             RConPass = password;
-
         }
 
         /// <summary>
@@ -75,7 +70,6 @@ namespace LibMCRcon.RCon
         /// <returns>Return TCPRcon with the same host,port, and password.</returns>
         public TCPRcon CopyConnection()
         {
-
             TCPRcon r = new TCPRcon(RConHost, RConPort, RConPass);
             if (r.StartComms() == false)
                 return null;
@@ -89,7 +83,6 @@ namespace LibMCRcon.RCon
         /// <returns>True of successfully started, otherwise false.</returns>
         public bool StartComms()
         {
-
             if (bgCommThread != null)
                 if (bgCommThread.IsAlive)
                 {
@@ -101,7 +94,6 @@ namespace LibMCRcon.RCon
 
             tc = new TimeCheck(10000);
 
-
             bgCommThread = new Thread(ConnectAndProcess)
             {
                 IsBackground = true
@@ -111,28 +103,24 @@ namespace LibMCRcon.RCon
             StateRCon = RConState.IDLE;
 
             bgCommThread.Start();
-            while(tc.Expired == false)
+            while (tc.Expired == false)
             {
-
                 if (StateTCP == TCPState.CONNECTED)
                     if (StateRCon == RConState.READY)
                         return true;
 
                 if (StateTCP == TCPState.ABORTED)
                     break;
-             
             }
-
-
 
             return false;
         }
+
         /// <summary>
         /// Stop communication and close all connections.  Will block until complete or timed out.
         /// </summary>
         public void StopComms()
         {
-
             StateTCP = TCPState.CLOSING;
             AbortTCP = true;
             if (bgCommThread != null)
@@ -142,14 +130,17 @@ namespace LibMCRcon.RCon
             bgCommThread = null;
             StateRCon = RConState.IDLE;
         }
+
         /// <summary>
         /// True if connected and active.
         /// </summary>
         public bool IsConnected { get { return StateTCP == TCPState.CONNECTED; } }
+
         /// <summary>
         /// True if the asynchronous thread is running.
         /// </summary>
         public bool IsStarted { get { return bgCommThread.IsAlive; } }
+
         /// <summary>
         /// True if the connection is open and the queue is ready for commands.
         /// </summary>
@@ -157,15 +148,11 @@ namespace LibMCRcon.RCon
 
         private void ConnectAndProcess()
         {
-
             DateTime transmitLatch = DateTime.Now.AddMilliseconds(-1);
             Random r = new Random();
-           
 
             using (TcpClient cli = new TcpClient())
             {
-
-
                 sessionID = r.Next(1, int.MaxValue) + 1;
 
                 StateTCP = TCPState.CONNECTING;
@@ -174,12 +161,10 @@ namespace LibMCRcon.RCon
                 AbortTCP = false;
                 try
                 {
-
                     cli.ConnectAsync(RConHost, RConPort).Wait(5000);
 
                     if (cli.Connected == false)
                     {
-   
                         AbortTCP = true;
                         StateTCP = TCPState.ABORTED;
                         StateRCon = RConState.NETWORK_FAIL;
@@ -201,12 +186,10 @@ namespace LibMCRcon.RCon
                         {
                             if (resp.SessionID == -1 && resp.ServerType == 2)
                                 StateRCon = RConState.AUTHENTICATE_FAIL;
-
                         }
                         else
                             StateRCon = RConState.NETWORK_FAIL;
                     }
-
 
                     if (StateTCP == TCPState.CONNECTED)
                     {
@@ -214,7 +197,6 @@ namespace LibMCRcon.RCon
                         {
                             StateTCP = TCPState.ABORTED;
                             AbortTCP = true;
-
                         }
 
                         if (StateRCon != RConState.AUTHENTICATE)
@@ -228,34 +210,27 @@ namespace LibMCRcon.RCon
                             StateRCon = RConState.READY;
                     }
 
-
                     Comms(cli);
 
                     AbortTCP = true;
                     StateTCP = TCPState.ABORTED;
                 }
-
                 catch (Exception e)
                 {
                     LastTCPError = e.Message;
                     AbortTCP = true;
                     StateRCon = RConState.NETWORK_FAIL;
                 }
-
                 finally
                 {
-                    if(cli.Connected == true)
-                       cli.Close();
+                    if (cli.Connected == true)
+                        cli.Close();
                 }
-
-
             }
-
         }
 
         private void Comms(TcpClient cli)
         {
-
             TimeCheck tc = new TimeCheck();
             Int32 dT = 200;
 
@@ -264,7 +239,6 @@ namespace LibMCRcon.RCon
 
             try
             {
-
                 if (cli.Connected == false) //Not connected, shut it down...
                 {
                     StateRCon = RConState.NETWORK_FAIL;
@@ -272,15 +246,12 @@ namespace LibMCRcon.RCon
                     AbortTCP = true;
                 }
 
-
                 tc.Reset(dT);
 
                 while (AbortTCP == false)
                 {
-
                     do
                     {
-
                         if (cli.Client.Poll(0, SelectMode.SelectRead))
                         {
                             byte[] buff = new byte[1];
@@ -293,15 +264,10 @@ namespace LibMCRcon.RCon
                                 AbortTCP = true;
                                 break;
                             }
-
                         }
-                       
-
 
                         if (cli.Available > 0)
                         {
-
-
                             RconPacket resp = new RconPacket();
                             resp.ReadFromNetworkSteam(cli.GetStream());
 
@@ -311,7 +277,6 @@ namespace LibMCRcon.RCon
                                 StateRCon = RConState.NETWORK_FAIL;
                                 AbortTCP = true;
                                 break;
-
                             }
 
                             if (Count > 1500)
@@ -323,7 +288,6 @@ namespace LibMCRcon.RCon
                             }
                             else
                             {
-
                                 Enqueue(resp);
                                 StateRCon = RConState.READY;
                             }
@@ -333,13 +297,10 @@ namespace LibMCRcon.RCon
                         }
 
                         Thread.Sleep(1);
-
-
                     } while (tc.Expired == false || cli.Available > 0);
 
                     if (AbortTCP == true)
                         break;
-
 
                     if (cmdQue.Count > 0)
                     {
@@ -352,7 +313,6 @@ namespace LibMCRcon.RCon
                     Thread.Sleep(1);
                 }
             }
-
             catch (Exception ee)
             {
                 AbortTCP = true;
@@ -365,8 +325,6 @@ namespace LibMCRcon.RCon
                     ex = ee.InnerException;
                 } while (ex != null);
 
-
-
                 LastTCPError = sb.ToString();
 
                 StateTCP = TCPState.ABORTED;
@@ -375,12 +333,10 @@ namespace LibMCRcon.RCon
 
             if (cli.Connected)
                 cli.Close();
-
         }
 
         private void ShutDownComms()
         {
-
             AbortTCP = true;
             if (bgCommThread.IsAlive)
                 bgCommThread.Join();
@@ -389,8 +345,8 @@ namespace LibMCRcon.RCon
                 StateTCP = TCPState.ABORTED;
                 StateRCon = RConState.IDLE;
             }
-
         }
+
         /// <summary>
         /// Execute a command and wait for a response, blocking main calling thread.  Once response given return.
         /// </summary>
@@ -401,6 +357,7 @@ namespace LibMCRcon.RCon
         {
             return ExecuteCmd(string.Format(formatedCmd, args));
         }
+
         /// <summary>
         /// Execute a command and wait for a response, blocking main calling thread.  Once response given return.
         /// </summary>
@@ -408,7 +365,6 @@ namespace LibMCRcon.RCon
         /// <returns>If command is sent and a response given, the repsonse is removed from the response que an returned.</returns>
         public string ExecuteCmd(string Cmd)
         {
-
             if (AbortTCP == true)
                 return "RCON_ABORTED";
 
@@ -435,19 +391,45 @@ namespace LibMCRcon.RCon
             }
 
             return sb.ToString();
-
         }
 
-    
+        public async Task<string> ExecuteCmdAsync(string cmd)
+        {
+            if (AbortTCP == true)
+                return "RCON_ABORTED";
 
+            RconPacket p;
+            StringBuilder sb = new StringBuilder();
+
+            TimeCheck tc = new TimeCheck();
+
+            QueCommand(cmd);
+
+            while (Count == 0)
+            {
+                await Task.Delay(100);
+                if (AbortTCP == true) break;
+                if (tc.Expired == true) break;
+            }
+
+            while (Count > 0)
+            {
+                p = Dequeue();
+                sb.Append(p.Response);
+
+                if (AbortTCP == true) break;
+            }
+
+            return sb.ToString();
+        }
     }
 
     public class TCPRconAsync : Queue<RconPacket>
     {
-
-
         public enum TCPState { IDLE, CONNECTING, CONNECTED, CLOSING, CLOSED, ABORTED };
+
         public enum RConState { IDLE, AUTHENTICATE, READY, NETWORK_FAIL, AUTHENTICATE_FAIL };
+
         public string LastTCPError { get; set; }
 
         public string RConHost { get; set; }
@@ -459,21 +441,20 @@ namespace LibMCRcon.RCon
 
         protected bool AbortTCP { get; set; }
 
-        Task bgTask;
+        private Task bgTask;
 
-        Queue<RconPacket> cmdQue = new Queue<RconPacket>();
+        private Queue<RconPacket> cmdQue = new Queue<RconPacket>();
 
-        int sessionID = -1;
+        private int sessionID = -1;
+
         /// <summary>
         /// Default constructor, will still need RCon server url, password and port.
         /// </summary>
         public TCPRconAsync()
             : base()
         {
-
-
-
         }
+
         /// <summary>
         /// Create a TCPRcon connection.  Does not open on creation.
         /// </summary>
@@ -486,7 +467,6 @@ namespace LibMCRcon.RCon
             RConHost = host;
             RConPort = port;
             RConPass = password;
-
         }
 
         /// <summary>
@@ -504,7 +484,6 @@ namespace LibMCRcon.RCon
         /// <returns>Return TCPRcon with the same host,port, and password.</returns>
         public async Task<TCPRconAsync> CopyConnection()
         {
-
             TCPRconAsync r = new TCPRconAsync(RConHost, RConPort, RConPass);
             if (await r.StartComms() == false)
                 return null;
@@ -518,7 +497,6 @@ namespace LibMCRcon.RCon
         /// <returns>True of successfully started, otherwise false.</returns>
         public async Task<bool> StartComms()
         {
-
             if (bgTask != null)
                 await StopComms();
 
@@ -527,22 +505,21 @@ namespace LibMCRcon.RCon
 
             var cli = await Connect();
 
-
             if (StateTCP == TCPState.CONNECTED)
                 if (StateRCon == RConState.READY)
                 {
                     bgTask = Process(cli);
                     return true;
                 }
-                         
+
             return false;
         }
+
         /// <summary>
         /// Stop communication and close all connections.  Will block until complete or timed out.
         /// </summary>
         public async Task StopComms()
         {
-
             StateTCP = TCPState.CLOSING;
             AbortTCP = true;
 
@@ -554,14 +531,17 @@ namespace LibMCRcon.RCon
 
             StateRCon = RConState.IDLE;
         }
+
         /// <summary>
         /// True if connected and active.
         /// </summary>
         public bool IsConnected { get { return StateTCP == TCPState.CONNECTED; } }
+
         /// <summary>
         /// True if the asynchronous thread is running.
         /// </summary>
         public bool IsStarted { get { return bgTask != null; } }
+
         /// <summary>
         /// True if the connection is open and the queue is ready for commands.
         /// </summary>
@@ -580,13 +560,11 @@ namespace LibMCRcon.RCon
             AbortTCP = false;
             try
             {
-
                 await Task.WhenAny(cli.ConnectAsync(RConHost, RConPort), Task.Delay(5000));
 
                 if (cli.Connected == false)
                 {
                     cli.Close();
-                  
 
                     AbortTCP = true;
                     StateTCP = TCPState.ABORTED;
@@ -609,12 +587,10 @@ namespace LibMCRcon.RCon
                     {
                         if (resp.SessionID == -1 && resp.ServerType == 2)
                             StateRCon = RConState.AUTHENTICATE_FAIL;
-
                     }
                     else
                         StateRCon = RConState.NETWORK_FAIL;
                 }
-
 
                 if (StateTCP == TCPState.CONNECTED)
                 {
@@ -657,14 +633,10 @@ namespace LibMCRcon.RCon
 
         private async Task Process(TcpClient cli)
         {
-
-
-            using(cli)
+            using (cli)
             {
-
                 try
                 {
-
                     await CommsAsync(cli);
 
                     AbortTCP = true;
@@ -676,22 +648,17 @@ namespace LibMCRcon.RCon
                     AbortTCP = true;
                     StateRCon = RConState.NETWORK_FAIL;
                 }
-
                 finally
                 {
                     if (cli.Connected == true)
                         cli.Close();
                 }
-
-
             }
-
         }
+
         private async Task CommsAsync(TcpClient cli)
         {
-
             TimeSpan dT = TimeSpan.FromSeconds(5);
-
 
             cli.SendTimeout = 5000;
             cli.ReceiveTimeout = 20000;
@@ -702,7 +669,6 @@ namespace LibMCRcon.RCon
                 {
                     RconPacket Cmd = cmdQue.Dequeue();
                     await Cmd.SendToNetworkStreamAsync(cli.GetStream());
-                   
                 }
             }
             async Task<RconPacket> FetchNextPacket()
@@ -714,7 +680,6 @@ namespace LibMCRcon.RCon
 
             try
             {
-
                 if (cli.Connected == false) //Not connected, shut it down...
                 {
                     StateRCon = RConState.NETWORK_FAIL;
@@ -722,67 +687,59 @@ namespace LibMCRcon.RCon
                     AbortTCP = true;
                 }
 
-
-
                 while (AbortTCP == false)
                 {
-
-                        if (cli.Client.Poll(0, SelectMode.SelectRead))
+                    if (cli.Client.Poll(0, SelectMode.SelectRead))
+                    {
+                        byte[] buff = new byte[1];
+                        if (cli.Client.Receive(buff, SocketFlags.Peek) == 0)
                         {
-                            byte[] buff = new byte[1];
-                            if (cli.Client.Receive(buff, SocketFlags.Peek) == 0)
-                            {
-                                //client seems to be closed - lets close it
+                            //client seems to be closed - lets close it
 
-                                StateTCP = TCPState.CLOSED;
-                                StateRCon = RConState.NETWORK_FAIL;
-                                AbortTCP = true;
-                                break;
-                            }
-
+                            StateTCP = TCPState.CLOSED;
+                            StateRCon = RConState.NETWORK_FAIL;
+                            AbortTCP = true;
+                            break;
                         }
+                    }
 
-                        var NextSend = FetchNextCommand();
+                    var NextSend = FetchNextCommand();
 
-                        if (cli.Available > 0)
+                    if (cli.Available > 0)
+                    {
+                        var resp = await FetchNextPacket();
+
+                        if (resp.IsBadPacket)
                         {
-                            var resp = await FetchNextPacket();
-
-                            if (resp.IsBadPacket)
-                            {
-                                StateTCP = TCPState.ABORTED;
-                                StateRCon = RConState.NETWORK_FAIL;
-                                AbortTCP = true;
-                                break;
-                            }
-                            else
-                                Enqueue(resp);
-
-                            if (Count > 1500)
-                            {
-
-                                //There are over 1500 responses in the queue - too much...
-                                StateRCon = RConState.IDLE;
-                                StateTCP = TCPState.ABORTED;
-                                AbortTCP = true;
-                                break;
-                            }
-                            else
-                            {
-                                StateRCon = RConState.READY;
-                            }
-
+                            StateTCP = TCPState.ABORTED;
+                            StateRCon = RConState.NETWORK_FAIL;
+                            AbortTCP = true;
+                            break;
                         }
+                        else
+                            Enqueue(resp);
 
-                        await NextSend;
-                        await Task.Delay(1);
+                        if (Count > 1500)
+                        {
+                            //There are over 1500 responses in the queue - too much...
+                            StateRCon = RConState.IDLE;
+                            StateTCP = TCPState.ABORTED;
+                            AbortTCP = true;
+                            break;
+                        }
+                        else
+                        {
+                            StateRCon = RConState.READY;
+                        }
+                    }
 
+                    await NextSend;
+                    await Task.Delay(1);
 
                     if (AbortTCP == true)
                         break;
                 }
             }
-
             catch (Exception ee)
             {
                 AbortTCP = true;
@@ -795,8 +752,6 @@ namespace LibMCRcon.RCon
                     ex = ee.InnerException;
                 } while (ex != null);
 
-
-
                 LastTCPError = sb.ToString();
 
                 StateTCP = TCPState.ABORTED;
@@ -805,7 +760,6 @@ namespace LibMCRcon.RCon
 
             if (cli.Connected)
                 cli.Close();
-
         }
 
         /// <summary>
@@ -818,6 +772,7 @@ namespace LibMCRcon.RCon
         {
             return await ExecuteCmd(string.Format(formatedCmd, args));
         }
+
         /// <summary>
         /// Execute a command and wait for a response, blocking main calling thread.  Once response given return.
         /// </summary>
@@ -859,10 +814,6 @@ namespace LibMCRcon.RCon
             }
 
             return sb.ToString();
-
         }
-
-
-
     }
 }

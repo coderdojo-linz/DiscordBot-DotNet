@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 using System.IO;
 using System.IO.Compression;
-using zlib;
+using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 
 using LibMCRcon.Nbt;
 
@@ -121,7 +121,7 @@ namespace LibMCRcon.Network
                         MemoryStream ms;
 
                         ms = new MemoryStream(rdata);
-                        ZInputStream zlib = new ZInputStream(ms);
+                        InflaterInputStream zlib = new InflaterInputStream(ms);
 
                         if (zlib.Read(Data, 0, DataLength) == DataLength)
                             DataRead = true;
@@ -172,7 +172,7 @@ namespace LibMCRcon.Network
 
 
                 MemoryStream ms = new MemoryStream();
-                ZOutputStream zo = new ZOutputStream(ms);
+                DeflaterOutputStream zo = new DeflaterOutputStream(ms);
 
 
                 zo.Write(viPacketID.VarIntData, 0, viPacketID.Length);

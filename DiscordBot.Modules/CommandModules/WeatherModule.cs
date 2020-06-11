@@ -1,12 +1,9 @@
-﻿using Discord.Commands;
+﻿using System.IO;
 using System.Threading.Tasks;
-using System.Net.Http;
-using DiscordBot.Domain.WeatherModel;
-using Newtonsoft.Json;
+using Discord.Commands;
 using DiscordBot.Domain.Abstractions;
-using System.IO;
 
-namespace DiscordBot.Modules
+namespace DiscordBot.Modules.CommandModules
 {
     public class WeatherModule : ModuleBase
     {
