@@ -3,9 +3,10 @@ using Discord.Commands;
 using Discord.WebSocket;
 
 using DiscordBot.Domain.Configuration;
+using DiscordBot.Services.ReactionBase;
+
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -55,6 +56,45 @@ namespace DiscordBot.Services.Base
             // Hook MessageReceived so we can process each message to see
             // if it qualifies as a command.
             _discord.MessageReceived += MessageReceivedAsync;
+
+            _discord.ReactionAdded += ReactionAdded;
+        }
+
+        private async Task ReactionAdded(Cacheable<IUserMessage, ulong> userMessage, ISocketMessageChannel messageChannel, SocketReaction reaction)
+        {
+            using (var scope = _services.CreateScope())
+            {
+                var registry = scope.ServiceProvider.GetService<ReactionModuleRegistry>();
+                if (registry == null)
+                {
+                    _logger.LogWarning($"The {nameof(ReactionModuleRegistry)} is unconfigured");
+                    return;
+                }
+
+                var types = registry.GetRegisteredTypes(reaction.Emote.Name);
+                if (!types.Any())
+                {
+                    return;
+                }
+
+                var context = new ReactionContext(userMessage, messageChannel, reaction);
+
+                foreach (var type in types)
+                {
+                    if (!(scope.ServiceProvider.GetService(type) is ReactionModuleBase module))
+                    {
+                        _logger.LogWarning($"Invalid type in {nameof(ReactionModuleRegistry)} found: '{type.FullName}'");
+                        continue;
+                    }
+
+                    module.Context = context;
+
+                    if (await module.ExecuteAsync())
+                    {
+                        return;
+                    }
+                }
+            }
         }
 
         private void InitializePrefix()

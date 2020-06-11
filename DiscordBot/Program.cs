@@ -17,6 +17,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using DiscordBot.Services;
+using DiscordBot.Services.ReactionBase;
 using LibMCRcon.RCon;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -48,14 +49,19 @@ namespace DiscordBot
                         .AddOptions()
                         .AddHttpClient()
 
-                        .AddScoped<IWeatherService, WeatherService>()
-                        .AddScoped<ICatService, CatService>()
-                        .AddSingleton<MinecraftService>()
-
                         .AddSingleton<DiscordSocketClient>()
                         .AddSingleton<CommandService, InjectableCommandService>()
                         .AddSingleton<CommandHandlingService>()
                         .AddSingleton<DiscordLoggingService>()
+                        .AddSingleton<ReactionModuleRegistry>
+                        (
+                            x => new ReactionModuleRegistry()
+                            .Register<ReactionTestModule>("banhammer")
+                        )
+                        .AddScoped<IWeatherService, WeatherService>()
+                        .AddScoped<ICatService, CatService>()
+                        .AddSingleton<MinecraftService>()
+                        .AddScoped<ReactionTestModule>()
                         ;
 
                     services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
