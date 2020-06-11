@@ -8,7 +8,7 @@ namespace DiscordBot.Modules.ReactionModules
     {
         public override async Task<bool> ExecuteAsync()
         {
-            await base.Context.MessageChannel.SendMessageAsync($"Cool Reaction bro! '{base.Context.Reaction.Emote.Name}'");
+            await ReplyAsync($"Cool Reaction bro! '{base.Context.Reaction.Emote.Name}'");
             return true;
         }
     }
