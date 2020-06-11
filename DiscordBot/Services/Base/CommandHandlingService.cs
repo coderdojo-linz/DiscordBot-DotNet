@@ -3,8 +3,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 
 using DiscordBot.Domain.Configuration;
-using DiscordBot.Services.ReactionBase;
-
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +14,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using DiscordBot.Modules.Utils.ReactionBase;
 
 namespace DiscordBot.Services.Base
 {

@@ -1,9 +1,9 @@
-﻿using Discord;
+﻿using System;
+using System.Threading.Tasks;
+using Discord;
 using Discord.WebSocket;
 
-using System.Threading.Tasks;
-
-namespace DiscordBot.Services.Base
+namespace DiscordBot.Modules.Utils.ReactionBase
 {
     public class ReactionContext
     {
@@ -23,19 +23,20 @@ namespace DiscordBot.Services.Base
         public ISocketMessageChannel MessageChannel => _messageChannel;
     }
 
+    public class ReactionAttribute : Attribute
+    {
+        public string[] ReactionName { get; }
+
+        public ReactionAttribute(params string[] reactionName)
+        {
+            ReactionName = reactionName;
+        }
+    }
+
     public abstract class ReactionModuleBase
     {
         public ReactionContext Context { get; set; }
 
         public abstract Task<bool> ExecuteAsync();
-    }
-
-    public class ReactionTestModule : ReactionModuleBase
-    {
-        public override async Task<bool> ExecuteAsync()
-        {
-            await base.Context.MessageChannel.SendMessageAsync($"Cool Reaction bro! '{base.Context.Reaction.Emote.Name}'");
-            return true;
-        }
     }
 }

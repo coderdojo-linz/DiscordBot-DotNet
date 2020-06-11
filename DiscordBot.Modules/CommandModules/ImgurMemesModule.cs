@@ -1,16 +1,16 @@
-﻿using Discord.Commands;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Discord.Commands;
+using DiscordBot.Domain.Configuration;
 using Imgur.API;
 using Imgur.API.Authentication.Impl;
 using Imgur.API.Endpoints.Impl;
 using Imgur.API.Models.Impl;
 using Microsoft.Extensions.Options;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
-using DiscordBot.Domain.Configuration;
 
-namespace DiscordBot.Modules
+namespace DiscordBot.Modules.CommandModules
 {
    public class ImgurMemesModule : ModuleBase
    {

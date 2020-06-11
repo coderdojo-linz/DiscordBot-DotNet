@@ -1,10 +1,8 @@
-﻿using Discord.Commands;
-
+﻿using System.Threading.Tasks;
+using Discord.Commands;
 using DiscordBot.Modules.Services;
 
-using System.Threading.Tasks;
-
-namespace DiscordBot.Modules
+namespace DiscordBot.Modules.CommandModules
 {
     [Group("mc")]
     [Summary("Manages our minecraft")]

@@ -1,10 +1,8 @@
-﻿using System;
+﻿using System.Threading.Tasks;
 using Discord.Commands;
-
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace DiscordBot.Modules
+namespace DiscordBot.Modules.CommandModules
 {
     public class PingModule : ModuleBase
     {

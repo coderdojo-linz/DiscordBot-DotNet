@@ -1,12 +1,11 @@
-﻿using Discord;
-using Discord.Commands;
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Discord;
+using Discord.Commands;
 
-namespace DiscordBot.Modules
+namespace DiscordBot.Modules.CommandModules
 {
     public class HelpModule : ModuleBase
     {
