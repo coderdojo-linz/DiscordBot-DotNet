@@ -17,7 +17,7 @@ namespace DiscordBot.Modules.CommandModules
         public async Task TestCommandAsync()
         {
           logger.LogInformation("Received ping, answering with poing.");
-          await ReplyAsync("Pongedy Ping!!!");
+          await ReplyAsync(":ping_pong: Ping Pong! The bot works!!!");
         }
     }
 }
