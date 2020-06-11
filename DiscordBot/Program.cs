@@ -18,6 +18,9 @@ using System.Text;
 using System.Threading.Tasks;
 using DiscordBot.Services;
 using LibMCRcon.RCon;
+using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights.WorkerService;
 
 namespace DiscordBot
 {
@@ -58,6 +61,8 @@ namespace DiscordBot
                     services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
                     services.Configure<ImgurSettings>(hostContext.Configuration.GetSection("Imgur"));
                     services.Configure<MinecraftSettings>(hostContext.Configuration.GetSection("Minecraft"));
+
+                    services.AddApplicationInsightsTelemetryWorkerService();
 
                     services.Configure<CommandServiceConfig>(hostContext.Configuration.GetSection("Discord:CommandService"));
 
