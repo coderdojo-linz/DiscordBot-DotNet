@@ -89,7 +89,7 @@ namespace DiscordBot.Services.Base
         {
             // Register modules that are public and inherit ModuleBase<T>.
 
-            foreach (var item in AppDomain.CurrentDomain.GetAssemblies().Append(Assembly.Load("DiscordBot.Modules")))
+            foreach (var item in AppDomain.CurrentDomain.GetAssemblies().Append(Assembly.Load("DiscordBot.Modules")).Distinct())
             {
                 var modules = (await _commands.AddModulesAsync(item, _services)).ToList();
                 if (modules.Count == 0)
@@ -157,7 +157,7 @@ namespace DiscordBot.Services.Base
             // command is unspecified when there was a search failure (command not found); we don't care about these errors
             if (!command.IsSpecified)
             {
-                _logger.LogInformation($"Command not recognized: {context?.Message?.Content ?? "[NOTF_OUND]" }");
+                _logger.LogInformation($"Command not recognized: {context?.Message?.Content ?? "[NOT_FOUND]" }");
                 return;
             }
 
