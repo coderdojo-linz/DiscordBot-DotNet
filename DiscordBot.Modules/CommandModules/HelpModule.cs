@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Discord;
+using Discord.Commands;
+
+using DiscordBot.Modules.Utils.Extensions;
+
+using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
 
 namespace DiscordBot.Modules.CommandModules
 {
@@ -19,13 +22,13 @@ namespace DiscordBot.Modules.CommandModules
         }
 
         [Command("help")]
-        [Summary("Listet die Botcommands auf.")]
+        [Summary("Lists this bot's commands.")]
         public async Task Help(string path = "")
         {
             EmbedBuilder output = new EmbedBuilder();
             if (path == "")
             {
-                output.Title = "Dojo Bot - Hilfe";
+                output.Title = "Dojo Bot - help";
                 foreach (var mod in _commands.Modules.Where(m => m.Parent == null))
                 {
                     AddHelp(mod, ref output);
@@ -33,19 +36,24 @@ namespace DiscordBot.Modules.CommandModules
 
                 output.Footer = new EmbedFooterBuilder
                 {
-                    Text = "Benutze 'help <Modul>' um Hilfe zu einem Modul zu erhalten."
+                    Text = "Use 'help <module>' to get help with a module."
                 };
             }
             else
             {
-                var mod = _commands.Modules.FirstOrDefault(m => m.Name.Replace("Module", "").ToLower() == path.ToLower());
-                if (mod == null) { await ReplyAsync("Es konnte kein Modul mit diesem Namen gefunden werden."); return; }
+                var mod = _commands.Modules.FirstOrDefault(m => string.Equals(m.Group, path, StringComparison.OrdinalIgnoreCase));
+                // var mod = _commands.Modules.FirstOrDefault(m => m.FriendlyName().ToLower() == path.ToLower());
+                if (mod == null)
+                {
+                    await ReplyAsync("No module could be found with that name.");
+                    return;
+                }
 
-                output.Title = mod.Name;
+                output.Title = mod.FriendlyName();
                 output.Description = $"{mod.Summary}\n" +
                 (!string.IsNullOrEmpty(mod.Remarks) ? $"({mod.Remarks})\n" : "") +
-                (mod.Aliases.Any() ? $"Prefix(e): {string.Join(",", mod.Aliases)}\n" : "") +
-                (mod.Submodules.Any() ? $"Submodule: {mod.Submodules.Select(m => m)}\n" : "") + " ";
+                (mod.Aliases.Any() ? $"Prefix(es): {string.Join(",", mod.Aliases)}\n" : "") +
+                (mod.Submodules.Any() ? $"Submodules: {mod.Submodules.Select(m => m)}\n" : "") + " ";
                 AddCommands(mod, ref output);
             }
 
@@ -70,7 +78,7 @@ namespace DiscordBot.Modules.CommandModules
 
             if (subModules.Any())
             {
-                sb.AppendLine($"Submodule: {string.Join(", ", subModules.Select(x => x.Name))}");
+                sb.AppendLine($"Submodules: {string.Join(", ", subModules.Select(x => x.Name))}");
             }
 
             if (commands.Any())
@@ -78,9 +86,14 @@ namespace DiscordBot.Modules.CommandModules
                 sb.AppendLine($"Commands: {string.Join(", ", commands)}");
             }
 
+            if (!string.IsNullOrEmpty(module.Summary))
+            {
+                sb.AppendLine($"Summary: {module.Summary}");
+            }
+
             builder.AddField(f =>
             {
-                f.Name = $"**{module.Name}**";
+                f.Name = $"**{module.FriendlyName()}**";
                 f.Value = sb.ToString();
             });
         }
@@ -101,8 +114,8 @@ namespace DiscordBot.Modules.CommandModules
                 f.Name = $"**{command.Name}**";
                 f.Value = $"{command.Summary}\n" +
                 (!string.IsNullOrEmpty(command.Remarks) ? $"({command.Remarks})\n" : "") +
-                (command.Aliases.Any() ? $"**Aliase:** {string.Join(", ", command.Aliases.Select(x => $"`{x}`"))}\n" : "") +
-                $"**Verwendungsweise:** `{GetPrefix(command)} {GetAliases(command)}`";
+                (command.Aliases.Any() ? $"**Aliases:** {string.Join(", ", command.Aliases.Select(x => $"`{x}`"))}\n" : "") +
+                $"**Usage:** `{GetPrefix(command)} {GetAliases(command)}`";
             });
         }
 
