@@ -16,6 +16,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using DiscordBot.Services;
 using LibMCRcon.RCon;
 
 namespace DiscordBot
@@ -46,10 +47,10 @@ namespace DiscordBot
 
                         .AddScoped<IWeatherService, WeatherService>()
                         .AddScoped<ICatService, CatService>()
-                         .AddSingleton<MinecraftService>()
+                        .AddSingleton<MinecraftService>()
 
                         .AddSingleton<DiscordSocketClient>()
-                        .AddSingleton<CommandService>()
+                        .AddSingleton<CommandService, InjectableCommandService>()
                         .AddSingleton<CommandHandlingService>()
                         .AddSingleton<DiscordLoggingService>()
                         ;
@@ -57,6 +58,8 @@ namespace DiscordBot
                     services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
                     services.Configure<ImgurSettings>(hostContext.Configuration.GetSection("Imgur"));
                     services.Configure<MinecraftSettings>(hostContext.Configuration.GetSection("Minecraft"));
+
+                    services.Configure<CommandServiceConfig>(hostContext.Configuration.GetSection("Discord:CommandService"));
 
                     services.AddHostedService<BotService>();
                 });
