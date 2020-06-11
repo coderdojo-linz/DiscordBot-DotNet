@@ -46,6 +46,7 @@ namespace DiscordBot
 
                         .AddScoped<IWeatherService, WeatherService>()
                         .AddScoped<ICatService, CatService>()
+                         .AddSingleton<MinecraftService>()
 
                         .AddSingleton<DiscordSocketClient>()
                         .AddSingleton<CommandService>()
@@ -55,6 +56,7 @@ namespace DiscordBot
 
                     services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
                     services.Configure<ImgurSettings>(hostContext.Configuration.GetSection("Imgur"));
+                    services.Configure<MinecraftSettings>(hostContext.Configuration.GetSection("Minecraft"));
 
                     services.AddHostedService<BotService>();
                 });

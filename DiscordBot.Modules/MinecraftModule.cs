@@ -1,8 +1,7 @@
 ﻿using Discord.Commands;
-using LibMCRcon.RCon;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
+using DiscordBot.Modules.Services;
+
 using System.Threading.Tasks;
 
 namespace DiscordBot.Modules
@@ -11,18 +10,15 @@ namespace DiscordBot.Modules
     [Summary("Manages our minecraft")]
     public class MinecraftModule : ModuleBase<SocketCommandContext>
     {
-        [Command("list")]
-        public async Task ListPlayersAsync()
+        private MinecraftService _service;
+
+        public MinecraftModule(MinecraftService service) => _service = service;
+
+        [Command("say")]
+        public async Task ListPlayersAsync([Remainder] string text)
         {
-            var rcon = LibMCRcon.RCon.MCHelper.ActivateRcon("XXX", 25575, "XXX");
-            var errsb = new StringBuilder();
-            var players = MCHelper.LoadPlayers(rcon, errsb);
-
-
-          
-
-            rcon.StopComms();
-            await base.Context.Channel.SendMessageAsync(string.Join("\n", players));
+            await _service.EnqueueCommandsAsync(new[] { $"say {text}" });
+            await base.Context.Channel.SendMessageAsync($"told them '{text}'");
         }
     }
 }

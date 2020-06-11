@@ -1,10 +1,11 @@
-﻿using LibMCRcon.RCon;
+﻿using DiscordBot.Domain.Configuration;
+
+using LibMCRcon.RCon;
 
 using Microsoft.Extensions.Options;
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.Services
