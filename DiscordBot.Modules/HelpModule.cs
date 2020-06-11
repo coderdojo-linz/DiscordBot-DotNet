@@ -27,7 +27,6 @@ namespace DiscordBot.Modules
             if (path == "")
             {
                 output.Title = "Dojo Bot - help";
-                //.GroupBy(x => x.Name).Select(x => x.First())
                 foreach (var mod in _commands.Modules.Where(m => m.Parent == null))
                 {
                     AddHelp(mod, ref output);
