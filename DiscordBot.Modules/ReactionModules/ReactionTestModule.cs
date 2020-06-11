@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.ReactionModules
 {
-    [Reaction("banhammer", "wave", "👋")]
+    [Reaction("banhammer", "wave", "👋", "poop")]
     public class ReactionTestModule : ReactionModuleBase
     {
         public override async Task<bool> ExecuteAsync()
