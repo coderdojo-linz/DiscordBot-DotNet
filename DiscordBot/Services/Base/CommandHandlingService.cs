@@ -156,7 +156,10 @@ namespace DiscordBot.Services.Base
 
             // command is unspecified when there was a search failure (command not found); we don't care about these errors
             if (!command.IsSpecified)
+            {
+                _logger.LogInformation($"Command not recognized: {context?.Message?.Content ?? "[NOTF_OUND]" }");
                 return;
+            }
 
             // the command was successful, we don't care about this result, unless we want to log that a command succeeded.
             if (result.IsSuccess)
