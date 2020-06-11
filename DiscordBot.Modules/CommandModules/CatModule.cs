@@ -10,7 +10,7 @@ namespace DiscordBot.Modules.CommandModules
 
         public CatModule(ICatService catService) => _catService = catService;
 
-        [Command("oldcat")]
+        [Command("cat")]
         public async Task OldCat() => await base.Context.Channel.SendFileAsync(await _catService.GetCatAsync(), "cat.jpg");
     }
 
