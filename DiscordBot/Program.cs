@@ -53,7 +53,6 @@ namespace DiscordBot
                         .AddScoped<IWeatherService, WeatherService>()
                         .AddScoped<ICatService, CatService>()
                         .AddSingleton<MinecraftService>()
-                        .AddScoped<ReactionTestModule>()
                         ;
 
                     services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
