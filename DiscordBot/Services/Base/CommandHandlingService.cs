@@ -3,6 +3,8 @@ using Discord.Commands;
 using Discord.WebSocket;
 
 using DiscordBot.Domain.Configuration;
+using DiscordBot.Modules.Utils.ReactionBase;
+
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +16,6 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using DiscordBot.Modules.Utils.ReactionBase;
 
 namespace DiscordBot.Services.Base
 {
@@ -56,10 +57,18 @@ namespace DiscordBot.Services.Base
             // if it qualifies as a command.
             _discord.MessageReceived += MessageReceivedAsync;
 
-            _discord.ReactionAdded += ReactionAdded;
+            _discord.ReactionAdded += (x, y, z) => ReactionAction(x, y, z, ReactionType.Added);
+            _discord.ReactionRemoved += (x, y, z) => ReactionAction(x, y, z, ReactionType.Removed);
+            _discord.ReactionsCleared += (x, y) => ReactionAction(x, y, null, ReactionType.Cleared);
         }
 
-        private async Task ReactionAdded(Cacheable<IUserMessage, ulong> userMessage, ISocketMessageChannel messageChannel, SocketReaction reaction)
+        private async Task ReactionAction
+        (
+            Cacheable<IUserMessage, ulong> userMessage,
+            ISocketMessageChannel messageChannel,
+            SocketReaction reaction,
+            ReactionType reactionType
+        )
         {
             using (var scope = _services.CreateScope())
             {
@@ -76,7 +85,7 @@ namespace DiscordBot.Services.Base
                     return;
                 }
 
-                var context = new ReactionContext(userMessage, messageChannel, reaction);
+                var context = new ReactionContext(userMessage, messageChannel, reaction, reactionType);
 
                 foreach (var type in types)
                 {

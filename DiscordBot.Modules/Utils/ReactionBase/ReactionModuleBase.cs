@@ -1,5 +1,6 @@
-﻿using System.Threading.Tasks;
-using Discord;
+﻿using Discord;
+
+using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.Utils.ReactionBase
 {
@@ -7,8 +8,29 @@ namespace DiscordBot.Modules.Utils.ReactionBase
     {
         public ReactionContext Context { get; set; }
 
-        public abstract Task<bool> ExecuteAsync();
+        public virtual Task<bool> ExecuteAsync() => Context.ReactionType switch
+        {
+            ReactionType.Added => ReactionAddedAsync(),
+            ReactionType.Removed => ReactionRemovedAsync(),
+            ReactionType.Cleared => ReactionClearedAsync(),
+            ReactionType.Default => Task.FromResult(false),
+            _ => Task.FromResult(false)
+        };
 
+        public virtual Task<bool> ReactionAddedAsync()
+        {
+            return Task.FromResult(false);
+        }
+
+        public virtual Task<bool> ReactionRemovedAsync()
+        {
+            return Task.FromResult(false);
+        }
+
+        public virtual Task<bool> ReactionClearedAsync()
+        {
+            return Task.FromResult(false);
+        }
 
         /// <summary>Sends a message to the source channel.</summary>
         /// <param name="message">
