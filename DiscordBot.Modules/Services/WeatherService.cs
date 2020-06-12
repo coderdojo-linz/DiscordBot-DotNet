@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,14 +37,17 @@ namespace DiscordBot.Modules.Services
                 var weather = await GetOpenWeatherMapModuleByLocation(location);
 
                 //Get Picture
+                if ((weather?.Weather?.Length ?? 0) == 0 || weather.Weather[0].Icon == null)
+                {
+                    return null;
+                }
                 string weatherIcon = weather.Weather[0].Icon;
-                if (weatherIcon == null)
-                    throw new Exception();
+
                 var pictureResponse = await _httpClient.GetAsync($"http://openweathermap.org/img/wn/{weatherIcon}@2x.png");
                 //Send back to Discord Server
                 return await pictureResponse.Content.ReadAsStreamAsync();
             }
-            catch(Exception)
+            catch (Exception)
             {
                 return null;
             }
