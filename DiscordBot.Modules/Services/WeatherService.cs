@@ -33,12 +33,13 @@ namespace DiscordBot.Modules.Services
             try
             {
                 //Get Weather from the API
-                var weather = await getOpenWeatherMapModuleByLocation(location);
+                var weather = await GetOpenWeatherMapModuleByLocation(location);
 
                 //Get Picture
                 string weatherIcon = weather.Weather[0].Icon;
+                if (weatherIcon == null)
+                    throw new Exception();
                 var pictureResponse = await _httpClient.GetAsync($"http://openweathermap.org/img/wn/{weatherIcon}@2x.png");
-
                 //Send back to Discord Server
                 return await pictureResponse.Content.ReadAsStreamAsync();
             }
@@ -54,9 +55,9 @@ namespace DiscordBot.Modules.Services
         /// </summary>
         /// <param name="location">Location of the Temperature</param>
         /// <returns>Temperature</returns>
-        public async Task<double> GetTemperature(string location) => (await getOpenWeatherMapModuleByLocation(location)).Main.Temp;
+        public async Task<double> GetTemperature(string location) => (await GetOpenWeatherMapModuleByLocation(location)).Main.Temp;
 
-        private async Task<OpenWeatherMapModel> getOpenWeatherMapModuleByLocation(string location)
+        private async Task<OpenWeatherMapModel> GetOpenWeatherMapModuleByLocation(string location)
         {
             var result = await _httpClient.GetAsync($"http://api.openweathermap.org/data/2.5/weather?q={location}&appid=ab2446e861742c6758a49c789d0f4e6a");
             return JsonConvert.DeserializeObject<OpenWeatherMapModel>(await result.Content.ReadAsStringAsync());
