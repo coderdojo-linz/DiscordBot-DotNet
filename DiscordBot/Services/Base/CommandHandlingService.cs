@@ -1,4 +1,4 @@
-using Discord;
+﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 
@@ -96,10 +96,17 @@ namespace DiscordBot.Services.Base
                     }
 
                     module.Context = context;
-
-                    if (await module.ExecuteAsync())
+                    try
                     {
-                        return;
+                        if (await module.ExecuteAsync())
+                        {
+                            return;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogCritical(e, $"ReactionHandler '{module.GetType().FullName}' returned exception!");
+                        throw;
                     }
                 }
             }

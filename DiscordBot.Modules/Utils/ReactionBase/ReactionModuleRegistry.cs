@@ -119,11 +119,28 @@ namespace DiscordBot.Modules.Utils.ReactionBase
 
                 foreach (var reactionName in attribute.ReactionNames)
                 {
+                    TryRegisterAliases(type, reactionName);
+
                     RegisterInternal(type, reactionName);
                 }
             }
 
             return this;
+        }
+
+        private void TryRegisterAliases(Type type, string reactionName)
+        {
+            var parsed = GEmojiSharp.Emoji.Get(reactionName);
+            if (parsed.IsCustom)
+            {
+                return;
+            }
+
+            RegisterInternal(type, parsed.Raw);
+            foreach (var alias in parsed.Aliases ?? Array.Empty<string>())
+            {
+                RegisterInternal(type, alias);
+            }
         }
     }
 }

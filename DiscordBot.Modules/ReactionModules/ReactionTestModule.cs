@@ -4,9 +4,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.ReactionModules
 {
-    //"wave": 👋
-    //"poop": 💩
-    [Reaction("banhammer", "dojo", "👋", "💩")]
+    [Reaction("banhammer", "dojo", "wave")]
     public class ReactionTestModule : ReactionModuleBase
     {
         public override async Task<bool> ReactionAddedAsync()
@@ -28,6 +26,8 @@ namespace DiscordBot.Modules.ReactionModules
         public override async Task<bool> ReactionRemovedAsync()
         {
             await ReplyAsync($"Reaction Removed! '{base.Context.Reaction.Emote.Name}'");
+            // Application insights also works here:
+            // throw new AggregateException("Yolo");
             return true;
         }
 
