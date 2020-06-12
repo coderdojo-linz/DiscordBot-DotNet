@@ -10,6 +10,8 @@ using DiscordBot.Domain.Configuration;
 
 namespace DiscordBot.Modules
 {
+    [Group("jakob"), Name("Jakob Cat")]
+    [Summary("Verbesserungsvorschlege von Jakob, den Katzenbefehl zu erweitern.")]
     public class CatModuleJakob : ModuleBase
     {
         public CatModuleJakob(IOptions<DiscordSettings> options)
@@ -17,6 +19,7 @@ namespace DiscordBot.Modules
             string prefix = options.Value.CommandPrefix;
             _prefix = prefix;
         }
+
         string _prefix;
         [Command("catexamples")]
         [Summary("Gibt dir Beispiele für Katzenarten aus")]
@@ -29,6 +32,7 @@ namespace DiscordBot.Modules
                 .WithCurrentTimestamp();
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
+
         [Command("cat", RunMode = RunMode.Async)]
         [Summary("Zeigt dir eine süße Katze ^-^")]
         public async Task Cat([Remainder] string input = "nothing")
@@ -41,16 +45,14 @@ namespace DiscordBot.Modules
 
             if (response == "[]" || input == "nothing")
             {
-                if (input == "nothing")
-                {
-                }
-                else
+                if (input != "nothing")
                 {
                     await ReplyAsync($"Es konnte keine Katze der Art ``{input}`` gefunden werden!");
                     await Task.Delay(1500);
                     await ReplyAsync("Hier bekommst du trotzdem eine zufällige Katze <:cutecat:720278063409004565>");
                     time = 1000;
                 }
+
                 HttpResponseMessage message2 = await httpClient.GetAsync("https://api.thecatapi.com/v1/images/search");
                 string response2 = await message2.Content.ReadAsStringAsync();
 
@@ -74,6 +76,7 @@ namespace DiscordBot.Modules
                 await base.Context.Channel.SendFileAsync(streamResponse, "cat.jpg");
             }
         }
+
         [Command("catgif")]
         [Alias("gifcat")]
         [Summary("Schickt dir eine animierte Katze ^-^")]

@@ -4,11 +4,17 @@ namespace DiscordBot.Modules.Utils.ReactionBase
 {
     public class ReactionAttribute : Attribute
     {
-        public string[] ReactionName { get; }
+        public ReactionFilter FilterMode { get; }
+        public string[] ReactionNames { get; }
 
-        public ReactionAttribute(params string[] reactionName)
+        public ReactionAttribute(params string[] reactionName) : this(ReactionFilter.Select, reactionName)
         {
-            ReactionName = reactionName;
+        }
+
+        public ReactionAttribute(ReactionFilter selection, params string[] reactionName)
+        {
+            FilterMode = selection;
+            ReactionNames = reactionName ?? Array.Empty<string>();
         }
     }
 }

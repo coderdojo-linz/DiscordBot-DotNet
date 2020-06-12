@@ -2,4 +2,4 @@
 
 This is a Discord Bot that we maintain together at CoderDojo Linz.
 
-We work hard on this project!
+We work hard on this project!!
