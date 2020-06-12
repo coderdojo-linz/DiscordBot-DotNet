@@ -2,12 +2,6 @@
 
 namespace DiscordBot.Modules.Utils.ReactionBase
 {
-    public enum ReactionFilter
-    {
-        PassAll = 1,
-        Select = 2
-    }
-
     public class ReactionAttribute : Attribute
     {
         public ReactionFilter FilterMode { get; }

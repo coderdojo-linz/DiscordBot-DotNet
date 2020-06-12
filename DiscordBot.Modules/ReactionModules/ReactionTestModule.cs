@@ -4,13 +4,24 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.ReactionModules
 {
-    //[Reaction("banhammer", "wave", "👋", "poop")]
-    [Reaction(ReactionFilter.PassAll)]
+    //"wave": 👋
+    //"poop": 💩
+    [Reaction("banhammer", "dojo", "👋", "💩")]
     public class ReactionTestModule : ReactionModuleBase
     {
         public override async Task<bool> ReactionAddedAsync()
         {
-            await ReplyAsync($"Reaction added! '{base.Context.Reaction.Emote.Name}'");
+            var emote = base.Context.Reaction.Emote switch
+            {
+                // For this to work, the bot has to be in the same server, the emote is from
+                // Because of this, banhammer wont work because the bot is not in the same server
+                Discord.Emote em => $"<:{em.Name}:{em.Id}>",
+                Discord.Emoji emoji => $"{emoji.Name}",
+                _ => ""
+            };
+
+            await ReplyAsync($"Reaction added! '{emote}'");
+
             return true;
         }
 
