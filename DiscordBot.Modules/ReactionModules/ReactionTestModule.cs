@@ -27,7 +27,7 @@ namespace DiscordBot.Modules.ReactionModules
         {
             await ReplyAsync($"Reaction Removed! '{base.Context.Reaction.Emote.Name}'");
             // Application insights also works here:
-            // throw new AggregateException("Yolo");
+            // throw new AggregateException("I don't like this");
             return true;
         }
 
