@@ -44,12 +44,22 @@ namespace DiscordBot.Modules.CommandModules
         public async Task GetWeatherAsync([Remainder] string location)
         {
             var weather = await _weatherService.GetWeatherAsync(location);
+            if (weather == null)
+            {
+                await ReplyAsync($"No weather for '{location}' found");
+                return;
+            }
 
             var eb = new EmbedBuilder()
                 .WithThumbnailUrl(weather.ThumbnailUrl)
                 .WithTitle(weather.Main)
                 .WithDescription(weather.Description)
-                .AddField("Temparatur", weather.Temparature);
+                .AddField("Temparatur", weather.Temparature, true)
+                .AddField("RealFeel", weather.RealFeelTemp, true)
+                // This doesnt look good:
+                //.AddField("Luftfeuchtigkeit", weather.Humidity, true)
+                //.AddField("Luftdruck", weather.Pressure, true)
+                ;
 
             await ReplyAsync(embed: eb.Build());
         }
