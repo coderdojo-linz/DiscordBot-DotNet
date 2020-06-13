@@ -46,9 +46,9 @@ namespace DiscordBot.Modules.CommandModules
 
             builder.AddField("Add a reaction to perform your vote", sb);
 
-            var res = builder.Build();
+            var embed = builder.Build();
 
-            var msg = await ReplyAsync(embed: res);
+            var msg = await ReplyAsync(embed: embed);
 
             foreach (var reaction in emojis.Take(options.Length))
             {

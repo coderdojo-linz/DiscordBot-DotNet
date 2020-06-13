@@ -1,7 +1,10 @@
-﻿using System.IO;
-using System.Threading.Tasks;
+﻿using Discord;
 using Discord.Commands;
+
 using DiscordBot.Domain.Abstractions;
+
+using System.IO;
+using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.CommandModules
 {
@@ -14,8 +17,8 @@ namespace DiscordBot.Modules.CommandModules
             _weatherService = weatherService;
         }
 
-        [Command("weather")]
-        public async Task GetWeatherAsync([Remainder] string location)
+        [Command("weather-legacy")]
+        public async Task GetWeatherLegacyAsync([Remainder] string location)
         {
             //Get Values
             var WeatherStream = await _weatherService.GetWeatherStream(location);
@@ -33,8 +36,22 @@ namespace DiscordBot.Modules.CommandModules
                 WeatherStream.Seek(0, SeekOrigin.Begin);
             }
 
-            //Answer 
+            //Answer
             await Context.Channel.SendFileAsync(WeatherStream, $"{location}.png", temperature.ToString());
+        }
+
+        [Command("weather")]
+        public async Task GetWeatherAsync([Remainder] string location)
+        {
+            var weather = await _weatherService.GetWeatherAsync(location);
+
+            var eb = new EmbedBuilder()
+                .WithThumbnailUrl(weather.ThumbnailUrl)
+                .WithTitle(weather.Main)
+                .WithDescription(weather.Description)
+                .AddField("Temparatur", weather.Temparature);
+
+            await ReplyAsync(embed: eb.Build());
         }
     }
 }

@@ -1,13 +1,12 @@
 ﻿using DiscordBot.Domain.Abstractions;
-using DiscordBot.Domain.WeatherModel;
+using DiscordBot.Domain.Weather.Dto;
+using DiscordBot.Domain.Weather.OpenWeatherMapModel;
+
 using Newtonsoft.Json;
+
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.Services
@@ -51,7 +50,6 @@ namespace DiscordBot.Modules.Services
             {
                 return null;
             }
-
         }
 
         /// <summary>
@@ -60,6 +58,28 @@ namespace DiscordBot.Modules.Services
         /// <param name="location">Location of the Temperature</param>
         /// <returns>Temperature</returns>
         public async Task<double> GetTemperature(string location) => (await GetOpenWeatherMapModuleByLocation(location)).Main.Temp;
+
+        public async Task<WeatherDto> GetWeatherAsync(string location)
+        {
+            //Get Weather from the API
+            var weatherModel = await GetOpenWeatherMapModuleByLocation(location);
+
+            //Get Picture
+            if ((weatherModel?.Weather?.Length ?? 0) == 0 || weatherModel.Weather[0].Icon == null)
+            {
+                return null;
+            }
+
+            var firstData = weatherModel.Weather[0];
+
+            return new WeatherDto
+            {
+                Main = firstData.Main,
+                Description = firstData.Description,
+                Temparature = $"{(weatherModel.Main.Temp - 273.15):##,##}°C",
+                ThumbnailUrl = $"http://openweathermap.org/img/wn/{firstData.Icon}@2x.png"
+            };
+        }
 
         private async Task<OpenWeatherMapModel> GetOpenWeatherMapModuleByLocation(string location)
         {
