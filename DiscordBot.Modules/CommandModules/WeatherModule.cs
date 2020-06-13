@@ -17,14 +17,24 @@ namespace DiscordBot.Modules.CommandModules
         [Command("weather")]
         public async Task GetWeatherAsync([Remainder] string location)
         {
-            var catStream = await _weatherService.GetWeatherStream(location);
-            if (catStream.CanSeek)
+            //Get Values
+            var WeatherStream = await _weatherService.GetWeatherStream(location);
+            double temperature = await _weatherService.GetTemperature(location);
+
+            //Check if returned Values are valid
+            if (WeatherStream == null)
             {
-                catStream.Seek(0, SeekOrigin.Begin);
+                await Context.Channel.SendMessageAsync("Location invalid");
+                return;
             }
 
-            await Context.Channel.SendFileAsync(catStream, "cat.png");
+            if (WeatherStream.CanSeek)
+            {
+                WeatherStream.Seek(0, SeekOrigin.Begin);
+            }
 
+            //Answer 
+            await Context.Channel.SendFileAsync(WeatherStream, $"{location}.png", temperature.ToString());
         }
     }
 }
