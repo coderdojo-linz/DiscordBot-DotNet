@@ -37,6 +37,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DiscordBot.Domain\DiscordBot.Domain.csproj" />
     <ProjectReference Include="..\DiscordBot.Modules\DiscordBot.Modules.csproj" />
+    <ProjectReference Include="..\DiscordBot.CoderDojoInfoModule\DiscordBot.CoderDojoInfoModule.csproj" />
   </ItemGroup>
 
 </Project>
