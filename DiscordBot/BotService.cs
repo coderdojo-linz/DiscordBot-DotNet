@@ -22,9 +22,20 @@ namespace DiscordBot
         private readonly DiscordSocketClient client;
         private readonly CommandHandlingService commandHandlingService;
 
-        public BotService(ILogger<BotService> logger, IOptions<DiscordSettings> discordSettings,
-            DiscordSocketClient client, CommandHandlingService commandHandlingService)
+        public BotService
+        (
+            ILogger<BotService> logger, 
+            IOptions<DiscordSettings> discordSettings,
+            DiscordSocketClient client, 
+            CommandHandlingService commandHandlingService,
+            Microsoft.Extensions.Hosting.IHostApplicationLifetime lifetime
+        )
         {
+            //lifetime.ApplicationStopping.Register(async () =>
+            //{
+            //    await StopAsync(default);
+            //});
+
             _logger = logger;
             this.discordSettings = discordSettings.Value;
             this.client = client;
@@ -50,7 +61,7 @@ namespace DiscordBot
             // Here we initialize the logic required to register our commands.
             await commandHandlingService.InitializeAsync();
 
-            await Task.Delay(-1);
+            //await Task.Delay(-1);
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)

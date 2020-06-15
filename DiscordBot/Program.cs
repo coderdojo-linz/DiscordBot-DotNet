@@ -27,10 +27,10 @@ namespace DiscordBot
                 .ConfigureServices(ConfigureServices)
                 .Build();
 
-            System.Runtime.Loader.AssemblyLoadContext.Default.Unloading += ctx =>
-            {
-                host.StopAsync().Wait();
-            };
+            //System.Runtime.Loader.AssemblyLoadContext.Default.Unloading += ctx =>
+            //{
+            //    host.StopAsync().Wait();
+            //};
 
             host.Run();
         }
