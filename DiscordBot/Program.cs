@@ -20,20 +20,10 @@ namespace DiscordBot
 {
     internal class Program
     {
-        public static void Main(string[] args)
-        {
-            var host = Host.CreateDefaultBuilder(args)
+        public static void Main(string[] args) => Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration(GetConfiguration)
                 .ConfigureServices(ConfigureServices)
-                .Build();
-
-            //System.Runtime.Loader.AssemblyLoadContext.Default.Unloading += ctx =>
-            //{
-            //    host.StopAsync().Wait();
-            //};
-
-            host.Run();
-        }
+                .Build().Run();
 
         private static void GetConfiguration(IConfigurationBuilder builder)
         {

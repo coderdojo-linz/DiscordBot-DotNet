@@ -27,15 +27,9 @@ namespace DiscordBot
             ILogger<BotService> logger, 
             IOptions<DiscordSettings> discordSettings,
             DiscordSocketClient client, 
-            CommandHandlingService commandHandlingService,
-            Microsoft.Extensions.Hosting.IHostApplicationLifetime lifetime
+            CommandHandlingService commandHandlingService
         )
         {
-            //lifetime.ApplicationStopping.Register(async () =>
-            //{
-            //    await StopAsync(default);
-            //});
-
             _logger = logger;
             this.discordSettings = discordSettings.Value;
             this.client = client;
