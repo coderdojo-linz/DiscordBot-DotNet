@@ -49,12 +49,16 @@ namespace DiscordBot
 
                 .AddScoped<IWeatherService, WeatherService>()
                 .AddScoped<ICatService, CatService>()
-                .AddSingleton<MinecraftService>();
+                .AddSingleton<MinecraftService>()
+                .AddTransient<MapBoxStaticMapService>()
+                
+                ;
 
             services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
             services.Configure<ImgurSettings>(hostContext.Configuration.GetSection("Imgur"));
             services.Configure<MinecraftSettings>(hostContext.Configuration.GetSection("Minecraft"));
-            services.Configure<JawgSettings>(hostContext.Configuration.GetSection("Jawg"));
+            services.Configure<JawgSettings>(hostContext.Configuration.GetSection("MapServices:Jawg"));
+            services.Configure<MapBoxSettings>(hostContext.Configuration.GetSection("MapServices:MapBox"));
 
             services.AddApplicationInsightsTelemetryWorkerService();
 

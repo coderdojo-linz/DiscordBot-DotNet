@@ -2,6 +2,7 @@
 
 using DiscordBot.Domain.Configuration;
 using DiscordBot.Domain.IpInfo;
+using DiscordBot.Modules.Services;
 
 using Flurl.Http;
 
@@ -9,7 +10,6 @@ using Microsoft.Extensions.Options;
 
 using System.Globalization;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.CommandModules
@@ -17,10 +17,16 @@ namespace DiscordBot.Modules.CommandModules
     [Group("ip")]
     public class IpInfoModule : ModuleBase<SocketCommandContext>
     {
+        private readonly MapBoxStaticMapService _mapBoxStaticMapService;
         private JawgSettings _jawgSettings;
 
-        public IpInfoModule(IOptions<JawgSettings> jawgSettings)
+        public IpInfoModule
+        (
+            IOptions<JawgSettings> jawgSettings,
+            MapBoxStaticMapService mapBoxStaticMapService
+        )
         {
+            _mapBoxStaticMapService = mapBoxStaticMapService;
             _jawgSettings = jawgSettings.Value;
         }
 
@@ -32,7 +38,6 @@ namespace DiscordBot.Modules.CommandModules
                 await ReplyAsync("Invalid ip format :(");
                 return;
             }
-            
 
             var ipInfo = await $"http://ip-api.com/json/{ipAddress}".GetJsonAsync<IpApiResult>();
             if (ipInfo == null)
@@ -41,8 +46,18 @@ namespace DiscordBot.Modules.CommandModules
                 return;
             }
 
-            var staticMap = await GetStaticImageUrl(ipInfo).GetStreamAsync();
+            var staticMap = await _mapBoxStaticMapService.GetImageStream(ipInfo.Lat, ipInfo.Lon);
+            // await GetStaticImageUrlMapBox(ipInfo).GetStreamAsync();
             await base.Context.Channel.SendFileAsync(staticMap, "map.png", $"{ipInfo.Country} - {ipInfo.City}");
+        }
+
+        private string GetStaticImageUrlMapBox(IpApiResult ipInfo)
+        {
+            var culture = new CultureInfo("en-US");
+            var apiKey = "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.-g_vE53SD2WrJ6tFX7QHmA";
+            var position = $"{ipInfo.Lon.ToString(culture)},{ipInfo.Lat.ToString(culture)}";
+
+            return $"https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/pin-l({position})/{position},14/720x480?access_token={apiKey}";
         }
 
         private string GetStaticImageUrl(IpApiResult ipInfo)

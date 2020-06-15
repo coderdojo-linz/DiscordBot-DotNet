@@ -82,7 +82,8 @@ namespace DiscordBot.Modules.Services
 
         public void Dispose()
         {
-            rcon.StopComms();
+            rcon?.StopComms();
+            rcon = null;
         }
     }
 }
