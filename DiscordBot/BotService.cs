@@ -44,7 +44,7 @@ namespace DiscordBot
 
             _ = Task.Run(async () =>
             {
-                await SendStartMessage(client);
+                await SendBotSpamMessage(client, "Bot started.");
             });
 
             // Here we initialize the logic required to register our commands.
@@ -53,8 +53,20 @@ namespace DiscordBot
             await Task.Delay(-1);
         }
 
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            await SendBotSpamMessage(client, "Stopping bot...");
+
+            _logger.LogInformation("Attempting graceful stop");
+            _logger.LogInformation("Logging out");
+            await client.LogoutAsync();
+            _logger.LogInformation("Disconnecting");
+            await client.StopAsync();
+            client.Dispose();
+        }
+
         //Warning: Hack
-        private async Task SendStartMessage(DiscordSocketClient client)
+        private async Task SendBotSpamMessage(DiscordSocketClient client, string message)
         {
             try
             {
@@ -75,7 +87,7 @@ namespace DiscordBot
                 {
                     _logger.LogInformation($"Sending msg to {dojo.Name} - {spamChannel.Name}");
 
-                    await messageChannel.SendMessageAsync("Bot started.");
+                    await messageChannel.SendMessageAsync(message);
                 }
             }
             catch (Exception ex)
@@ -83,11 +95,6 @@ namespace DiscordBot
                 // Guess we dont have this channel anymore ¯\_(ツ)_/¯
                 _logger.LogInformation(ex, "Cannot send enter msg");
             }
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
         }
     }
 }
