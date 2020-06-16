@@ -1,12 +1,11 @@
-﻿using Discord.Commands;
+﻿using Discord;
+using Discord.Commands;
 
 using Microsoft.Extensions.Logging;
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using Discord;
 
 namespace DiscordBot.Modules.CommandModules
 {
@@ -66,8 +65,8 @@ namespace DiscordBot.Modules.CommandModules
 
             int random = randomGen.Next(0, 6);
 
-            await message.ModifyAsync(msg => msg.Content = $"Ein zufälliger Algorithmus würfelt.... :game_die: {unicodeEmojis[random - 1]}\nDie Würfel sind gefallen!");
-            logger.LogInformation($"{Context.User} hat die Zahl {random} gewürfelt!");
+            await message.ModifyAsync(msg => msg.Content = $"Ein zufälliger Algorithmus würfelt.... :game_die: {unicodeEmojis[random]}\nDie Würfel sind gefallen!");
+            logger.LogInformation($"{Context.User} hat die Zahl {random + 1} gewürfelt!");
         }
     }
 }
