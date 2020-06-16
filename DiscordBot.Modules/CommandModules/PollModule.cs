@@ -81,6 +81,14 @@ namespace DiscordBot.Modules.CommandModules
                     //await errmsg.DeleteAsync();
                     return;
                 }
+                if (!CheckPollMsg(msg))
+                {
+                    var errmsg = await ReplyAsync("Die angegebene Nachricht ist kein Poll!");
+                    //await Task.Delay(3000);
+                    //await base.Context.Message.DeleteAsync();
+                    //await errmsg.DeleteAsync();
+                    return;
+                }
                 var embed = msg.Embeds.First();
 
                 string[] availableOptions = embed.Fields[0].Value.Split("\n");
@@ -109,6 +117,20 @@ namespace DiscordBot.Modules.CommandModules
                 //await base.Context.Message.DeleteAsync();
                 //await err.DeleteAsync();
             }
+        }
+
+        private bool CheckPollMsg(IUserMessage msg)
+        {
+            //Console.WriteLine($"`{msg.Embeds.First().Fields.Count()}Desc");
+            if ((msg.Content != "") ||
+                (msg.Embeds.Count != 1) ||
+                (msg.Embeds.First().Title == "") ||
+                (msg.Embeds.First().Footer.ToString() != $"{_prefix}poll") ||
+                (msg.Embeds.First().Timestamp == null) ||
+                (msg.Embeds.First().Description != null) ||
+                (msg.Embeds.First().Fields.Count() != 1) ||
+                (msg.Embeds.First().Fields.First().Value == "")) { return false; }
+            return true;
         }
     }
 }
