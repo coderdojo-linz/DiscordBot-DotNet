@@ -123,15 +123,48 @@ namespace DiscordBot.Modules.CommandModules
         private bool CheckPollMsg(IUserMessage msg)
         {
             //Console.WriteLine($"`{msg.Embeds.First().Fields.Count()}Desc");
+            if (msg.Content != "")
+            {
+                return false;
+            }
+
+            if (msg.Embeds.Count != 1)
+            {
+                return false;
+            }
+
             var emb = msg.Embeds.FirstOrDefault();
-            if ((msg.Content != "") ||
-                (msg.Embeds.Count != 1) ||
-                (emb.Title == "") ||
-                (emb.Footer.ToString() != $"{_prefix}poll") ||
-                (emb.Timestamp == null) ||
-                (emb.Description != null) ||
-                (emb.Fields.Count() != 1) ||
-                (emb.Fields.First().Value == "")) { return false; }
+
+            if (emb.Title == "")
+            {
+                return false;
+            }
+
+            if (emb.Footer.ToString() != $"{_prefix}poll")
+            {
+                return false;
+            }
+
+            if (emb.Timestamp == null)
+            {
+                return false;
+            }
+
+            if (emb.Description != null)
+            {
+                return false;
+            }
+
+            if (emb.Fields.Count() != 1)
+            {
+                return false;
+            }
+
+            if (emb.Fields.First().Value == "")
+            {
+                return false;
+            }
+
             return true;
         }
     }
