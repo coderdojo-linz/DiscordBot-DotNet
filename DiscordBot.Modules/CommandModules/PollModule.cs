@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Discord;
 using Discord.Commands;
@@ -20,7 +19,7 @@ namespace DiscordBot.Modules.CommandModules
         }
 
         [Command("poll")]
-        public async Task CreatePoll(string title, params string[] options)
+        public async Task CreatePollAsync(string title, params string[] options)
         {
             if (options.Length > 10)
             {
@@ -32,15 +31,19 @@ namespace DiscordBot.Modules.CommandModules
             }
             var emojis = new[]
             {
-                "one", "two", "three",
-                "four", "five", "six", "seven",
-                "eight", "nine", "keycap_ten"
-            };
-            var unicodeEmojis = new List<string>();
-            for (int i = 0; i < options.Length; i++)
-            {
-                unicodeEmojis.Add(GEmojiSharp.Emoji.Get(emojis[i]).Raw);
+                "one",
+                "two",
+                "three",
+                "four",
+                "five",
+                "six",
+                "seven",
+                "eight",
+                "nine",
+                "keycap_ten"
             }
+                .Select(emoji => GEmojiSharp.Emoji.Get(emoji).Raw)
+                .ToList();
 
             var builder = new EmbedBuilder()
                 .WithColor(Color.DarkRed)
@@ -51,20 +54,20 @@ namespace DiscordBot.Modules.CommandModules
             string desc = "";
             for (int i = 0; i < options.Length; i++)
             {
-                desc += $"{unicodeEmojis[i]} - {options[i]}\n";
+                desc += $"{emojis[i]} - {options[i]}\n";
             }
             builder.AddField("Reagiere mit einem Emoji um zu voten:", desc);
 
-            await base.Context.Message.DeleteAsync();
+            //await base.Context.Message.DeleteAsync();
             IUserMessage message = await base.Context.Channel.SendMessageAsync(embed: builder.Build());
-            foreach (var emoji in unicodeEmojis)
+            for (int i = 0; i < options.Length; i++)
             {
-                await message.AddReactionAsync(new Emoji(emoji));
+                await message.AddReactionAsync(new Emoji(emojis[i]));
             }
         }
 
         [Command("endpoll")]
-        public async Task EndPoll(string idOrUrl, [Remainder] string message = "")
+        public async Task EndPollAsync(string idOrUrl, [Remainder] string message = "")
         {
             Match idMatch = Regex.Match(idOrUrl, @"^(?:https?://(?:www\.)?discord(?:app)?\.com(?:/channels)/\d+/\d+/)?(\d+)$");
             if (idMatch.Success)
@@ -73,12 +76,12 @@ namespace DiscordBot.Modules.CommandModules
                 if (msg == null)
                 {
                     var errmsg = await ReplyAsync("Der Poll wurde nicht gefunden! Stelle sicher, dass sich der Poll in dem aktuellen Kanal befindet!");
-                    await Task.Delay(3000);
-                    await base.Context.Message.DeleteAsync();
-                    await errmsg.DeleteAsync();
+                    //await Task.Delay(3000);
+                    //await base.Context.Message.DeleteAsync();
+                    //await errmsg.DeleteAsync();
                     return;
                 }
-                var embed = msg.Embeds.ToArray()[0];
+                var embed = msg.Embeds.First();
 
                 string[] availableOptions = embed.Fields[0].Value.Split("\n");
                 string votes = "";
@@ -96,15 +99,15 @@ namespace DiscordBot.Modules.CommandModules
                     .WithFooter(footer => footer.Text = $"{_prefix}poll")
                     .WithCurrentTimestamp()
                     .WithDescription($"Voteergebnis:\n{votes}\n{message}");
-                await base.Context.Message.DeleteAsync();
+                //await base.Context.Message.DeleteAsync();
                 await msg.ModifyAsync(msg => msg.Embed = emb.Build());
             }
             else
             {
-                await base.Context.Message.DeleteAsync();
-                var err = await ReplyAsync("Please specify a valid id or url!");
-                await Task.Delay(3000);
-                await err.DeleteAsync();
+                var err = await ReplyAsync("Bitte gib eine gültige ID oder Url an!");
+                //await Task.Delay(3000);
+                //await base.Context.Message.DeleteAsync();
+                //await err.DeleteAsync();
             }
         }
     }
