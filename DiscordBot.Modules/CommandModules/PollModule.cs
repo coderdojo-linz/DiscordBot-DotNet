@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text;
 using System.Text.RegularExpressions;
 using Discord;
 using Discord.Commands;
@@ -51,12 +52,12 @@ namespace DiscordBot.Modules.CommandModules
                 .WithCurrentTimestamp()
                 .WithTitle(title);
 
-            string desc = "";
+            StringBuilder desc = new StringBuilder();
             for (int i = 0; i < options.Length; i++)
             {
-                desc += $"{emojis[i]} - {options[i]}\n";
+                desc.AppendLine($"{emojis[i]} - {options[i]}");
             }
-            builder.AddField("Reagiere mit einem Emoji um zu voten:", desc);
+            builder.AddField("Reagiere mit einem Emoji um zu voten:", desc.ToString());
 
             //await base.Context.Message.DeleteAsync();
             IUserMessage message = await base.Context.Channel.SendMessageAsync(embed: builder.Build());
@@ -122,14 +123,15 @@ namespace DiscordBot.Modules.CommandModules
         private bool CheckPollMsg(IUserMessage msg)
         {
             //Console.WriteLine($"`{msg.Embeds.First().Fields.Count()}Desc");
+            var emb = msg.Embeds.FirstOrDefault();
             if ((msg.Content != "") ||
                 (msg.Embeds.Count != 1) ||
-                (msg.Embeds.First().Title == "") ||
-                (msg.Embeds.First().Footer.ToString() != $"{_prefix}poll") ||
-                (msg.Embeds.First().Timestamp == null) ||
-                (msg.Embeds.First().Description != null) ||
-                (msg.Embeds.First().Fields.Count() != 1) ||
-                (msg.Embeds.First().Fields.First().Value == "")) { return false; }
+                (emb.Title == "") ||
+                (emb.Footer.ToString() != $"{_prefix}poll") ||
+                (emb.Timestamp == null) ||
+                (emb.Description != null) ||
+                (emb.Fields.Count() != 1) ||
+                (emb.Fields.First().Value == "")) { return false; }
             return true;
         }
     }
