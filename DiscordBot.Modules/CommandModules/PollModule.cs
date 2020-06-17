@@ -162,7 +162,7 @@ namespace DiscordBot.Modules.CommandModules
                 return false;
             }
 
-            if (fields.First().Value == "")
+            if (fields[0].Value == "")
             {
                 return false;
             }
