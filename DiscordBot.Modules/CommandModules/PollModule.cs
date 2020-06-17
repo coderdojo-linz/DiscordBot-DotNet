@@ -55,7 +55,7 @@ namespace DiscordBot.Modules.CommandModules
             StringBuilder desc = new StringBuilder();
             for (int i = 0; i < options.Length; i++)
             {
-                desc.AppendLine($"{emojis[i]} - {options[i]}");
+                desc.AppendLine($"{emojis[i]} - {options[i]}\n");
             }
             builder.AddField("Reagiere mit einem Emoji um zu voten:", desc.ToString());
 
@@ -92,7 +92,7 @@ namespace DiscordBot.Modules.CommandModules
                 }
                 var embed = msg.Embeds.First();
 
-                string[] availableOptions = embed.Fields[0].Value.Split("\n");
+                string[] availableOptions = Regex.Replace(embed.Fields[0].Value, @"\n+", "\n").Split("\n");
                 string votes = "";
                 var voteList = msg.Reactions;
                 for (int i = 0; i < availableOptions.Length; i++)
@@ -155,12 +155,14 @@ namespace DiscordBot.Modules.CommandModules
                 return false;
             }
 
-            if (emb.Fields.Count() != 1)
+            var fields = emb.Fields.Take(2).ToList();
+
+            if (fields.Count != 1)
             {
                 return false;
             }
 
-            if (emb.Fields.First().Value == "")
+            if (fields.First().Value == "")
             {
                 return false;
             }
