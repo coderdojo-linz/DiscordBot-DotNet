@@ -133,7 +133,7 @@ namespace DiscordBot.Modules.CommandModules
                 return false;
             }
 
-            var emb = msg.Embeds.FirstOrDefault();
+            var emb = msg.Embeds.First();
 
             if (emb.Title == "")
             {
