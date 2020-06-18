@@ -15,6 +15,8 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Net.Http;
+using DiscordBot.Domain.CoderDojoInfoModule.Configuration;
+using DiscordBot.Domain.CoderDojoInfoModule.ServicesImpl;
 
 namespace DiscordBot
 {
@@ -51,14 +53,14 @@ namespace DiscordBot
                 .AddScoped<ICatService, CatService>()
                 .AddSingleton<MinecraftService>()
                 .AddTransient<MapBoxStaticMapService>()
-                
-                ;
+                .AddScoped<ICoderDojoAppointmentReaderService, CoderDojoAppointmentReaderService>();
 
             services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
             services.Configure<ImgurSettings>(hostContext.Configuration.GetSection("Imgur"));
             services.Configure<MinecraftSettings>(hostContext.Configuration.GetSection("Minecraft"));
             services.Configure<JawgSettings>(hostContext.Configuration.GetSection("MapServices:Jawg"));
             services.Configure<MapBoxSettings>(hostContext.Configuration.GetSection("MapServices:MapBox"));
+            services.Configure<CDAppointmentSettings>(hostContext.Configuration.GetSection("CoderDojoAppointments"));
 
             services.AddApplicationInsightsTelemetryWorkerService();
 

@@ -4,35 +4,41 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using DiscordBot.Domain.CoderDojoInfoModule.Controller;
+using DiscordBot.Domain.CoderDojoInfoModule.ServicesImpl;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace DiscordBot.Domain.CoderDojoInfoModule {
     public class CoderDojoInfoModule : ModuleBase {
-        private static IConfiguration config;
-        
-        static CoderDojoInfoModule() {
-            // read settings if there are any.
-            config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", true, true)
-                .Build();
-                        
+        public ICoderDojoAppointmentReaderService ReaderService { get; }
+        public ILogger<CoderDojoInfoModule> Logger { get; }
+
+        public CoderDojoInfoModule(ICoderDojoAppointmentReaderService readerService, ILogger<CoderDojoInfoModule> logger) {
+            ReaderService = readerService;
+            Logger = logger;
         }
         
         [Command("termine")]
-        public async Task NextAppointments(IGuildUser user) {
-            string url = config["nextAppointmentsUrl"] ?? "https://participants-management-service.azurewebsites.net/api/events/?past=false";
+        public async Task NextAppointments() {
 
-            var parser = new CoderDojoAppointmentReader(new Uri(url));
-            var appointments = await parser.ReadCurrentAppointments();
-            
-            StringBuilder response = new StringBuilder();
-            response.Append($"Hier die Termine für dich, {user.Nickname}:  \n"); // the two blanks in front of linebreak are needed because discord uses Markdown
-            foreach (var appointment in appointments) {
-                response.Append($"> {appointment.Date.ToString("dddd, dd.MM.yyyy", new CultureInfo("de-DE"))}  \n");
+            try {
+                var appointments = await ReaderService.ReadCurrentAppointments();
+
+                StringBuilder response = new StringBuilder();
+
+                // the two blanks in front of linebreak are needed because discord uses Markdown
+                response.Append($"Hier die Termine für dich {Context.User.Username}:  \n"); 
+                foreach (var appointment in appointments) {
+                    response.Append($"> {appointment.Date.ToString("dddd, dd.MM.yyyy", new CultureInfo("de-DE"))}  \n");
+                }
+
+                await ReplyAsync(response.ToString());
             }
-
-            await ReplyAsync(response.ToString());
+            catch (Exception ex) {
+                Logger.LogError(ex, "Failed to get Appointments");
+                await ReplyAsync("Leider kann ich dir die Termine im Moment " +
+                                 "nicht sagen, weil ein Fehler aufgetreten ist .....");
+            }
         }
     }
 }
