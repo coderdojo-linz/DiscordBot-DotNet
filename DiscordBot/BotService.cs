@@ -74,7 +74,7 @@ namespace DiscordBot
                 if (spamChannel is IMessageChannel messageChannel)
                 {
                     _logger.LogInformation($"Sending msg to {dojo.Name} - {spamChannel.Name}");
-
+                    _logger.LogInformation($"                        MMM             \n                          MMMM          \n                MMMMMM      MMMMM       \n                M    M       MMMMM      \n                M    M       MMMMMMM    \n                M    M        MMMMMMM   \n                M    M        MMMMMMMM  \n                MMMMMM       MMMMMMMMMM \n                             MMMMMMMMMM \n                            MMMMMMMMMMM \n                          MMMMMMMMMMMMMM\n                        MMMMMMMMMMMMMMMM\n                MMMMMMMMMMMMMMMMMMMMMMMM\n             MMMMMMMMMMMMMMMMMMMMMMMMMM \n            MMMMMMMMMMMMMMMMMMMMMMMMMMM \n           MMMMMMMMMMMMMMMMMMMMMMMMMMMM \n          MMMMMMMM  MMMMMMMMMMMMMMMMMM  \n          MMMMMMMMM MMMMMMMMMMMMMMMMMM  \n          MMMMMMMMM MMMMMMMMMMMMMMMMM   \n          MMMMMMMMM MMMMMMMMMMMMMMMM    \n          MMMMMMMMM MM MMMMMMMMMMM      \n           MMMMMM      MMMMMMMMMM       \n            MMMMMMMMMMMMMMMMMMM         \n              MMMMMMMMMMMMMM            \n                MMMMM                  \n");
                     await messageChannel.SendMessageAsync("Bot started.");
                 }
             }

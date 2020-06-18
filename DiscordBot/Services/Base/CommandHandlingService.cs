@@ -156,6 +156,7 @@ namespace DiscordBot.Services.Base
             }
 
             _logger.Log(LogLevel.Information, $"Modules initialized");
+            _logger.LogInformation($"                   MMM             \n                          MMMM          \n                MMMMMM      MMMMM       \n                M    M       MMMMM      \n                M    M       MMMMMMM    \n                M    M        MMMMMMM   \n                M    M        MMMMMMMM  \n                MMMMMM       MMMMMMMMMM \n                             MMMMMMMMMM \n                            MMMMMMMMMMM \n                          MMMMMMMMMMMMMM\n                        MMMMMMMMMMMMMMMM\n                MMMMMMMMMMMMMMMMMMMMMMMM\n             MMMMMMMMMMMMMMMMMMMMMMMMMM \n            MMMMMMMMMMMMMMMMMMMMMMMMMMM \n           MMMMMMMMMMMMMMMMMMMMMMMMMMMM \n          MMMMMMMM  MMMMMMMMMMMMMMMMMM  \n          MMMMMMMMM MMMMMMMMMMMMMMMMMM  \n          MMMMMMMMM MMMMMMMMMMMMMMMMM   \n          MMMMMMMMM MMMMMMMMMMMMMMMM    \n          MMMMMMMMM MM MMMMMMMMMMM      \n           MMMMMM      MMMMMMMMMM       \n            MMMMMMMMMMMMMMMMMMM         \n              MMMMMMMMMMMMMM            \n                MMMMM                  \n \n \n  _______  _______  _______    _______  _______  _______  ______    _______  _______  ______  \n|  _    ||       ||       |  |       ||       ||   _   ||    _ |  |       ||       ||      | \n| |_|   ||   _   ||_     _|  |  _____||_     _||  |_|  ||   | ||  |_     _||    ___||  _    |\n|       ||  | |  |  |   |    | |_____   |   |  |       ||   |_||_   |   |  |   |___ | | |   |\n|  _   | |  |_|  |  |   |    |_____  |  |   |  |       ||    __  |  |   |  |    ___|| |_|   |\n| |_|   ||       |  |   |     _____| |  |   |  |   _   ||   |  | |  |   |  |   |___ |       |\n|_______||_______|  |___|    |_______|  |___|  |__| |__||___|  |_|  |___|  |_______||______| \n");
         }
 
         public async Task MessageReceivedAsync(SocketMessage rawMessage)
@@ -212,13 +213,20 @@ namespace DiscordBot.Services.Base
             // command is unspecified when there was a search failure (command not found); we don't care about these errors
             if (!command.IsSpecified)
             {
-                _logger.LogInformation($"Command not recognized: {context?.Message?.Content ?? "[NOT_FOUND]" }");
+                await context.Channel.SendMessageAsync($"Ein Fehler ist aufgetreten: der Command ``{context.Message.Content}`` wurde nicht gefunden!");
+                _logger.LogInformation($"Der Command {context.Message.Content} wurde nicht gefunden! Autor: {context.User}");
                 return;
             }
 
             // the command was successful, we don't care about this result, unless we want to log that a command succeeded.
             if (result.IsSuccess)
+            {
+                _logger.LogInformation($"Der Command {context.Message.Content} wurde von {context.User} erfolgreich ausgeführt!");
                 return;
+            }
+
+            await context.Channel.SendMessageAsync($"Ein Fehler ist aufgetreten: der Command ``{context.Message.Content}`` konnte nicht ausgeführt werden!");
+            _logger.LogInformation($"FEHLER: der Command {context.Message.Content}, ausgeführt von {context.User}, konnte nicht ausgeführt werden!");
 
             // the command failed, let's notify the user that something happened.
             if (result is ExecuteResult executeResult && executeResult.Exception != null)
