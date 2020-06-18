@@ -36,6 +36,8 @@ stages:
         DISCORD_TOKEN: $(DISCORD_TOKEN)
         IMGUR_SECRET: $(IMGUR_SECRET)
         AI_INSTRUMENTATION_KEY: $(AI_INSTRUMENTATION_KEY)
+        JAWG_APIKEY: $(JAWG_APIKEY)
+        MAPBOX_APIKEY: $(MAPBOX_APIKEY)
       inputs:
         azureSubscription: 'CoderDojo Containers'
         scriptType: bash
@@ -44,6 +46,12 @@ stages:
           az provider register --namespace 'Microsoft.ContainerInstance'
           az container create --resource-group Containers --name $(imageName) --image coderdojo.azurecr.io/$(imageName):latest \
             --dns-name-label $(imageName) --registry-login-server coderdojo.azurecr.io --registry-username $ACR_USER --registry-password $ACR_SECRET \
-            --secure-environment-variables Discord__Token=$DISCORD_TOKEN Imgur__Client_ID=$IMGUR_CLIENT_ID Imgur__Client_Secret=$IMGUR_SECRET ApplicationInsights__InstrumentationKey=$AI_INSTRUMENTATION_KEY
+            --secure-environment-variables \
+                    Discord__Token=$DISCORD_TOKEN \
+                    Imgur__Client_ID=$IMGUR_CLIENT_ID \
+                    Imgur__Client_Secret=$IMGUR_SECRET \
+                    ApplicationInsights__InstrumentationKey=$AI_INSTRUMENTATION_KEY \
+                    MapServices__Jawg__ApiKey=$JAWG_APIKEY  \
+                    MapServices__MapBox__ApiKey=$MAPBOX_APIKEY
           az container restart  --resource-group Containers --name $(imageName)
           
