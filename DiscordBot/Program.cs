@@ -14,15 +14,16 @@ using Microsoft.Extensions.Hosting;
 
 using System;
 using System.IO;
+using System.Net.Http;
 
 namespace DiscordBot
 {
     internal class Program
     {
-        public static void Main(string[] args)  => Host.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration(GetConfiguration)
-            .ConfigureServices(ConfigureServices)
-            .Build().Run();
+        public static void Main(string[] args) => Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration(GetConfiguration)
+                .ConfigureServices(ConfigureServices)
+                .Build().Run();
 
         private static void GetConfiguration(IConfigurationBuilder builder)
         {
@@ -38,20 +39,26 @@ namespace DiscordBot
         {
             services.AddOptions()
                 .AddHttpClient()
+                .AddTransient<HttpClient>(x => x.GetService<IHttpClientFactory>().CreateClient("default"))
                 .AddReactionModules()
 
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService, InjectableCommandService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<DiscordLoggingService>()
-              
+
                 .AddScoped<IWeatherService, WeatherService>()
                 .AddScoped<ICatService, CatService>()
-                .AddSingleton<MinecraftService>();
+                .AddSingleton<MinecraftService>()
+                .AddTransient<MapBoxStaticMapService>()
+                
+                ;
 
             services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
             services.Configure<ImgurSettings>(hostContext.Configuration.GetSection("Imgur"));
             services.Configure<MinecraftSettings>(hostContext.Configuration.GetSection("Minecraft"));
+            services.Configure<JawgSettings>(hostContext.Configuration.GetSection("MapServices:Jawg"));
+            services.Configure<MapBoxSettings>(hostContext.Configuration.GetSection("MapServices:MapBox"));
 
             services.AddApplicationInsightsTelemetryWorkerService();
 

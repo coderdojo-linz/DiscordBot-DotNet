@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace DiscordBot.Domain.WeatherModel
+namespace DiscordBot.Domain.Weather.OpenWeatherMapModel
 {
     public partial class CloudsModel
     {

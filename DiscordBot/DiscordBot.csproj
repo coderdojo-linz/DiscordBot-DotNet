@@ -6,6 +6,12 @@
     <RootNamespace>DiscordBot</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Models\**" />
+    <EmbeddedResource Remove="Models\**" />
+    <None Remove="Models\**" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Discord.Net" Version="2.2.0" />
@@ -19,6 +25,9 @@
     <None Update="appsettings.Development.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="appsettings.Development.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -26,13 +35,9 @@
 
 
   <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
-
-
-  <ItemGroup>
     <ProjectReference Include="..\DiscordBot.Domain\DiscordBot.Domain.csproj" />
     <ProjectReference Include="..\DiscordBot.Modules\DiscordBot.Modules.csproj" />
+    <ProjectReference Include="..\DiscordBot.CoderDojoInfoModule\DiscordBot.CoderDojoInfoModule.csproj" />
   </ItemGroup>
 
 </Project>
