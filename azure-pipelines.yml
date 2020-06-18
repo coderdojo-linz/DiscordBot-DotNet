@@ -37,6 +37,7 @@ stages:
         IMGUR_SECRET: $(IMGUR_SECRET)
         AI_INSTRUMENTATION_KEY: $(AI_INSTRUMENTATION_KEY)
         JAWG_APIKEY: $(JAWG_APIKEY)
+        MAPBOX_APIKEY: $(MAPBOX_APIKEY)
       inputs:
         azureSubscription: 'CoderDojo Containers'
         scriptType: bash
@@ -50,6 +51,7 @@ stages:
                     Imgur__Client_ID=$IMGUR_CLIENT_ID \
                     Imgur__Client_Secret=$IMGUR_SECRET \
                     ApplicationInsights__InstrumentationKey=$AI_INSTRUMENTATION_KEY \
-                    Jawg__ApiKey=$JAWG_APIKEY
+                    MapServices__Jawg__ApiKey=$JAWG_APIKEY  \
+                    MapServices__MapBox__ApiKey=$MAPBOX_APIKEY
           az container restart  --resource-group Containers --name $(imageName)
           

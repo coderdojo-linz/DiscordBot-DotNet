@@ -22,8 +22,13 @@ namespace DiscordBot
         private readonly DiscordSocketClient client;
         private readonly CommandHandlingService commandHandlingService;
 
-        public BotService(ILogger<BotService> logger, IOptions<DiscordSettings> discordSettings,
-            DiscordSocketClient client, CommandHandlingService commandHandlingService)
+        public BotService
+        (
+            ILogger<BotService> logger, 
+            IOptions<DiscordSettings> discordSettings,
+            DiscordSocketClient client, 
+            CommandHandlingService commandHandlingService
+        )
         {
             _logger = logger;
             this.discordSettings = discordSettings.Value;
@@ -44,17 +49,29 @@ namespace DiscordBot
 
             _ = Task.Run(async () =>
             {
-                await SendStartMessage(client);
+                await SendBotSpamMessage(client, "Bot started.");
             });
 
             // Here we initialize the logic required to register our commands.
             await commandHandlingService.InitializeAsync();
 
-            await Task.Delay(-1);
+            //await Task.Delay(-1);
+        }
+
+        public async Task StopAsync(CancellationToken cancellationToken)
+        {
+            await SendBotSpamMessage(client, "Stopping bot...");
+
+            _logger.LogInformation("Attempting graceful stop");
+            _logger.LogInformation("Logging out");
+            await client.LogoutAsync();
+            _logger.LogInformation("Disconnecting");
+            await client.StopAsync();
+            client.Dispose();
         }
 
         //Warning: Hack
-        private async Task SendStartMessage(DiscordSocketClient client)
+        private async Task SendBotSpamMessage(DiscordSocketClient client, string message)
         {
             try
             {
@@ -75,7 +92,7 @@ namespace DiscordBot
                 {
                     _logger.LogInformation($"Sending msg to {dojo.Name} - {spamChannel.Name}");
                     _logger.LogInformation($"                        MMM             \n                          MMMM          \n                MMMMMM      MMMMM       \n                M    M       MMMMM      \n                M    M       MMMMMMM    \n                M    M        MMMMMMM   \n                M    M        MMMMMMMM  \n                MMMMMM       MMMMMMMMMM \n                             MMMMMMMMMM \n                            MMMMMMMMMMM \n                          MMMMMMMMMMMMMM\n                        MMMMMMMMMMMMMMMM\n                MMMMMMMMMMMMMMMMMMMMMMMM\n             MMMMMMMMMMMMMMMMMMMMMMMMMM \n            MMMMMMMMMMMMMMMMMMMMMMMMMMM \n           MMMMMMMMMMMMMMMMMMMMMMMMMMMM \n          MMMMMMMM  MMMMMMMMMMMMMMMMMM  \n          MMMMMMMMM MMMMMMMMMMMMMMMMMM  \n          MMMMMMMMM MMMMMMMMMMMMMMMMM   \n          MMMMMMMMM MMMMMMMMMMMMMMMM    \n          MMMMMMMMM MM MMMMMMMMMMM      \n           MMMMMM      MMMMMMMMMM       \n            MMMMMMMMMMMMMMMMMMM         \n              MMMMMMMMMMMMMM            \n                MMMMM                  \n");
-                    await messageChannel.SendMessageAsync("Bot started.");
+                    await messageChannel.SendMessageAsync(message);
                 }
             }
             catch (Exception ex)
@@ -83,11 +100,6 @@ namespace DiscordBot
                 // Guess we dont have this channel anymore ¯\_(ツ)_/¯
                 _logger.LogInformation(ex, "Cannot send enter msg");
             }
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
         }
     }
 }

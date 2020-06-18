@@ -9,6 +9,11 @@ namespace DiscordBot.Modules.ReactionModules
     {
         public override async Task<bool> ReactionAddedAsync()
         {
+            if (!(base.Context.Channel.Name?.Contains("bot-spam") ?? false))
+            {
+                return false;
+            }
+
             var emote = base.Context.Reaction.Emote switch
             {
                 // For this to work, the bot has to be in the same server, the emote is from

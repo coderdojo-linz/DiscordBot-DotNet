@@ -25,6 +25,9 @@
     <None Update="appsettings.Development.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="appsettings.Development.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -34,6 +37,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DiscordBot.Domain\DiscordBot.Domain.csproj" />
     <ProjectReference Include="..\DiscordBot.Modules\DiscordBot.Modules.csproj" />
+    <ProjectReference Include="..\DiscordBot.CoderDojoInfoModule\DiscordBot.CoderDojoInfoModule.csproj" />
   </ItemGroup>
 
 </Project>
