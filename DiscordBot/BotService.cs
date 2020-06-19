@@ -7,10 +7,10 @@ using DiscordBot.Services.Base;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-
+using Newtonsoft.Json;
 using System;
-using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -69,13 +69,25 @@ namespace DiscordBot
         public async Task YoutubeHandler()
         {
             int _counter = 1;
+            var _guild = client.GetGuild(youtubeSettings.GuildID);
+            var _channel = _guild.GetChannel(youtubeSettings.ChannelID) as IVoiceChannel;
+            string query = "https://www.googleapis.com/youtube/v3/channels?part=statistics&id=" + youtubeSettings.YTChannelID + "&key=" + youtubeSettings.APIKey;
+            HttpClient httpClient = new HttpClient();
             while (true)
             {
-                var _Guild = client.GetGuild(youtubeSettings.GuildID);
-                var _Channel = _Guild.GetChannel(youtubeSettings.ChannelID);
-                await _Channel.ModifyAsync(prop => prop.Name = $"Hallo :D {_counter}");
-                _counter += 1;
-                _logger.LogInformation($"{ _counter}");
+                HttpResponseMessage message = await httpClient.GetAsync(query);
+                string response = await message.Content.ReadAsStringAsync();
+
+                var deserialized = JsonConvert.DeserializeObject<YTApiResponse>(response);
+                var subs = deserialized.subscriberCount;
+
+                await _channel.ModifyAsync(property => 
+                { 
+                    property.Name = $"Hallo xD {subs}"; 
+                });
+                _counter = _counter + 1;
+                _logger.LogInformation($"{subs}");
+                await Task.Delay(300000);
             }
         }
 
