@@ -38,6 +38,7 @@ stages:
         AI_INSTRUMENTATION_KEY: $(AI_INSTRUMENTATION_KEY)
         JAWG_APIKEY: $(JAWG_APIKEY)
         MAPBOX_APIKEY: $(MAPBOX_APIKEY)
+        STORAGE_KEY: $(STORAGE_KEY)
       inputs:
         azureSubscription: 'CoderDojo Containers'
         scriptType: bash
@@ -46,6 +47,8 @@ stages:
           az provider register --namespace 'Microsoft.ContainerInstance'
           az container create --resource-group Containers --name $(imageName) --image coderdojo.azurecr.io/$(imageName):latest \
             --dns-name-label $(imageName) --registry-login-server coderdojo.azurecr.io --registry-username $ACR_USER --registry-password $ACR_SECRET \
+            --azure-file-volume-account-name coderdojodiscord --azure-file-volume-account-key $STORAGE_KEY \
+            --azure-file-volume-share-name bot-data --azure-file-volume-mount-path /mnt/data/ \
             --secure-environment-variables \
                     Discord__Token=$DISCORD_TOKEN \
                     Imgur__Client_ID=$IMGUR_CLIENT_ID \
