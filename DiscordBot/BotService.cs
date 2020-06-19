@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,21 +20,24 @@ namespace DiscordBot
     {
         private readonly ILogger _logger;
         private readonly DiscordSettings discordSettings;
+        private readonly YoutubeSettings youtubeSettings;
         private readonly DiscordSocketClient client;
         private readonly CommandHandlingService commandHandlingService;
 
         public BotService
         (
-            ILogger<BotService> logger, 
+            ILogger<BotService> logger,
             IOptions<DiscordSettings> discordSettings,
-            DiscordSocketClient client, 
-            CommandHandlingService commandHandlingService
+            DiscordSocketClient client,
+            CommandHandlingService commandHandlingService,
+            IOptions<YoutubeSettings> youtubeSettings
         )
         {
             _logger = logger;
             this.discordSettings = discordSettings.Value;
             this.client = client;
             this.commandHandlingService = commandHandlingService;
+            this.youtubeSettings = youtubeSettings.Value;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -56,6 +60,23 @@ namespace DiscordBot
             await commandHandlingService.InitializeAsync();
 
             //await Task.Delay(-1);
+            _ = Task.Run(async () => await this.YoutubeHandler());
+
+
+        }
+
+        
+        public async Task YoutubeHandler()
+        {
+            int _counter = 1;
+            while (true)
+            {
+                var _Guild = client.GetGuild(youtubeSettings.GuildID);
+                var _Channel = _Guild.GetChannel(youtubeSettings.ChannelID);
+                await _Channel.ModifyAsync(prop => prop.Name = $"Hallo :D {_counter}");
+                _counter += 1;
+                _logger.LogInformation($"{ _counter}");
+            }
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)

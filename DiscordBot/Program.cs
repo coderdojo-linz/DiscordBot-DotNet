@@ -57,6 +57,7 @@ namespace DiscordBot
             services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
             services.Configure<ImgurSettings>(hostContext.Configuration.GetSection("Imgur"));
             services.Configure<MinecraftSettings>(hostContext.Configuration.GetSection("Minecraft"));
+            services.Configure<YoutubeSettings>(hostContext.Configuration.GetSection("YouTube"));
             services.Configure<JawgSettings>(hostContext.Configuration.GetSection("MapServices:Jawg"));
             services.Configure<MapBoxSettings>(hostContext.Configuration.GetSection("MapServices:MapBox"));
 
