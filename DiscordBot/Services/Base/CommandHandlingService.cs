@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -237,32 +238,50 @@ namespace DiscordBot.Services.Base
         private async Task SuggestCommand(string cmd, IMessageChannel channel)
         {
             var commands = _commands.Commands.Select(x => x.Name).ToArray();
-            var nearest = GetNearest(commands, cmd, 5);
 
-            if (nearest == "")
-            {
-                await channel.SendMessageAsync($"Dein Befehl wurde nicht erkannt!");
-                return;
-            }
-
-            await channel.SendMessageAsync($"Dein Befehl wurde nicht erkannt! Meintest du: `{nearest}`?");
+            await channel.SendMessageAsync($"Dein Befehl wurde nicht erkannt!{CreateDidYouMean(commands, cmd)}");
         }
 
-        private string GetNearest(string[] list, string what, int radius = 0)
+        private string CreateDidYouMean(string[] commands, string wrongCommand)
         {
-            string result = "";
+            string[] nearests = GetNearests(commands, wrongCommand, 5);
+            int count = nearests.Length;
+
+            if (count == 0) { return ""; }
+
+            if (count <= 2)
+            {
+                return $" Meintest du: {string.Join(" oder ", nearests.Select(x => $"`{x}`"))}?";
+            }
+
+            return $" Meintest du einen der folgenden Befehle?\n{string.Join('\n', nearests.Select(x => $"- `{x}`"))}";
+        }
+
+        private string[] GetNearests(string[] list, string what, int radius = 0)
+        {
+            List<string> result = new List<string>();
             int lastDistance = int.MaxValue - 1;
             int currentDistance;
             foreach (string entry in list)
             {
                 currentDistance = GetLevenshteinDistance(entry, what);
-                if (lastDistance > currentDistance && (radius == 0 || currentDistance <= radius))
+                if (radius == 0 || currentDistance <= radius)
                 {
-                    lastDistance = currentDistance;
-                    result = entry;
+                    if (lastDistance > currentDistance)
+                    {
+                        lastDistance = currentDistance;
+                        result.Clear();
+                        result.Add(entry);
+                    }
+                    else if (lastDistance == currentDistance)
+                    {
+                        lastDistance = currentDistance;
+                        result.Add(entry);
+                    }
                 }
             }
-            return result;
+            result.Sort();
+            return result.ToArray();
         }
 
         private int GetLevenshteinDistance(string s, string t)
