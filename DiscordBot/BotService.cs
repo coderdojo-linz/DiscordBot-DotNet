@@ -2,12 +2,14 @@
 using Discord.WebSocket;
 
 using DiscordBot.Domain.Configuration;
+using DiscordBot.Domain.YouTubeAPI;
 using DiscordBot.Services.Base;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
 using System.Net.Http;
@@ -71,6 +73,12 @@ namespace DiscordBot
             int _counter = 1;
             var _guild = client.GetGuild(youtubeSettings.GuildID);
             var _channel = _guild.GetChannel(youtubeSettings.ChannelID) as IVoiceChannel;
+            var _channel2 = _guild.GetChannel(718472111454158890) as ITextChannel;
+            asdif (_channel == null)
+            {
+                return;
+            }
+
             string query = "https://www.googleapis.com/youtube/v3/channels?part=statistics&id=" + youtubeSettings.YTChannelID + "&key=" + youtubeSettings.APIKey;
             HttpClient httpClient = new HttpClient();
             while (true)
@@ -78,17 +86,24 @@ namespace DiscordBot
                 HttpResponseMessage message = await httpClient.GetAsync(query);
                 string response = await message.Content.ReadAsStringAsync();
 
-                var deserialized = JsonConvert.DeserializeObject<YTApiResponse>(response);
-                var subs = deserialized.subscriberCount;
+                var data = JsonConvert.DeserializeObject<Welcome>(response);
+                if (data.Items != null && data.Items.Length > 0)
+                {
+                    var subs = data.Items[0].Statistics.SubscriberCount;
+                    await _channel.ModifyAsync(property =>
+                    {
+                        property.Name = $"Abonnenten: {subs}";
+                    });
+                };
 
-                await _channel.ModifyAsync(property => 
-                { 
-                    property.Name = $"Hallo xD {subs}"; 
-                });
-                _counter = _counter + 1;
-                _logger.LogInformation($"{subs}");
-                await Task.Delay(300000);
+                await Task.Delay(TimeSpan.FromMinutes(5));
             }
+        }
+
+        public class YTApiResponse
+        {
+            [JsonProperty("subscriberCount")]
+            public long subscriberCount { get; }
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
