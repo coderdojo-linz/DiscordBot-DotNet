@@ -49,6 +49,7 @@ namespace DiscordBot
 
                 .AddScoped<IWeatherService, WeatherService>()
                 .AddScoped<ICatService, CatService>()
+                .AddSingleton<YoutubeService>()
                 .AddSingleton<MinecraftService>()
                 .AddTransient<MapBoxStaticMapService>()
                 
