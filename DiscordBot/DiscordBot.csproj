@@ -40,4 +40,7 @@
     <ProjectReference Include="..\DiscordBot.CoderDojoInfoModule\DiscordBot.CoderDojoInfoModule.csproj" />
   </ItemGroup>
 
+
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
+
 </Project>

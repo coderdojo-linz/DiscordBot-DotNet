@@ -67,7 +67,7 @@ namespace DiscordBot.Modules.Services
             }
 
 
-            string query = "https://www.googleapis.com/youtube/v3/channels?part=statistics&id=" + youtubeSettings.YTChannelID + "&key=" + youtubeSettings.APIKey;
+            string query = "https://www.googleapis.com/youtube/v3/channels?part=snippet%2Cstatistics&id=" + youtubeSettings.YTChannelID + "&key=" + youtubeSettings.APIKey;
             HttpClient httpClient = new HttpClient();
             while (true)
             {
@@ -75,7 +75,6 @@ namespace DiscordBot.Modules.Services
                 string response = await message.Content.ReadAsStringAsync();
 
                 var data = JsonConvert.DeserializeObject<Welcome>(response);
-                var views = data.Items[0].Statistics.ViewCount;
                 if (data.Items != null && data.Items.Length > 0)
                 {
                     var subs = data.Items[0].Statistics.SubscriberCount;
@@ -84,17 +83,18 @@ namespace DiscordBot.Modules.Services
                         property.Name = $"Abonnenten: {subs}";
                     });
                     _logger.LogInformation($"Abonnenten eingeholt: der User mit der ID {youtubeSettings.YTChannelID} hat {subs} Abonnenten");
-                    await channel3.ModifyAsync(property =>
-                    {
-                        property.Name = $"Views vor 5 min: {views}";
-                    });
-                    _logger.LogInformation($"Views eingeholt: der User mit der ID {youtubeSettings.YTChannelID} hatte vor 5 Minuten {views} Views");
-                    views = data.Items[0].Statistics.ViewCount;
+                    var views = data.Items[0].Statistics.ViewCount;
                     await channel2.ModifyAsync(property =>
                     {
                         property.Name = $"Views: {views}";
                     });
                     _logger.LogInformation($"Views eingeholt: der User mit der ID {youtubeSettings.YTChannelID} hat {views} Views");
+                    var user = data.Items[0].Snippet.Title;
+                    await channel3.ModifyAsync(property =>
+                    {
+                        property.Name = $"YouTube: {user}";
+                    });
+                    _logger.LogInformation($"YouTube Name eingeholt: der User mit der ID {youtubeSettings.YTChannelID} heißt {user}");
                 };
 
                 await Task.Delay(TimeSpan.FromMinutes(5));
