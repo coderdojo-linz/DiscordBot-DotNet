@@ -1,5 +1,6 @@
 ﻿using Discord.Commands;
 
+using DiscordBot.Domain;
 using DiscordBot.Domain.Configuration;
 
 using Microsoft.Extensions.Options;
@@ -15,13 +16,6 @@ using Newtonsoft.Json;
 
 namespace DiscordBot.Modules.CommandModules
 {
-    public class SnippetInfo
-    {
-        public ulong UserId { get; set; }
-        public string Name { get; set; }
-        public string Code { get; set; }
-    }
-
     [Group("code")]
     [Summary("Saves and shows code snippets.")]
     public class CodeSnippetModule : ModuleBase
