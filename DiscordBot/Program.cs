@@ -45,6 +45,7 @@ namespace DiscordBot
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService, InjectableCommandService>()
                 .AddSingleton<CommandHandlingService>()
+                .AddSingleton<CommandSuggestionsService>()
                 .AddSingleton<DiscordLoggingService>()
 
                 .AddScoped<IWeatherService, WeatherService>()
