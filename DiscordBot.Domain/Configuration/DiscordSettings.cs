@@ -4,5 +4,6 @@
     {
         public string Token { get; set; }
         public string CommandPrefix { get; set; }
+        public ulong WelcomeMessageChannelId { get; set; }
     }
 }
