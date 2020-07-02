@@ -1,5 +1,8 @@
 ﻿using Discord;
 using Discord.Commands;
+using Discord.Webhook;
+
+
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,65 +15,79 @@ namespace DiscordBot.Modules
         [Command("sans")]
         public async Task Sans()
         {
-            await ReplyAsync("<a:sans:719488632104288286>");
-            await base.Context.Channel.DeleteMessageAsync(base.Context.Message);
+            await SendEmojiWithName("sans");
         }
         [Command("thonk")]
         public async Task Thonk()
         {
-            await ReplyAsync("<:thonk:718853430969368637>");
-            await base.Context.Channel.DeleteMessageAsync(base.Context.Message);
+            await SendEmojiWithName("thonk");
         }
         [Command("mindblowing")]
         public async Task Mindblowing()
         {
-            await ReplyAsync("<:mindblowing:719492411369324584>");
-            await base.Context.Channel.DeleteMessageAsync(base.Context.Message);
+            await SendEmojiWithName("mindblowing");
         }
         [Command("rotatethink")]
         public async Task Rotatethink()
         {
-            await ReplyAsync("<a:rotatethonk:719491269885427752>");
-            await base.Context.Channel.DeleteMessageAsync(base.Context.Message);
+            await SendEmojiWithName("rotatethink");
         }
         [Command("hyper")]
         public async Task Hyper()
         {
-            await ReplyAsync("<a:hyper:719494595313926244>");
-            await base.Context.Channel.DeleteMessageAsync(base.Context.Message);
+            await SendEmojiWithName("hyper");
         }
         [Command("xd")]
         public async Task Xd()
         {
-            await ReplyAsync("<:xd:719510255402352690>");
-            await base.Context.Channel.DeleteMessageAsync(base.Context.Message);
+            await SendEmojiWithName("xd");
         }
         [Command("rainbowcat")]
         public async Task Rainbowcat()
         {
-            var sb = new StringBuilder();
-            sb.AppendLine("<a:catrainbow1:719513824511656037><a:catrainbow2:719513824553861121>");
-            sb.AppendLine("<a:catrainbow3:719513824905920603><a:catrainbow4:719513825040400415>");
-            await ReplyAsync(sb.ToString());
-            await base.Context.Channel.DeleteMessageAsync(base.Context.Message);
+            await SendEmojiWithName("rainbowcat");
         }
         [Command("yes")]
         public async Task Yes()
         {
-            await ReplyAsync("<a:yes:719496630902063149>");
-            await base.Context.Channel.DeleteMessageAsync(base.Context.Message);
+            await SendEmojiWithName("yes");
         }
         [Command("no")]
         public async Task No()
         {
-            await ReplyAsync("<a:no:719496639471157288>");
-            await base.Context.Channel.DeleteMessageAsync(base.Context.Message);
+            await SendEmojiWithName("no");
         }
         [Command("calculated")]
         public async Task Calculated()
         {
-            await ReplyAsync("<:calculated:719518217730654218>");
-            await base.Context.Channel.DeleteMessageAsync(base.Context.Message);
+            await SendEmojiWithName("calculated");
+        }
+
+        private async Task SendEmojiWithName(string name)
+        {
+            string emoji = name switch
+            {
+                "sans" => "<a:sans:719488632104288286>",
+                "thonk" => "<:thonk:718853430969368637>",
+                "mindblowing" => "<:mindblowing:719492411369324584>",
+                "rotatethink" => "<a:rotatethonk:719491269885427752>",
+                "hyper" => "<a:hyper:719494595313926244>",
+                "xd" => "<:xd:719510255402352690>",
+                "rainbowcat" => "<a:catrainbow1:719513824511656037><a:catrainbow2:719513824553861121>\n<a:catrainbow3:719513824905920603><a:catrainbow4:719513825040400415>",
+                "yes" => "<a:yes:719496630902063149>",
+                "no" => "<a:no:719496639471157288>",
+                "calculated" => "<:calculated:719518217730654218>",
+                _ => "unknown"
+            };
+
+            var cxt = base.Context;
+            var webhook = await ((ITextChannel)cxt.Channel).CreateWebhookAsync(((IGuildUser)cxt.User).Nickname ?? cxt.User.Username);
+            var webhookClient = new DiscordWebhookClient(webhook);
+
+            await cxt.Channel.DeleteMessageAsync(base.Context.Message);
+            await webhookClient.SendMessageAsync(emoji, avatarUrl: cxt.User.GetAvatarUrl());
+
+            await webhookClient.DeleteWebhookAsync();
         }
     }
 }
