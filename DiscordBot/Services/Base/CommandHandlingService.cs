@@ -27,6 +27,7 @@ namespace DiscordBot.Services.Base
         private readonly ILogger<CommandHandlingService> _logger;
         private readonly TelemetryClient _telemetryClient;
         private readonly IServiceProvider _services;
+        private readonly CommandSuggestionsService _commandSuggestions = new CommandSuggestionsService();
 
         private char? _messagePrefix = null;
 
@@ -214,7 +215,7 @@ namespace DiscordBot.Services.Base
             {
                 _logger.LogInformation($"Command not recognized: {context?.Message?.Content ?? "[NOT_FOUND]" }");
 
-                await CommandSuggestionsService.SuggestCommand(_commands, context, _discordSettings.CurrentValue.CommandPrefix[0]);
+                await _commandSuggestions.SuggestCommand(_commands, context, _discordSettings.CurrentValue.CommandPrefix[0]);
                 return;
             }
 

@@ -9,7 +9,7 @@ namespace DiscordBot.Services.Base
 {
     internal class CommandSuggestionsService
     {
-        public static async Task SuggestCommand(CommandService commandService, ICommandContext context, char prefix)
+        public async Task SuggestCommand(CommandService commandService, ICommandContext context, char prefix)
         {
             var cmd = context.Message.Content;
             cmd = cmd.TrimStart(prefix);
@@ -20,7 +20,7 @@ namespace DiscordBot.Services.Base
             await context.Channel.SendMessageAsync($"Dein Befehl wurde nicht erkannt!{CreateDidYouMean(availableCommands, cmd)}");
         }
 
-        private static string CreateDidYouMean(string[] commands, string wrongCommand)
+        private string CreateDidYouMean(string[] commands, string wrongCommand)
         {
             string[] nearests = GetNearests(commands, wrongCommand, 5);
             int count = nearests.Length;
@@ -35,7 +35,7 @@ namespace DiscordBot.Services.Base
             return $" Meintest du einen der folgenden Befehle?\n{string.Join('\n', nearests.Select(x => $"- `{x}`"))}";
         }
 
-        private static string[] GetNearests(string[] list, string what, int radius = 0)
+        private string[] GetNearests(string[] list, string what, int radius = 0)
         {
             List<string> result = new List<string>();
             int lastDistance = int.MaxValue - 1;
@@ -62,7 +62,7 @@ namespace DiscordBot.Services.Base
             return result.ToArray();
         }
 
-        private static int GetLevenshteinDistance(string s, string t)
+        private int GetLevenshteinDistance(string s, string t)
         {
             int n = s.Length;
             int m = t.Length;
