@@ -217,7 +217,7 @@ namespace DiscordBot.Services.Base
             {
                 _logger.LogInformation($"Command not recognized: {context?.Message?.Content ?? "[NOT_FOUND]" }");
 
-                await _commandSuggestions.SuggestCommand(_commands, context, _discordSettings.CurrentValue.CommandPrefix[0]);
+                await _commandSuggestions.SuggestCommand(context, _discordSettings.CurrentValue.CommandPrefix[0]);
                 return;
             }
 

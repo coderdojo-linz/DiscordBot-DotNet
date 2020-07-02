@@ -9,13 +9,20 @@ namespace DiscordBot.Services.Base
 {
     public class CommandSuggestionsService
     {
-        public async Task SuggestCommand(CommandService commandService, ICommandContext context, char prefix)
+        private readonly CommandService _commandService;
+
+        public CommandSuggestionsService(CommandService commandService)
+        {
+            _commandService = commandService;
+        }
+
+        public async Task SuggestCommand(ICommandContext context, char prefix)
         {
             var cmd = context.Message.Content;
             cmd = cmd.TrimStart(prefix);
             cmd = cmd.Split(' ')[0];
 
-            var availableCommands = commandService.Commands.Select(x => x.Name).ToArray();
+            var availableCommands = _commandService.Commands.Select(x => x.Name).ToArray();
 
             await context.Channel.SendMessageAsync($"Dein Befehl wurde nicht erkannt!{CreateDidYouMean(availableCommands, cmd)}");
         }
