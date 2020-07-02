@@ -27,7 +27,7 @@ namespace DiscordBot.Services.Base
         private readonly ILogger<CommandHandlingService> _logger;
         private readonly TelemetryClient _telemetryClient;
         private readonly IServiceProvider _services;
-        private readonly CommandSuggestionsService _commandSuggestions = new CommandSuggestionsService();
+        private readonly CommandSuggestionsService _commandSuggestions;
 
         private char? _messagePrefix = null;
 
@@ -37,6 +37,7 @@ namespace DiscordBot.Services.Base
         (
             IServiceProvider services,
             CommandService commandService,
+            CommandSuggestionsService commandSuggestions,
             DiscordSocketClient discordSocketClient,
             IOptionsMonitor<DiscordSettings> configurationMonitor,
             ILogger<CommandHandlingService> logger,
@@ -45,6 +46,7 @@ namespace DiscordBot.Services.Base
         {
             _services = services;
             _commands = commandService;
+            _commandSuggestions = commandSuggestions;
             _discord = discordSocketClient;
 
             _discordSettings = configurationMonitor;

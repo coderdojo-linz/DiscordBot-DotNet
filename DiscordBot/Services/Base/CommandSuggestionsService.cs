@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DiscordBot.Services.Base
 {
-    internal class CommandSuggestionsService
+    public class CommandSuggestionsService
     {
         public async Task SuggestCommand(CommandService commandService, ICommandContext context, char prefix)
         {
