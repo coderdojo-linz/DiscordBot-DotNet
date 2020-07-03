@@ -53,9 +53,9 @@ namespace DiscordBot.Modules.CommandModules
                 Match idMatch = Regex.Match(URL, @"^(?:https?://(?:www\.)?discord(?:app)?\.com(?:/channels)/\d+/\d+/)?(\d+)$");
                 if (idMatch.Success)
                 {
+                    await base.Context.Message.DeleteAsync();
                     IUserMessage msg = (IUserMessage)await base.Context.Channel.GetMessageAsync(Convert.ToUInt64(idMatch.Groups[1].Value));
                     await msg.AddReactionAsync(emoji);
-                    await base.Context.Message.DeleteAsync();
                 }
             }
         }
