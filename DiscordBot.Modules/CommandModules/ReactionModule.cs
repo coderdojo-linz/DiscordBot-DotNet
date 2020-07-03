@@ -10,11 +10,11 @@ namespace DiscordBot.Modules.CommandModules
 {
     public class ReactionModule : ModuleBase
     {
-        private readonly ILogger<PingModule> logger;
+        private readonly ILogger<PingModule> _logger;
 
         public ReactionModule(ILogger<PingModule> logger)
         {
-            this.logger = logger;
+            logger = _logger;
         }
 
         [Command("react")]
