@@ -14,7 +14,7 @@ namespace DiscordBot.Modules.CommandModules
 
         public ReactionModule(ILogger<PingModule> logger)
         {
-            logger = _logger;
+            _logger = logger;
         }
 
         [Command("react")]
