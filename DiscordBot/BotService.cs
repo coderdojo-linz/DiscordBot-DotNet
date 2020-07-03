@@ -75,22 +75,18 @@ namespace DiscordBot
         {
             try
             {
-                var dojo = client.Guilds.FirstOrDefault(x => x.Name?.Contains("CoderDojo Austria") ?? false);
-                if (dojo == null)
+                var id = discordSettings.WelcomeMessageChannelId;
+                var botChannel = (IGuildChannel) client.GetChannel(id);
+
+                if (botChannel == null)
                 {
-                    _logger.LogInformation("Cannot send enter msg: Dojo server not found!");
-                    return;
-                }
-                var spamChannel = dojo.Channels.FirstOrDefault(x => x.Name == "bot-spam");
-                if (spamChannel == null)
-                {
-                    _logger.LogInformation("Cannot send enter msg: Spam channel not found!");
+                    _logger.LogInformation($"Cannot send enter msg: Channel {id} not found!");
                     return;
                 }
 
-                if (spamChannel is IMessageChannel messageChannel)
+                if (botChannel is IMessageChannel messageChannel)
                 {
-                    _logger.LogInformation($"Sending msg to {dojo.Name} - {spamChannel.Name}");
+                    _logger.LogInformation($"Sending msg to {botChannel.Guild.Name} - {botChannel.Name}");
 
                     await messageChannel.SendMessageAsync(message);
                 }
