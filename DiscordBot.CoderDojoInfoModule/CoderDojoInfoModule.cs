@@ -25,7 +25,7 @@ namespace DiscordBot.Domain.CoderDojoInfoModule {
                 StringBuilder response = new StringBuilder();
 
                 // the two blanks in front of linebreak are needed because discord uses Markdown
-                response.Append($"Hier die Termine für dich {Context.User.Username}:  \n"); 
+                response.Append($"{Context.User.Mention} Hier die Termine für dich:  \n"); 
                 foreach (var appointment in appointments) {
                     response.Append($"> {appointment.Date.ToString("dddd, dd.MM.yyyy", new CultureInfo("de-DE"))}  \n");
                 }
@@ -33,7 +33,7 @@ namespace DiscordBot.Domain.CoderDojoInfoModule {
                 await ReplyAsync(response.ToString());
             }
             catch (Exception ex) {
-                Logger.LogError(ex, "Failed to get Appointments");
+                Logger.LogError($"Die Termine konnte nicht eingeholt werden: {ex}");
                 await ReplyAsync("Leider kann ich dir die Termine im Moment " +
                                  "nicht sagen, weil ein Fehler aufgetreten ist .....");
             }

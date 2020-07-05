@@ -27,7 +27,7 @@ namespace DiscordBot.Modules.CommandModules
             //Check if returned Values are valid
             if (WeatherStream == null)
             {
-                await Context.Channel.SendMessageAsync("Location invalid");
+                await Context.Channel.SendMessageAsync("Ort ungültig!");
                 return;
             }
 
@@ -46,7 +46,7 @@ namespace DiscordBot.Modules.CommandModules
             var weather = await _weatherService.GetWeatherAsync(location);
             if (weather == null)
             {
-                await ReplyAsync($"No weather for '{location}' found");
+                await ReplyAsync($"Für `{location}` wurde kein Wetter gefunden!");
                 return;
             }
 

@@ -23,14 +23,14 @@ namespace DiscordBot.Modules.ReactionModules
                 _ => ""
             };
 
-            await ReplyAsync($"Reaction added! '{emote}'");
+            await ReplyAsync($"Reaction hinzugefügt! '{emote}'");
 
             return true;
         }
 
         public override async Task<bool> ReactionRemovedAsync()
         {
-            await ReplyAsync($"Reaction Removed! '{base.Context.Reaction.Emote.Name}'");
+            await ReplyAsync($"Reaction entfernt! '{base.Context.Reaction.Emote.Name}'");
             // Application insights also works here:
             // throw new AggregateException("I don't like this");
             return true;
@@ -38,7 +38,7 @@ namespace DiscordBot.Modules.ReactionModules
 
         public override async Task<bool> ReactionClearedAsync()
         {
-            await ReplyAsync($"Reactions Cleared!");
+            await ReplyAsync($"Reactions geleert!");
             return true;
         }
     }
