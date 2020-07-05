@@ -56,9 +56,9 @@ namespace DiscordBot.Modules.CommandModules
                 .WithDescription(weather.Description)
                 .AddField("Temparatur", weather.Temparature, true)
                 .AddField("RealFeel", weather.RealFeelTemp, true)
-                // This doesnt look good:
-                //.AddField("Luftfeuchtigkeit", weather.Humidity, true)
-                //.AddField("Luftdruck", weather.Pressure, true)
+                .AddField("\u200b", "\u200b", false)
+                .AddField("Luftfeuchtigkeit", weather.Humidity, true)
+                .AddField("Luftdruck", weather.Pressure, true)
                 ;
 
             await ReplyAsync(embed: eb.Build());
