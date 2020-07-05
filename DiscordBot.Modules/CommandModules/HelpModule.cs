@@ -44,8 +44,12 @@ namespace DiscordBot.Modules.CommandModules
                 var mod = _commands.Modules.FirstOrDefault(m => string.Equals(m.Group, path, StringComparison.OrdinalIgnoreCase));
                 if (mod != null)
                 {
+                    var descAttr = (DescriptionAttribute)mod.Attributes.First(a => a is DescriptionAttribute);
+                    string desc = "";
+                    if (descAttr != null)
+                        desc = descAttr.Text + "\n";
                     output.Title = mod.FriendlyName();
-                    output.Description = $"{mod.Summary}\n" +
+                    output.Description = $"{mod.Summary}\n{desc}\n" +
                                          (!string.IsNullOrEmpty(mod.Remarks) ? $"({mod.Remarks})\n" : "") +
                                          (mod.Aliases.Any() ? $"Prefix(es): {string.Join(",", mod.Aliases)}\n" : "") +
                                          (mod.Submodules.Any() ? $"Submodules: {mod.Submodules.Select(m => m)}\n" : "") + " ";
