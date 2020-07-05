@@ -1,7 +1,5 @@
 ﻿using Discord.Commands;
-
 using DiscordBot.Modules.Services;
-
 using System.Threading.Tasks;
 
 namespace DiscordBot.Modules.CommandModules

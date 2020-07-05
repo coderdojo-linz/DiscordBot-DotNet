@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace DiscordBot.Domain.Weather.Dto
+﻿namespace DiscordBot.Domain.Weather.Dto
 {
     public class WeatherDto
     {

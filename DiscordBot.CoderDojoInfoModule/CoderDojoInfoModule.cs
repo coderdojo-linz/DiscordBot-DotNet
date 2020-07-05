@@ -2,10 +2,8 @@ using System;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
-using Discord;
 using Discord.Commands;
 using DiscordBot.Domain.CoderDojoInfoModule.ServicesImpl;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace DiscordBot.Domain.CoderDojoInfoModule {
