@@ -34,9 +34,23 @@ namespace DiscordBot.Domain.Database
             _container = await _database.CreateContainerIfNotExistsAsync(_name, partitionKey);
         }
 
+        /// <summary>
+        /// Queries the database with the string <paramref name="query"/>.
+        /// </summary>
+        /// <param name="query">The query to send</param>
+        /// <returns>Array of type <typeparamref name="T"/></returns>
         public T[] Query(string query) => _container.GetItemQueryIterator<T>(query).ReadNextAsync().Result.ToArray();
+        /// <summary>
+        /// Lists all entries in the database.
+        /// </summary>
+        /// <returns>Array of type <typeparamref name="T"/> with all entries</returns>
         public T[] ReadAll() => Query("select * from db");
 
+        /// <summary>
+        /// Inserts the provided <paramref name="item"/> into the database.
+        /// </summary>
+        /// <param name="item">The item to insert</param>
+        /// <returns>The provided <paramref name="item"/></returns>
         public T Insert(T item)
         {
             DatabaseHelpers.CalculateStorageKeys(_props, item);
@@ -44,6 +58,11 @@ namespace DiscordBot.Domain.Database
             return item;
         }
 
+        /// <summary>
+        /// Updates the <paramref name="item"/> if it exists, else inserts it.
+        /// </summary>
+        /// <param name="item">The item to update or insert</param>
+        /// <returns>The provided <paramref name="item"/></returns>
         public T Upsert(T item)
         {
             DatabaseHelpers.CalculateStorageKeys(_props, item);
@@ -54,6 +73,11 @@ namespace DiscordBot.Domain.Database
             return item;
         }
 
+        /// <summary>
+        /// Deletes the <paramref name="item"/>.
+        /// </summary>
+        /// <param name="item">The item to delete</param>
+        /// <returns>The provided <paramref name="item"/></returns>
         public T Delete(T item)
         {
             DatabaseHelpers.CalculateStorageKeys(_props, item);
