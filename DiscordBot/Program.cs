@@ -3,6 +3,7 @@ using Discord.WebSocket;
 
 using DiscordBot.Domain.Abstractions;
 using DiscordBot.Domain.Configuration;
+using DiscordBot.Domain.Database;
 using DiscordBot.Modules.Services;
 using DiscordBot.Modules.Utils.ReactionBase;
 using DiscordBot.Services;
@@ -54,7 +55,8 @@ namespace DiscordBot
                 .AddScoped<ICatService, CatService>()
                 .AddSingleton<MinecraftService>()
                 .AddTransient<MapBoxStaticMapService>()
-                .AddScoped<ICoderDojoAppointmentReaderService, CoderDojoAppointmentReaderService>();
+                .AddScoped<ICoderDojoAppointmentReaderService, CoderDojoAppointmentReaderService>()
+                .AddSingleton<IDatabaseService, DatabaseService>();
 
             services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
             services.Configure<ImgurSettings>(hostContext.Configuration.GetSection("Imgur"));
