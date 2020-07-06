@@ -29,7 +29,7 @@ namespace DiscordBot.Services.Base
         private readonly IServiceProvider _services;
         private readonly CommandSuggestionsService _commandSuggestions;
 
-        private char? _messagePrefix = null;
+        private string? _messagePrefix = null;
 
         private readonly ConcurrentDictionary<ulong, IServiceScope> _scopes = new ConcurrentDictionary<ulong, IServiceScope>();
 
@@ -117,30 +117,10 @@ namespace DiscordBot.Services.Base
 
         private void InitializePrefix()
         {
-            UpdateMessagePrefix(_discordSettings.CurrentValue.CommandPrefix);
-            _discordSettings.OnChange(x => UpdateMessagePrefix(x.CommandPrefix));
-        }
-
-        private void UpdateMessagePrefix(string prefix)
-        {
-            var prefixLength = string.IsNullOrEmpty(prefix) ? 0 : prefix.Length;
-            var prefixValid = prefixLength == 1;
-            if (prefixValid)
-            {
-                _messagePrefix = prefix[0];
-                return;
-            }
-
-            if (!_messagePrefix.HasValue)
-            {
-                _logger.LogWarning($"Prefix hat eine ungültige Länge ({prefixLength}). '!' wird verwendet.");
-                _messagePrefix = '!';
-            }
-            else
-            {
-                _logger.LogWarning($"Prefix hat eine ungültige Länge ({prefixLength}).");
-            }
-            return;
+            _messagePrefix = _discordSettings.CurrentValue.CommandPrefix;
+            _discordSettings.OnChange(x => {
+                _messagePrefix = x.CommandPrefix;
+            });
         }
 
         public async Task InitializeAsync()
@@ -172,13 +152,13 @@ namespace DiscordBot.Services.Base
             // for a more traditional command format like !help.
             //if (!message.HasMentionPrefix(_discord.CurrentUser, ref argPos)) return;
 
-            if (!_messagePrefix.HasValue)
+            if (_messagePrefix == null)
             {
                 _logger.Log(LogLevel.Information, $"Kein prefix gefunden.");
                 return;
             }
 
-            if (!message.HasCharPrefix(_messagePrefix.Value, ref argPos) && !(message.Channel is IPrivateChannel))
+            if (!message.HasStringPrefix(_messagePrefix, ref argPos) && !(message.Channel is IPrivateChannel))
             {
                 return;
             }
