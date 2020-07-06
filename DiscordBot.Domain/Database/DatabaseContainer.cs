@@ -16,7 +16,14 @@ namespace DiscordBot.Domain.Database
 
         public DatabaseContainer(IOptions<DatabaseSettings> configuration, string name, CosmosClient client, ObjectStoreProperties props)
         {
-            _name = props.ContainerName ?? name;
+            if (name != null && name != "")
+            {
+                _name = name;
+            }
+            else
+            {
+                _name = props.ContainerName;
+            }
             _database = client.GetDatabase(configuration.Value.Name);
             _props = props;
             InitAsync().Wait();

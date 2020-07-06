@@ -20,6 +20,6 @@ namespace DiscordBot.Domain.Database
         /// </summary>
         /// <typeparam name="TContainer">The Type you want to store</typeparam>
         /// <returns></returns>
-        DatabaseContainer<TContainer> GetContainer<TContainer>(string name) where TContainer : DatabaseObject;
+        DatabaseContainer<TContainer> GetContainer<TContainer>(string name = null) where TContainer : DatabaseObject;
     }
 }

@@ -22,7 +22,7 @@ namespace DiscordBot.Domain.Database
             return Client.GetDatabase(_configuration.Value.Name);
         }
 
-        public DatabaseContainer<TContainer> GetContainer<TContainer>(string name) where TContainer : DatabaseObject
+        public DatabaseContainer<TContainer> GetContainer<TContainer>(string name = null) where TContainer : DatabaseObject
         {
             return new DatabaseContainer<TContainer>(_configuration, name, Client, DatabaseHelpers.GetProperties<TContainer>());
         }
