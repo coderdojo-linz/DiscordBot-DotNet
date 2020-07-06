@@ -1,56 +1,42 @@
 ﻿using Discord;
 using Discord.Commands;
 
+using DiscordBot.Domain;
 using DiscordBot.Domain.Configuration;
+using DiscordBot.Domain.Database;
 
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+
 using Newtonsoft.Json;
 
 namespace DiscordBot.Modules.CommandModules
 {
-
-
-
-    public class PollInfo
-    {
-        public ulong MessageId { get; set; }
-        public ulong UserId { get; set; }
-        public List<OptionEmojiPair> Options { get; set; } = new List<OptionEmojiPair>();
-    }
-
-    public class OptionEmojiPair
-    {
-        public string Option { get; set; }
-        public string Emoji { get; set; }
-    }
-
     public class PollModule : ModuleBase
     {
-        private readonly IConfiguration _configuration;
         private readonly ILogger<FileExplorerModule> _logger;
-        private string _prefix;
+        private readonly string _prefix;
+        private readonly DatabaseContainer<PollInfo> _container;
 
         public PollModule
         (
             IOptions<DiscordSettings> options, 
-            IConfiguration configuration,
-            ILogger<FileExplorerModule> logger 
+            ILogger<FileExplorerModule> logger,
+            IDatabaseService database
         )
         {
-            _configuration = configuration;
             _logger = logger;
             string prefix = options.Value.CommandPrefix;
             _prefix = prefix;
+            _container = database.GetContainer<PollInfo>();
         }
 
         [Command("poll")]
@@ -82,7 +68,9 @@ namespace DiscordBot.Modules.CommandModules
 
             var pollInfo = new PollInfo()
             {
-                UserId = base.Context.User.Id
+                UserId = base.Context.User.Id,
+                Title = title,
+                IsEnded = false
             };
 
             for (int i = 0; i < options.Length; i++)
@@ -111,6 +99,7 @@ namespace DiscordBot.Modules.CommandModules
             //await base.Context.Message.DeleteAsync();
             IUserMessage message = await base.Context.Channel.SendMessageAsync(embed: builder.Build());
             pollInfo.MessageId = message.Id;
+            pollInfo.ChannelId = message.Channel.Id;
 
             for (int i = 0; i < options.Length; i++)
             {
@@ -118,7 +107,7 @@ namespace DiscordBot.Modules.CommandModules
             }
 
             //Save database
-            await AddEntryToDatabase(pollInfo);
+            AddEntryToDatabase(pollInfo);
         }
 
         /// <summary>
@@ -127,51 +116,18 @@ namespace DiscordBot.Modules.CommandModules
         /// 3. Save Database
         /// </summary>
         /// <returns></returns>
-        public async Task AddEntryToDatabase(PollInfo pollInfo)
+        private void AddEntryToDatabase(PollInfo info)
         {
-            var db = await ReadDatabase();
-            db.Add(pollInfo);
-
-            var filesFolder = _configuration["FileStore:DataFolder"];
-            if (!Directory.Exists(filesFolder))
-            {
-                _logger.LogError("FileStore:DataFolder does not refer to an existing directory. Did you configure it in appsettings.json?");
-                await ReplyAsync("Bot not properly configured. Check logs for details.");
-                return;
-            }
-
-            var pollModuleDirectory = Directory.CreateDirectory(Path.Combine(filesFolder, "PollModule"));
-            var serialized = JsonConvert.SerializeObject(db);
-            await File.WriteAllTextAsync(Path.Combine(pollModuleDirectory.FullName, "PollDb.json"), serialized);
+            _container.Insert(info);
         }
-
-        public async Task<List<PollInfo>> ReadDatabase()
+        private PollInfo GetPollInfoForMessage(ulong id)
         {
-            var filesFolder = _configuration["FileStore:DataFolder"];
-            if (!Directory.Exists(filesFolder))
-            {
-                _logger.LogError("FileStore:DataFolder does not refer to an existing directory. Did you configure it in appsettings.json?");
-                await ReplyAsync("Bot not properly configured. Check logs for details.");
-                return null;
-            }
-
-            var pollModuleDirectory = Directory.CreateDirectory(Path.Combine(filesFolder, "PollModule"));
-            if (!File.Exists(Path.Combine(pollModuleDirectory.FullName, "PollDb.json")))
-            {
-                return new List<PollInfo>();
-            }
-
-            var content = await File.ReadAllTextAsync(Path.Combine(pollModuleDirectory.FullName, "PollDb.json"));
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<List<PollInfo>>(content);
-
+            return _container.Query($"SELECT * FROM db WHERE db.MessageId = {id}").FirstOrDefault();
         }
-
-        public async Task<PollInfo> GetPollInfoForMessage(ulong messageId)
+        private void UpdateDb(PollInfo info)
         {
-            var db = await ReadDatabase();
-            return db.Where(x => x.MessageId == messageId).FirstOrDefault();
-        } 
-
+            _container.Upsert(info);
+        }
 
         [Command("endpoll")]
         public async Task EndPollAsync(string idOrUrl, [Remainder] string message = "")
@@ -179,41 +135,65 @@ namespace DiscordBot.Modules.CommandModules
             Match idMatch = Regex.Match(idOrUrl, @"^(?:https?://(?:www\.)?discord(?:app)?\.com(?:/channels)/\d+/\d+/)?(\d+)$");
             if (idMatch.Success)
             {
-                IUserMessage msg = (IUserMessage)await base.Context.Channel.GetMessageAsync(Convert.ToUInt64(idMatch.Groups[1].Value));
+                var id = Convert.ToUInt64(idMatch.Groups[1].Value);
+                PollInfo info;
+                try
+                {
+                    info = GetPollInfoForMessage(id);
+                }
+                catch
+                {
+                    await ReplyAsync($"Die angegebene Nachricht ist kein Poll!");
+                    return;
+                }
+
+                if (info.IsEnded)
+                {
+                    var errmsg = await ReplyAsync("Der Poll wurde schon beendet!");
+                    //await Task.Delay(3000);
+                    //await base.Context.Message.DeleteAsync();
+                    //await errmsg.DeleteAsync();
+                    return;
+                }
+
+                ITextChannel channel = (ITextChannel)await base.Context.Guild.GetChannelAsync(info.ChannelId);
+                if (channel == null)
+                {
+                    var errmsg = await ReplyAsync("Der Kanal des Polls wurde nicht gefunden! Vielleicht hast du ihn schon gelöscht!");
+                    //await Task.Delay(3000);
+                    //await base.Context.Message.DeleteAsync();
+                    //await errmsg.DeleteAsync();
+                    return;
+                }
+                IUserMessage msg = (IUserMessage)await channel.GetMessageAsync(id);
                 if (msg == null)
                 {
-                    var errmsg = await ReplyAsync("Der Poll wurde nicht gefunden! Stelle sicher, dass sich der Poll in dem aktuellen Kanal befindet!");
+                    var errmsg = await ReplyAsync("Der Poll wurde nicht gefunden! Vielleicht hast du ihn schon gelöscht!");
                     //await Task.Delay(3000);
                     //await base.Context.Message.DeleteAsync();
                     //await errmsg.DeleteAsync();
                     return;
                 }
-                if (!CheckPollMsg(msg))
-                {
-                    var errmsg = await ReplyAsync("Die angegebene Nachricht ist kein Poll!");
-                    //await Task.Delay(3000);
-                    //await base.Context.Message.DeleteAsync();
-                    //await errmsg.DeleteAsync();
-                    return;
-                }
-                var embed = msg.Embeds.First();
 
-                string[] availableOptions = Regex.Replace(embed.Fields[0].Value, @"\n+", "\n").Split("\n");
-                string votes = "";
+                StringBuilder votes = new StringBuilder();
                 var voteList = msg.Reactions;
-                for (int i = 0; i < availableOptions.Length; i++)
+                foreach (OptionEmojiPair option in info.Options)
                 {
-                    Emoji emoji = new Emoji(Regex.Match(availableOptions[i], @"^([^ -]+) - ").Groups[1].Value);
-                    string option = availableOptions[i];
+                    Emoji emoji = new Emoji(option.Emoji);
                     int voteCount = voteList[emoji].ReactionCount - 1;
-                    votes += $"{availableOptions[i]}: {voteCount} Stimme{(voteCount == 1 ? "" : "n")}\n";
+                    option.Result = voteCount;
+                    votes.AppendLine($"{option.Emoji} - {option.Option}: {voteCount} Stimme{(voteCount == 1 ? "" : "n")}\n");
                 }
+                info.ResultText = message;
+                info.IsEnded = true;
+                UpdateDb(info);
+
                 EmbedBuilder emb = new EmbedBuilder()
                     .WithColor(Color.DarkRed)
-                    .WithTitle($"Auswertung | {embed.Title}")
+                    .WithTitle($"Auswertung | {info.Title}")
                     .WithFooter(footer => footer.Text = $"{_prefix}poll")
                     .WithCurrentTimestamp()
-                    .WithDescription($"Voteergebnis:\n{votes}\n{message}");
+                    .AddField("Voteergebnis:", $"{votes}\n{message}");
                 //await base.Context.Message.DeleteAsync();
                 await msg.ModifyAsync(msg => msg.Embed = emb.Build());
             }
