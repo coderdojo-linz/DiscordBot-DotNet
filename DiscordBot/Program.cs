@@ -62,6 +62,7 @@ namespace DiscordBot
             services.Configure<JawgSettings>(hostContext.Configuration.GetSection("MapServices:Jawg"));
             services.Configure<MapBoxSettings>(hostContext.Configuration.GetSection("MapServices:MapBox"));
             services.Configure<CDAppointmentSettings>(hostContext.Configuration.GetSection("CoderDojoAppointments"));
+            services.Configure<DatabaseSettings>(hostContext.Configuration.GetSection("Database"));
 
             services.AddApplicationInsightsTelemetryWorkerService();
 
