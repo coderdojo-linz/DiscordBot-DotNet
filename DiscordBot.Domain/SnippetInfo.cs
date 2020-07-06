@@ -1,6 +1,7 @@
-﻿namespace DiscordBot.Domain
+﻿using DiscordBot.Domain.Database;
+namespace DiscordBot.Domain
 {
-    public class SnippetInfo
+    public class SnippetInfo : DatabaseObject
     {
         public ulong UserId { get; set; }
         public string Name { get; set; }
