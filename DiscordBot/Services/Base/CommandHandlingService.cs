@@ -94,7 +94,7 @@ namespace DiscordBot.Services.Base
                 {
                     if (!(scope.ServiceProvider.GetService(type) is ReactionModuleBase module))
                     {
-                        _logger.LogWarning($"Ungültiger Type in {nameof(ReactionModuleRegistry)} gefunden: '{type.FullName}'.");
+                        _logger.LogWarning($"Ungültiger Typ in {nameof(ReactionModuleRegistry)} gefunden: '{type.FullName}'.");
                         continue;
                     }
 

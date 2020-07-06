@@ -25,7 +25,7 @@ namespace DiscordBot.Modules.CommandModules
         }
 
         [Command("help")]
-        [Summary("Zeigt hilfe an.")]
+        [Summary("Zeigt die Hilfe an.")]
         public async Task Help(string path = "")
         {
             EmbedBuilder output = new EmbedBuilder();
