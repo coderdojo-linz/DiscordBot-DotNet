@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lib-rcon", "Includes\lib-rc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBot.CoderDojoInfoModule", "DiscordBot.CoderDojoInfoModule\DiscordBot.CoderDojoInfoModule.csproj", "{C48DF2EF-B0E0-46A0-8257-228F84F4BB16}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBot.Database", "DiscordBot.Database\DiscordBot.Database.csproj", "{52E6CB79-E5F5-4E63-A3E2-DD6D8C639076}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{C48DF2EF-B0E0-46A0-8257-228F84F4BB16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C48DF2EF-B0E0-46A0-8257-228F84F4BB16}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C48DF2EF-B0E0-46A0-8257-228F84F4BB16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52E6CB79-E5F5-4E63-A3E2-DD6D8C639076}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52E6CB79-E5F5-4E63-A3E2-DD6D8C639076}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52E6CB79-E5F5-4E63-A3E2-DD6D8C639076}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52E6CB79-E5F5-4E63-A3E2-DD6D8C639076}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

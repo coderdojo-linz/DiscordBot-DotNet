@@ -1,17 +1,15 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.10.1" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.6" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Database\" />
-    <Folder Include="Database\Attributes\" />
+    <ProjectReference Include="..\DiscordBot.Database\DiscordBot.Database.csproj" />
   </ItemGroup>
 </Project>

@@ -11,13 +11,14 @@
     <PackageReference Include="GEmojiSharp.TagHelpers" Version="1.3.0" />
     <PackageReference Include="Imgur.API" Version="4.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.5" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.6" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.0-rc0002" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta0009" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DiscordBot.Database\DiscordBot.Database.csproj" />
     <ProjectReference Include="..\DiscordBot.Domain\DiscordBot.Domain.csproj" />
     <ProjectReference Include="..\Includes\lib-rcon\lib-rcon.csproj" />
   </ItemGroup>
