@@ -151,7 +151,10 @@ namespace DiscordBot.Modules.CommandModules
             foreach (var param in command.Parameters)
             {
                 if (param.IsOptional)
-                    output.Add($"[{param.Name}" + (param.DefaultValue.ToString() != "" ? $" = '{param.DefaultValue}'" : "") + "]");
+                {
+                    var defaultValue = param.DefaultValue;
+                    output.Add($"[{param.Name}" + ((string)defaultValue != "" && defaultValue != null ? $" = '{param.DefaultValue}'" : "") + "]");
+                }
                 else if (param.IsMultiple)
                     output.Add($"<{param.Name}->");
                 else if (param.IsRemainder)
