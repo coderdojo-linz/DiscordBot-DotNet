@@ -60,12 +60,13 @@ namespace DiscordBot.Domain.Database
         private static readonly Dictionary<Type, ObjectStoreProperties> _knownTypes = new Dictionary<Type, ObjectStoreProperties>();
         public static ObjectStoreProperties GetProperties<T>() where T : class
         {
-            if (!_knownTypes.ContainsKey(typeof(T)))
+            if (!_knownTypes.TryGetValue(typeof(T), out var value))
             {
-                _knownTypes[typeof(T)] = ObjectStoreProperties.Create(typeof(T));
+                value = ObjectStoreProperties.Create(typeof(T));
+                _knownTypes[typeof(T)] = value;
             }
 
-            return _knownTypes[typeof(T)];
+            return value;
         }
     }
 }
