@@ -4,7 +4,7 @@ using DiscordBot.Domain.Configuration;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Options;
 
-namespace DiscordBot.Domain.Database
+namespace DiscordBot.Database
 {
     public class DatabaseContainer<T> where T : DatabaseObject
     {

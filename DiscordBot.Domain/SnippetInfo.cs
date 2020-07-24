@@ -1,4 +1,4 @@
-﻿using DiscordBot.Domain.Database;
+﻿using DiscordBot.Database;
 namespace DiscordBot.Domain
 {
     public class SnippetInfo : DatabaseObject

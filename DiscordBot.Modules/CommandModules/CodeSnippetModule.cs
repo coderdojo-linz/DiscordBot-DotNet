@@ -1,7 +1,7 @@
 ﻿using Discord.Commands;
 
 using DiscordBot.Domain;
-using DiscordBot.Domain.Database;
+using DiscordBot.Database;
 
 using System;
 using System.Linq;

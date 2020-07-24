@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using DiscordBot.Domain.Database;
-using DiscordBot.Domain.Database.Attributes;
+using DiscordBot.Database;
+using DiscordBot.Database.Attributes;
 
 namespace DiscordBot.Domain
 {

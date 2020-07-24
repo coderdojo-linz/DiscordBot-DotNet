@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace DiscordBot.Domain.Database
+namespace DiscordBot.Database
 {
     public abstract class DatabaseObject
     {

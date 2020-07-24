@@ -1,6 +1,6 @@
 ﻿using Microsoft.Azure.Cosmos;
 
-namespace DiscordBot.Domain.Database
+namespace DiscordBot.Database
 {
     public interface IDatabaseService
     {

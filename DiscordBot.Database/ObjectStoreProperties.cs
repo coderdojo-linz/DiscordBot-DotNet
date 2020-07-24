@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using DiscordBot.Domain.Database.Attributes;
+using DiscordBot.Database.Attributes;
 
-namespace DiscordBot.Domain.Database
+namespace DiscordBot.Database
 {
     public class ObjectStoreProperties
     {

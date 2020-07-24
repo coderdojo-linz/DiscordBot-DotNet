@@ -1,6 +1,6 @@
 using System;
 
-namespace DiscordBot.Domain.Database.Attributes
+namespace DiscordBot.Database.Attributes
 {
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class ContainerNameAttribute : Attribute

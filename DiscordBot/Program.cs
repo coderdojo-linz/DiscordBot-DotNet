@@ -3,7 +3,7 @@ using Discord.WebSocket;
 
 using DiscordBot.Domain.Abstractions;
 using DiscordBot.Domain.Configuration;
-using DiscordBot.Domain.Database;
+using DiscordBot.Database;
 using DiscordBot.Modules.Services;
 using DiscordBot.Modules.Utils.ReactionBase;
 using DiscordBot.Services;

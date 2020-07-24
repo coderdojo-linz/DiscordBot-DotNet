@@ -3,7 +3,7 @@ using Discord.Commands;
 
 using DiscordBot.Domain;
 using DiscordBot.Domain.Configuration;
-using DiscordBot.Domain.Database;
+using DiscordBot.Database;
 
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;

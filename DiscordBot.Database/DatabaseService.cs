@@ -2,7 +2,7 @@
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Options;
 
-namespace DiscordBot.Domain.Database
+namespace DiscordBot.Database
 {
     public class DatabaseService : IDatabaseService
     {
