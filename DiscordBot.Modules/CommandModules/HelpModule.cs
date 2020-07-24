@@ -28,7 +28,7 @@ namespace DiscordBot.Modules.CommandModules
         [Summary("Zeigt die Hilfe an.")]
         public async Task Help(string path = "")
         {
-            EmbedBuilder output = new EmbedBuilder();
+            EmbedBuilder output = new EmbedBuilder().WithColor(0x129AD4);
             if (path == "")
             {
                 output.Title = "Dojo Bot - Hilfe";
