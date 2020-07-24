@@ -11,5 +11,6 @@
 
         public string Humidity { get; set; }
         public string Pressure { get; set; }
+        public double TempAsDouble { get; set; }
     }
 }
