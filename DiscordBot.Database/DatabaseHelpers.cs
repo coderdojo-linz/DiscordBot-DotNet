@@ -39,7 +39,9 @@ namespace DiscordBot.Domain.Database
                     builder.Append(key.GetMethod.Invoke(storeObject, null)?.ToString() ?? "null");
                 }
 
-                primaryKeyHash = MD5.Create().ComputeHash(Encoding.UTF8.GetBytes(builder.ToString()));
+                var md5 = MD5.Create();
+                primaryKeyHash = md5.ComputeHash(Encoding.UTF8.GetBytes(builder.ToString()));
+                md5.Dispose();
             }
             else
             {
