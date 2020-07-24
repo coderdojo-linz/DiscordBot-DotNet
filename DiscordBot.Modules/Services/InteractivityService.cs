@@ -55,6 +55,43 @@ namespace DiscordBot.Modules.Services
             return promise.Task;
         }
 
+        public Task<IReaction[]> AwaitReactionsAsync(IMessage message, ReactionFilter reactionFilter = null, int maxReactions = int.MaxValue, int maxTime = 10000)
+        { 
+            TaskCompletionSource<IReaction[]> promise = new TaskCompletionSource<IReaction[]>();
+
+            Task.Run(() =>
+            {
+                CancellationTokenSource cts = new CancellationTokenSource();
+                List<IReaction> result = new List<IReaction>();
+                Task ReactionHandler(Cacheable<IUserMessage, ulong> m, IChannel c, SocketReaction reaction)
+                {
+                    if (message.Id != m.Id) return Task.CompletedTask;
+                    if (reactionFilter != null && !reactionFilter(reaction)) return Task.CompletedTask;
+                    result.Add(reaction);
+                    if (result.Count >= maxReactions)
+                    {
+                        cts.Cancel();
+                        return Task.CompletedTask;
+                    }
+                    return Task.CompletedTask;
+                }
+                _client.ReactionAdded += ReactionHandler;
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        await Task.Delay(maxTime, cts.Token);
+                    }
+                    catch { }
+                    _client.ReactionAdded -= ReactionHandler;
+                    promise.TrySetResult(result.ToArray());
+                });
+            });
+
+            return promise.Task;
+        }
+
         public delegate bool MessageFilter(IMessage message);
+        public delegate bool ReactionFilter(SocketReaction reactionEmoji);
     }
 }
