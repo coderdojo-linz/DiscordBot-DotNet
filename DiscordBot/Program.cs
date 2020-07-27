@@ -17,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Net.Http;
+using DiscordBot.Database;
 
 namespace DiscordBot
 {
