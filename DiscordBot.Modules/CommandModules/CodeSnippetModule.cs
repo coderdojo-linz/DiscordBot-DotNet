@@ -1,37 +1,36 @@
 ﻿using Discord.Commands;
 
 using DiscordBot.Domain;
-using DiscordBot.Domain.Configuration;
+using DiscordBot.Database;
 
-using Microsoft.Extensions.Options;
-
-using System.Collections.Generic;
-using System.IO;
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 
 namespace DiscordBot.Modules.CommandModules
 {
     [Group("code")]
-    [Summary("Saves and shows code snippets.")]
+    [Summary("Speichert und zeigt Code-Snippets an.")]
     public class CodeSnippetModule : ModuleBase
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger<FileExplorerModule> _logger;
+        private readonly DatabaseContainer<SnippetInfo> _container;
 
         public CodeSnippetModule
         (
-            IOptions<DiscordSettings> options,
             IConfiguration configuration,
-            ILogger<FileExplorerModule> logger
+            ILogger<FileExplorerModule> logger,
+            IDatabaseService databaseService
         )
         {
             _configuration = configuration;
             _logger = logger;
+            _container = databaseService.GetContainer<SnippetInfo>("codesnippets");
         }
 
         [Command("add")]
@@ -42,34 +41,44 @@ namespace DiscordBot.Modules.CommandModules
             {
                 UserId = base.Context.User.Id,
                 Name = name,
-                Code = code
+                Code = code,
+                Id = Guid.NewGuid().ToString()
             };
-            if (await CodeWithNameExists(name))
+
+            try
+            {
+                AddEntryToDatabase(info);
+
+                await ReplyAsync($"Der Code wurde unter dem Namen `{name}` gespeichert.");
+            }
+            catch
             {
                 await ReplyAsync("Ein Code mit diesem Namen existiert bereits!");
-                return;
             }
 
-            await AddEntryToDatabase(info);
-            await ReplyAsync($"Der Code wurde unter dem Namen `{name}` gespeichert.");
         }
 
         [Command("edit")]
         public async Task EditCodeAsync(string name, [Remainder] string newCode)
         {
-            var info = await GetCodeInfoForName(name);
-            if (info == null)
+            SnippetInfo info;
+            try
+            {
+                info = GetCodeInfoForName(name);
+            }
+            catch
             {
                 await ReplyAsync($"Es wurde kein Code unter dem Namen `{name}` gefunden!");
                 return;
             }
+
             if (info.UserId != base.Context.User.Id)
             {
                 await ReplyAsync($"Du kannst keinen Code von anderen bearbeiten!");
                 return;
             }
-            info.Code = newCode;
-            await UpdateDb(name, info);
+
+            UpdateDb(name, newCode);
             await ReplyAsync("Der Code wurde erfolgreich geändert.");
         }
 
@@ -77,18 +86,24 @@ namespace DiscordBot.Modules.CommandModules
         [Alias("delete", "del", "rm", "-")]
         public async Task RemoveCodeAsync(string name)
         {
-            var info = await GetCodeInfoForName(name);
-            if (info == null)
+            SnippetInfo info;
+            try
+            {
+                info = GetCodeInfoForName(name);
+            }
+            catch
             {
                 await ReplyAsync($"Es wurde kein Code unter dem Namen `{name}` gefunden!");
                 return;
             }
+
             if (info.UserId != base.Context.User.Id)
             {
                 await ReplyAsync($"Du kannst keinen Code von anderen löschen!");
                 return;
             }
-            await RemoveFromDb(name);
+
+            RemoveFromDb(name);
             await ReplyAsync("Der Code wurde erfolgreich gelöscht.");
         }
 
@@ -96,8 +111,8 @@ namespace DiscordBot.Modules.CommandModules
         [Alias("ls")]
         public async Task ListCodeAsync(string showInfoRaw = "")
         {
-            var codes = await ReadDatabase();
-            int count = codes.Count;
+            var codes = ReadDatabase();
+            int count = codes.Length;
 
             if (count == 0)
             {
@@ -111,15 +126,15 @@ namespace DiscordBot.Modules.CommandModules
             int entryCounter = 1;
             string[] entries = codes
                 .Select(async x => {
-                    string entry = $"**{entryCounter++})** `{x.Value.Name}`";
+                    string entry = $"**{entryCounter++})** `{x.Name}`";
 
                     if (!showInfo)
                     {
                         return entry;
                     }
-                    var rawUser = await base.Context.Guild.GetUserAsync(x.Value.UserId);
+                    var rawUser = await base.Context.Guild.GetUserAsync(x.UserId);
                     string userTag = $"`{rawUser.Username}#{rawUser.Discriminator}`";
-                    string info = $" - Erstellt von: {userTag} - Länge: {x.Value.Code.Length} Zeichen";
+                    string info = $" - Erstellt von: {userTag} - Länge: {x.Code.Length} Zeichen";
                     return entry + info;
                 })
                 .Select(x => x.Result) // get the result of async operation. IMPORTANT!!!!
@@ -131,7 +146,7 @@ namespace DiscordBot.Modules.CommandModules
         [Command("info")]
         public async Task ShowCodeInfoAsync([Remainder] string name)
         {
-            var info = await GetCodeInfoForName(name);
+            var info = GetCodeInfoForName(name);
             if (info == null)
             {
                 await ReplyAsync($"Es wurde kein Code unter dem Namen `{name}` gefunden!");
@@ -151,7 +166,7 @@ namespace DiscordBot.Modules.CommandModules
         [Command("show")]
         public async Task ShowCodeAsync([Remainder] string name)
         {
-            var code = await GetCodeInfoForName(name);
+            var code = GetCodeInfoForName(name);
             if (code == null)
             {
                 await ReplyAsync($"Es wurde kein Code unter dem Namen `{name}` gefunden!");
@@ -166,90 +181,31 @@ namespace DiscordBot.Modules.CommandModules
         /// 3. Save Database
         /// </summary>
         /// <returns></returns>
-        public async Task AddEntryToDatabase(SnippetInfo info)
+        private void AddEntryToDatabase(SnippetInfo info)
         {
-            var db = await ReadDatabase();
-            db.Add(info.Name, info);
-
-            var filesFolder = _configuration["FileStore:DataFolder"];
-            if (!Directory.Exists(filesFolder))
-            {
-                _logger.LogError("FileStore:DataFolder does not refer to an existing directory. Did you configure it in appsettings.json?");
-                await ReplyAsync("Bot not properly configured. Check logs for details.");
-                return;
-            }
-
-            var pollModuleDirectory = Directory.CreateDirectory(Path.Combine(filesFolder, "CodeModule"));
-            var serialized = JsonConvert.SerializeObject(db);
-            await File.WriteAllTextAsync(Path.Combine(pollModuleDirectory.FullName, "CodeDb.json"), serialized);
+            _container.Insert(info);
         }
 
-        public async Task<Dictionary<string, SnippetInfo>> ReadDatabase()
+        private SnippetInfo[] ReadDatabase()
         {
-            var filesFolder = _configuration["FileStore:DataFolder"];
-            if (!Directory.Exists(filesFolder))
-            {
-                _logger.LogError("FileStore:DataFolder does not refer to an existing directory. Did you configure it in appsettings.json?");
-                await ReplyAsync("Bot not properly configured. Check logs for details.");
-                return null;
-            }
-
-            var pollModuleDirectory = Directory.CreateDirectory(Path.Combine(filesFolder, "CodeModule"));
-            if (!File.Exists(Path.Combine(pollModuleDirectory.FullName, "CodeDb.json")))
-            {
-                return new Dictionary<string, SnippetInfo>();
-            }
-
-            var content = await File.ReadAllTextAsync(Path.Combine(pollModuleDirectory.FullName, "CodeDb.json"));
-            return JsonConvert.DeserializeObject<Dictionary<string, SnippetInfo>>(content);
+            return _container.Query("SELECT * FROM db");
         }
 
-        private async Task UpdateDb(string name, SnippetInfo info)
+        private SnippetInfo GetCodeInfoForName(string name)
         {
-            var db = await ReadDatabase();
-            db[name] = info;
-
-            var filesFolder = _configuration["FileStore:DataFolder"];
-            if (!Directory.Exists(filesFolder))
-            {
-                _logger.LogError("FileStore:DataFolder does not refer to an existing directory. Did you configure it in appsettings.json?");
-                await ReplyAsync("Bot not properly configured. Check logs for details.");
-                return;
-            }
-
-            var pollModuleDirectory = Directory.CreateDirectory(Path.Combine(filesFolder, "CodeModule"));
-            var serialized = JsonConvert.SerializeObject(db);
-            await File.WriteAllTextAsync(Path.Combine(pollModuleDirectory.FullName, "CodeDb.json"), serialized);
+            return _container.Query($"SELECT * FROM db WHERE db.Name = '{name}'").FirstOrDefault();
         }
 
-        private async Task RemoveFromDb(string name)
+        private void UpdateDb(string name, string code)
         {
-            var db = await ReadDatabase();
-            db.Remove(name);
-
-            var filesFolder = _configuration["FileStore:DataFolder"];
-            if (!Directory.Exists(filesFolder))
-            {
-                _logger.LogError("FileStore:DataFolder does not refer to an existing directory. Did you configure it in appsettings.json?");
-                await ReplyAsync("Bot not properly configured. Check logs for details.");
-                return;
-            }
-
-            var pollModuleDirectory = Directory.CreateDirectory(Path.Combine(filesFolder, "CodeModule"));
-            var serialized = JsonConvert.SerializeObject(db);
-            await File.WriteAllTextAsync(Path.Combine(pollModuleDirectory.FullName, "CodeDb.json"), serialized);
+            var info = GetCodeInfoForName(name);
+            info.Code = code;
+            _container.Upsert(info);
         }
 
-        public async Task<SnippetInfo> GetCodeInfoForName(string name)
+        private void RemoveFromDb(string name)
         {
-            var db = await ReadDatabase();
-            return db.GetValueOrDefault(name);
-        }
-
-        public async Task<bool> CodeWithNameExists(string name)
-        {
-            var db = await ReadDatabase();
-            return db.Any(x => x.Value.Name == name);
+            _container.Delete(GetCodeInfoForName(name));
         }
     }
 }

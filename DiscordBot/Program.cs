@@ -55,7 +55,8 @@ namespace DiscordBot
                 .AddScoped<ICatService, CatService>()
                 .AddSingleton<MinecraftService>()
                 .AddTransient<MapBoxStaticMapService>()
-                .AddScoped<ICoderDojoAppointmentReaderService, CoderDojoAppointmentReaderService>();
+                .AddScoped<ICoderDojoAppointmentReaderService, CoderDojoAppointmentReaderService>()
+                .AddSingleton<IDatabaseService, DatabaseService>();
 
             services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
             services.Configure<ImgurSettings>(hostContext.Configuration.GetSection("Imgur"));
@@ -63,6 +64,7 @@ namespace DiscordBot
             services.Configure<JawgSettings>(hostContext.Configuration.GetSection("MapServices:Jawg"));
             services.Configure<MapBoxSettings>(hostContext.Configuration.GetSection("MapServices:MapBox"));
             services.Configure<CDAppointmentSettings>(hostContext.Configuration.GetSection("CoderDojoAppointments"));
+            services.Configure<DatabaseSettings>(hostContext.Configuration.GetSection("Database"));
 
             services.AddApplicationInsightsTelemetryWorkerService();
 
