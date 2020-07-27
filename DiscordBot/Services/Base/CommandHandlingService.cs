@@ -29,7 +29,7 @@ namespace DiscordBot.Services.Base
         private readonly IServiceProvider _services;
         private readonly CommandSuggestionsService _commandSuggestions;
 
-        private char? _messagePrefix = null;
+        private string? _messagePrefix = null;
 
         private readonly ConcurrentDictionary<ulong, IServiceScope> _scopes = new ConcurrentDictionary<ulong, IServiceScope>();
 
@@ -78,7 +78,7 @@ namespace DiscordBot.Services.Base
                 var registry = scope.ServiceProvider.GetService<ReactionModuleRegistry>();
                 if (registry == null)
                 {
-                    _logger.LogWarning($"The {nameof(ReactionModuleRegistry)} is unconfigured");
+                    _logger.LogWarning($"{nameof(ReactionModuleRegistry)} ist nicht konfiguriert");
                     return;
                 }
 
@@ -94,7 +94,7 @@ namespace DiscordBot.Services.Base
                 {
                     if (!(scope.ServiceProvider.GetService(type) is ReactionModuleBase module))
                     {
-                        _logger.LogWarning($"Invalid type in {nameof(ReactionModuleRegistry)} found: '{type.FullName}'");
+                        _logger.LogWarning($"Ungültiger Typ in {nameof(ReactionModuleRegistry)} gefunden: '{type.FullName}'.");
                         continue;
                     }
 
@@ -108,7 +108,7 @@ namespace DiscordBot.Services.Base
                     }
                     catch (Exception e)
                     {
-                        _logger.LogCritical(e, $"ReactionHandler '{module.GetType().FullName}' returned exception!");
+                        _logger.LogCritical(e, $"ReactionHandler '{module.GetType().FullName}' hat eine Exception zurückgegeben.");
                         throw;
                     }
                 }
@@ -117,30 +117,10 @@ namespace DiscordBot.Services.Base
 
         private void InitializePrefix()
         {
-            UpdateMessagePrefix(_discordSettings.CurrentValue.CommandPrefix);
-            _discordSettings.OnChange(x => UpdateMessagePrefix(x.CommandPrefix));
-        }
-
-        private void UpdateMessagePrefix(string prefix)
-        {
-            var prefixLength = string.IsNullOrEmpty(prefix) ? 0 : prefix.Length;
-            var prefixValid = prefixLength == 1;
-            if (prefixValid)
-            {
-                _messagePrefix = prefix[0];
-                return;
-            }
-
-            if (!_messagePrefix.HasValue)
-            {
-                _logger.LogWarning($"Prefix has invalid length ({prefixLength}). Defaulting to '!'");
-                _messagePrefix = '!';
-            }
-            else
-            {
-                _logger.LogWarning($"Prefix has invalid length ({prefixLength})");
-            }
-            return;
+            _messagePrefix = _discordSettings.CurrentValue.CommandPrefix;
+            _discordSettings.OnChange(x => {
+                _messagePrefix = x.CommandPrefix;
+            });
         }
 
         public async Task InitializeAsync()
@@ -155,10 +135,8 @@ namespace DiscordBot.Services.Base
                     continue;
                 }
 
-                _logger.Log(LogLevel.Information, $"Added {modules.Count} modules. ({string.Join('|', modules.Select(m => m.Name))})");
+                _logger.Log(LogLevel.Information, $"{modules.Count} Module wurden hunzugefügt. ({string.Join('|', modules.Select(m => m.Name))})");
             }
-
-            _logger.Log(LogLevel.Information, $"Modules initialized");
         }
 
         public async Task MessageReceivedAsync(SocketMessage rawMessage)
@@ -174,13 +152,13 @@ namespace DiscordBot.Services.Base
             // for a more traditional command format like !help.
             //if (!message.HasMentionPrefix(_discord.CurrentUser, ref argPos)) return;
 
-            if (!_messagePrefix.HasValue)
+            if (_messagePrefix == null)
             {
-                _logger.Log(LogLevel.Information, $"No prefix found");
+                _logger.Log(LogLevel.Information, $"Kein prefix gefunden.");
                 return;
             }
 
-            if (!message.HasCharPrefix(_messagePrefix.Value, ref argPos) && !(message.Channel is IPrivateChannel))
+            if (!message.HasStringPrefix(_messagePrefix, ref argPos) && !(message.Channel is IPrivateChannel))
             {
                 return;
             }
@@ -215,7 +193,7 @@ namespace DiscordBot.Services.Base
             // command is unspecified when there was a search failure (command not found); we don't care about these errors
             if (!command.IsSpecified)
             {
-                _logger.LogInformation($"Command not recognized: {context?.Message?.Content ?? "[NOT_FOUND]" }");
+                _logger.LogInformation($"Befehl nicht erkannt: {context?.Message?.Content ?? "[NOT_FOUND]" }");
 
                 await _commandSuggestions.SuggestCommand(context, _discordSettings.CurrentValue.CommandPrefix[0]);
                 return;
@@ -231,7 +209,7 @@ namespace DiscordBot.Services.Base
                 _logger.LogError(executeResult.Exception, executeResult.Exception.Message);
             }
 
-            await context.Channel.SendMessageAsync($"error: {result}");
+            await context.Channel.SendMessageAsync($"Fehler beim ausführen: {result}");
         }
     }
 }

@@ -79,6 +79,7 @@ namespace DiscordBot.Modules.Services
                 Main = firstData.Main,
                 Description = firstData.Description,
                 Temparature = $"{(weatherModel.Main.Temp - 273.15):##.##}°C",
+                TempAsDouble = weatherModel.Main.Temp - 273.15,
                 ThumbnailUrl = $"http://openweathermap.org/img/wn/{firstData.Icon}@2x.png",
                 Humidity = weatherModel.Main.Humidity.ToString(),
                 Pressure = weatherModel.Main.Pressure.ToString(),

@@ -3,7 +3,8 @@ using Discord.WebSocket;
 
 using DiscordBot.Domain.Abstractions;
 using DiscordBot.Domain.Configuration;
-using DiscordBot.Database;
+using DiscordBot.Domain.CoderDojoInfoModule.Configuration;
+using DiscordBot.Domain.CoderDojoInfoModule.ServicesImpl;
 using DiscordBot.Modules.Services;
 using DiscordBot.Modules.Utils.ReactionBase;
 using DiscordBot.Services;
@@ -16,8 +17,6 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Net.Http;
-using DiscordBot.Domain.CoderDojoInfoModule.Configuration;
-using DiscordBot.Domain.CoderDojoInfoModule.ServicesImpl;
 
 namespace DiscordBot
 {
@@ -49,6 +48,7 @@ namespace DiscordBot
                 .AddSingleton<CommandService, InjectableCommandService>()
                 .AddSingleton<CommandHandlingService>()
                 .AddSingleton<CommandSuggestionsService>()
+                .AddSingleton<InteractivityService>()
                 .AddSingleton<DiscordLoggingService>()
 
                 .AddScoped<IWeatherService, WeatherService>()

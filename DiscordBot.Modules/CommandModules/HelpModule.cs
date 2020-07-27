@@ -1,9 +1,10 @@
 ﻿using Discord;
 using Discord.Commands;
-
+using DiscordBot.Domain.Configuration;
 using DiscordBot.Modules.Utils.Extensions;
-
+using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,23 +13,25 @@ namespace DiscordBot.Modules.CommandModules
 {
     public class HelpModule : ModuleBase
     {
-        private readonly CommandService _commands;
         private readonly IServiceProvider _map;
+        private readonly CommandService _commands;
+        private readonly IOptions<DiscordSettings> _configuration;
 
-        public HelpModule(IServiceProvider map, CommandService commands)
+        public HelpModule(IServiceProvider map, CommandService commands, IOptions<DiscordSettings> configuration)
         {
-            _commands = commands;
             _map = map;
+            _commands = commands;
+            _configuration = configuration;
         }
 
         [Command("help")]
-        [Summary("Lists this bot's commands.")]
+        [Summary("Zeigt die Hilfe an.")]
         public async Task Help(string path = "")
         {
-            EmbedBuilder output = new EmbedBuilder();
+            EmbedBuilder output = new EmbedBuilder().WithColor(0x129AD4);
             if (path == "")
             {
-                output.Title = "Dojo Bot - help";
+                output.Title = "Dojo Bot - Hilfe";
                 foreach (var mod in _commands.Modules.Where(m => m.Parent == null))
                 {
                     AddHelp(mod, output);
@@ -36,7 +39,7 @@ namespace DiscordBot.Modules.CommandModules
 
                 output.Footer = new EmbedFooterBuilder
                 {
-                    Text = "Use 'help <module>' to get help with a module."
+                    Text = "Verwende 'help <module>' um Hilfe für ein Modul zu bekommen."
                 };
             }
             else
@@ -44,11 +47,15 @@ namespace DiscordBot.Modules.CommandModules
                 var mod = _commands.Modules.FirstOrDefault(m => string.Equals(m.Group, path, StringComparison.OrdinalIgnoreCase));
                 if (mod != null)
                 {
+                    var descAttr = (DescriptionAttribute)mod.Attributes.FirstOrDefault(a => a is DescriptionAttribute);
+                    string desc = "";
+                    if (descAttr != null)
+                        desc = descAttr.Text + "\n";
                     output.Title = mod.FriendlyName();
-                    output.Description = $"{mod.Summary}\n" +
+                    output.Description = $"{mod.Summary}\n{desc}\n" +
                                          (!string.IsNullOrEmpty(mod.Remarks) ? $"({mod.Remarks})\n" : "") +
-                                         (mod.Aliases.Any() ? $"Prefix(es): {string.Join(",", mod.Aliases)}\n" : "") +
-                                         (mod.Submodules.Any() ? $"Submodules: {mod.Submodules.Select(m => m)}\n" : "") + " ";
+                                         (mod.Aliases.Any() ? $"Prefix(e): {string.Join(", ", mod.Aliases.Select(x => $"`{x}`"))}\n" : "") +
+                                         (mod.Submodules.Any() ? $"Submodule: {mod.Submodules.Select(m => m)}\n" : "") + " ";
                     AddCommands(mod, output);
                 }
 
@@ -60,32 +67,16 @@ namespace DiscordBot.Modules.CommandModules
                 if (command != null)
                 {
                     AddCommand(command, output);
-                    //var sb = new StringBuilder();
-                    //if (command.Aliases.Any())
-                    //{
-                    //    sb.AppendLine($"Aliases: {string.Join(", ", command.Aliases)}");
-                    //}
-
-                    //if (!string.IsNullOrEmpty(command.Summary))
-                    //{
-                    //    sb.AppendLine($"Summary: {command.Summary}");
-                    //}
-
-                    //output.AddField(f =>
-                    //{
-                    //    f.Name = $"**{command.Name}**";
-                    //    f.Value = sb.ToString();
-                    //});
                 }
 
                 if (mod == null && command == null)
                 {
-                    await ReplyAsync("No module or command could be found with that name.");
+                    await ReplyAsync("Kein Modul oder Befehl wurde mit diesem Namen gefunden.");
                     return;
                 }
             }
 
-            await ReplyAsync("", embed: output.Build());
+            await ReplyAsync(embed: output.Build());
         }
 
         public void AddHelp(ModuleInfo module, EmbedBuilder builder)
@@ -106,12 +97,12 @@ namespace DiscordBot.Modules.CommandModules
 
             if (subModules.Any())
             {
-                sb.AppendLine($"Submodules: {string.Join(", ", subModules.Select(x => x.Name))}");
+                sb.AppendLine($"Submodule: {string.Join(", ", subModules.Select(x => x.Name))}");
             }
 
             if (commands.Any())
             {
-                sb.AppendLine($"Commands: {string.Join(", ", commands)}");
+                sb.AppendLine($"Befehle: {string.Join(", ", commands)}");
             }
 
             if (!string.IsNullOrEmpty(module.Summary))
@@ -137,9 +128,11 @@ namespace DiscordBot.Modules.CommandModules
 
         public void AddCommand(CommandInfo command, EmbedBuilder builder)
         {
-            var prefix = GetPrefix(command);
-            var aliases = GetAliases(command);
-            var usage = string.Join(" ", prefix, aliases).Replace(" ", "");
+            List<string> commandNameList = new List<string>();
+            AddPrefix(command, commandNameList);
+            List<string> parameters = GetParameters(command);
+
+            string usage = string.Join(" ", commandNameList.Concat(parameters));
 
             builder.AddField(f =>
             {
@@ -147,42 +140,44 @@ namespace DiscordBot.Modules.CommandModules
                 f.Value = $"{command.Summary}\n" +
                 (!string.IsNullOrEmpty(command.Remarks) ? $"({command.Remarks})\n" : "") +
                 (command.Aliases.Any() ? $"**Aliases:** {string.Join(", ", command.Aliases.Select(x => $"`{x}`"))}\n" : "") +
-                $"**Usage:** `{usage}`";
+                $"**Verwendung:** `{_configuration.Value.CommandPrefix}{usage}`";
             });
         }
 
-        public string GetAliases(CommandInfo command)
+        public List<string> GetParameters(CommandInfo command)
         {
-            StringBuilder output = new StringBuilder();
-            if (!command.Parameters.Any()) return output.ToString();
+            List<string> output = new List<string>();
+
             foreach (var param in command.Parameters)
             {
                 if (param.IsOptional)
-                    output.Append($"[{param.Name} = {param.DefaultValue}] ");
+                {
+                    var defaultValue = param.DefaultValue;
+                    output.Add($"[{param.Name}" + ((string)defaultValue != "" && defaultValue != null ? $" = '{param.DefaultValue}'" : "") + "]");
+                }
                 else if (param.IsMultiple)
-                    output.Append($"|{param.Name}| ");
+                    output.Add($"<{param.Name}->");
                 else if (param.IsRemainder)
-                    output.Append($"...{param.Name} ");
+                    output.Add($"<...{param.Name}>");
                 else
-                    output.Append($"<{param.Name}> ");
+                    output.Add($"<{param.Name}>");
             }
-            return output.ToString();
-        }
-
-        public string GetPrefix(CommandInfo command)
-        {
-            var output = GetPrefix(command.Module);
-            output += $"{command.Aliases.FirstOrDefault()} ";
             return output;
         }
 
-        public string GetPrefix(ModuleInfo module)
+        public void AddPrefix(CommandInfo command, List<string> output)
         {
-            string output = "";
-            if (module.Parent != null) output = $"{GetPrefix(module.Parent)}{output}";
-            if (module.Aliases.Any())
-                output += string.Concat(module.Aliases.FirstOrDefault(), " ");
-            return output;
+            AddPrefix(command.Module, output);
+            output.Add(command.Aliases.First());
+        }
+
+        public void AddPrefix(ModuleInfo module, List<string> output)
+        {
+            if (module.Parent != null)
+            {
+                AddPrefix(module.Parent, output);
+                output.Add(module.Aliases.First());
+            }
         }
     }
 }

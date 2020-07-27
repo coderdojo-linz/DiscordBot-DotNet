@@ -2,10 +2,8 @@ using System;
 using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
-using Discord;
 using Discord.Commands;
 using DiscordBot.Domain.CoderDojoInfoModule.ServicesImpl;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace DiscordBot.Domain.CoderDojoInfoModule {
@@ -27,7 +25,7 @@ namespace DiscordBot.Domain.CoderDojoInfoModule {
                 StringBuilder response = new StringBuilder();
 
                 // the two blanks in front of linebreak are needed because discord uses Markdown
-                response.Append($"Hier die Termine für dich {Context.User.Username}:  \n"); 
+                response.Append($"Hier die Termine für dich, {Context.User.Mention}: \n"); 
                 foreach (var appointment in appointments) {
                     response.Append($"> {appointment.Date.ToString("dddd, dd.MM.yyyy", new CultureInfo("de-DE"))}  \n");
                 }
@@ -35,7 +33,7 @@ namespace DiscordBot.Domain.CoderDojoInfoModule {
                 await ReplyAsync(response.ToString());
             }
             catch (Exception ex) {
-                Logger.LogError(ex, "Failed to get Appointments");
+                Logger.LogError($"Die Termine konnte nicht eingeholt werden: {ex}");
                 await ReplyAsync("Leider kann ich dir die Termine im Moment " +
                                  "nicht sagen, weil ein Fehler aufgetreten ist .....");
             }

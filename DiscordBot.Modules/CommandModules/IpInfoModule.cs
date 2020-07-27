@@ -35,14 +35,14 @@ namespace DiscordBot.Modules.CommandModules
         {
             if (!IPAddress.TryParse(ipAddress, out _))
             {
-                await ReplyAsync("Invalid ip format :(");
+                await ReplyAsync("Ungültiges IP-Format!");
                 return;
             }
 
             var ipInfo = await $"http://ip-api.com/json/{ipAddress}".GetJsonAsync<IpApiResult>();
             if (ipInfo == null)
             {
-                await ReplyAsync($"Cannot find ip {ipAddress}");
+                await ReplyAsync($"IP-Adresse {ipAddress} konnte nicht gefunden werden!");
                 return;
             }
 

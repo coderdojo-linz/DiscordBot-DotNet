@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -38,34 +37,33 @@ namespace DiscordBot
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            _logger.LogInformation("Mit Discord verbinden...");
             await client.LoginAsync(TokenType.Bot, discordSettings.Token);
             await client.StartAsync();
 
             while (client.ConnectionState != ConnectionState.Connected)
             {
-                _logger.LogInformation("!Connected");
-                await Task.Delay(500);
+                await Task.Delay(300);
             }
+
+            _logger.LogInformation("Verbunden!");
 
             _ = Task.Run(async () =>
             {
-                await SendBotSpamMessage(client, "Bot started.");
+                await SendBotSpamMessage(client, "Bot wurde gestartet.");
             });
 
             // Here we initialize the logic required to register our commands.
             await commandHandlingService.InitializeAsync();
-
-            //await Task.Delay(-1);
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            await SendBotSpamMessage(client, "Stopping bot...");
+            await SendBotSpamMessage(client, "Bot stoppt...");
 
-            _logger.LogInformation("Attempting graceful stop");
-            _logger.LogInformation("Logging out");
+            _logger.LogInformation("Ausloggen.");
             await client.LogoutAsync();
-            _logger.LogInformation("Disconnecting");
+            _logger.LogInformation("Verbindung trennen.");
             await client.StopAsync();
             client.Dispose();
         }
@@ -80,13 +78,13 @@ namespace DiscordBot
 
                 if (botChannel == null)
                 {
-                    _logger.LogInformation($"Cannot send enter msg: Channel {id} not found!");
+                    _logger.LogInformation($"Nachricht konnte nich gesendet werden: Kanal {id} nicht gefunden!");
                     return;
                 }
 
                 if (botChannel is IMessageChannel messageChannel)
                 {
-                    _logger.LogInformation($"Sending msg to {botChannel.Guild.Name} - {botChannel.Name}");
+                    _logger.LogInformation($"Nachricht wird an #{botChannel.Name} - {botChannel.Guild.Name} gesendet.");
 
                     await messageChannel.SendMessageAsync(message);
                 }
@@ -94,7 +92,7 @@ namespace DiscordBot
             catch (Exception ex)
             {
                 // Guess we dont have this channel anymore ¯\_(ツ)_/¯
-                _logger.LogInformation(ex, "Cannot send enter msg");
+                _logger.LogInformation($"Nachricht konnte nich gesendet werden: {ex}");
             }
         }
     }
