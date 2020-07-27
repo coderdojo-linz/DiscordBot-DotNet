@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace DiscordBot.Domain.Weather.Dto
+﻿namespace DiscordBot.Domain.Weather.Dto
 {
     public class WeatherDto
     {
@@ -13,5 +11,6 @@ namespace DiscordBot.Domain.Weather.Dto
 
         public string Humidity { get; set; }
         public string Pressure { get; set; }
+        public double TempAsDouble { get; set; }
     }
 }

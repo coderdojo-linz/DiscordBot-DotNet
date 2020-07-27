@@ -2,10 +2,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -28,8 +26,8 @@ namespace DiscordBot.Modules.CommandModules
             var filesFolder = configuration["FileStore:DataFolder"];
             if (!Directory.Exists(filesFolder))
             {
-                logger.LogError("FileStore:DataFolder does not refer to an existing directory. Did you configure it in appsettings.json?");
-                await ReplyAsync("Bot not properly configured. Check logs for details.");
+                logger.LogError("FileStore:DataFolder referenziert kein existierendes Verzeichnis. Hast du es in appsettings.json konfiguriert?");
+                await ReplyAsync("Der bot wurde nicht richtig konfiguriert. Siehe Logs für mehr Infos.");
                 return;
             }
 
@@ -50,8 +48,8 @@ namespace DiscordBot.Modules.CommandModules
                 return;
             }
 
-            logger.LogWarning($"Invalid command text {commandText}");
-            await ReplyAsync("Sorry, I don't understand you");
+            logger.LogWarning($"Ungültige Eingabe: {commandText}");
+            await ReplyAsync("Sorry, ich verstehe dich nicht.");
         }
     }
 }
