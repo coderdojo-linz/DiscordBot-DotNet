@@ -2,7 +2,7 @@
 using DiscordBot.Database;
 using DiscordBot.Database.Attributes;
 
-namespace DiscordBot.Domain
+namespace DiscordBot.Domain.DatabaseModels
 {
     [ContainerName("polls")]
     public class PollInfo : DatabaseObject

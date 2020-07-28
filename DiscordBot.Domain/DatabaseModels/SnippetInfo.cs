@@ -1,5 +1,5 @@
 ﻿using DiscordBot.Database;
-namespace DiscordBot.Domain
+namespace DiscordBot.Domain.DatabaseModels
 {
     public class SnippetInfo : DatabaseObject
     {

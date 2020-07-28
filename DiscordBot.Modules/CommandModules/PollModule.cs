@@ -1,22 +1,18 @@
 ﻿using Discord;
 using Discord.Commands;
 
-using DiscordBot.Domain;
-using DiscordBot.Domain.Configuration;
 using DiscordBot.Database;
+using DiscordBot.Domain.Configuration;
+using DiscordBot.Domain.DatabaseModels;
 
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using System;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
-using Newtonsoft.Json;
 
 namespace DiscordBot.Modules.CommandModules
 {

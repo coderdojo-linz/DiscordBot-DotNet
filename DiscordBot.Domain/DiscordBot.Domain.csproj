@@ -12,4 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DiscordBot.Database\DiscordBot.Database.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DatabaseModels\" />
+  </ItemGroup>
 </Project>
