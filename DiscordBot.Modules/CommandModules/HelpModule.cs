@@ -134,10 +134,15 @@ namespace DiscordBot.Modules.CommandModules
 
             string usage = string.Join(" ", commandNameList.Concat(parameters));
 
+            var descAttr = (DescriptionAttribute)command.Attributes.FirstOrDefault(a => a is DescriptionAttribute);
+            string desc = "";
+            if (descAttr != null)
+                desc = descAttr.Text + "\n";
+
             builder.AddField(f =>
             {
                 f.Name = $"**{command.Name}**";
-                f.Value = $"{command.Summary}\n" +
+                f.Value = $"{command.Summary}\n{desc}\n" +
                 (!string.IsNullOrEmpty(command.Remarks) ? $"({command.Remarks})\n" : "") +
                 (command.Aliases.Any() ? $"**Aliases:** {string.Join(", ", command.Aliases.Select(x => $"`{x}`"))}\n" : "") +
                 $"**Verwendung:** `{_configuration.Value.CommandPrefix}{usage}`";
