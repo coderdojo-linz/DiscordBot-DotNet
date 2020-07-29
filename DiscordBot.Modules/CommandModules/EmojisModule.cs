@@ -1,6 +1,8 @@
 ﻿using Discord;
 using Discord.Webhook;
 using Discord.Commands;
+using DiscordBot.Database;
+using DiscordBot.Domain.DatabaseModels;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +11,13 @@ namespace DiscordBot.Modules
 {
     public class EmojisModule : ModuleBase
     {
+        private DatabaseContainer<EmojiWebhook> _container;
+
+        public EmojisModule(IDatabaseService db)
+        {
+            _container = db.GetContainer<EmojiWebhook>();
+        }
+
         internal static Dictionary<string, string> Emojis { get; set; } = new Dictionary<string, string>()
         {
             ["sans"] = "<a:sans:719488632104288286>",
@@ -48,13 +57,51 @@ namespace DiscordBot.Modules
             }
 
             var cxt = base.Context;
-            var webhook = await ((ITextChannel)cxt.Channel).CreateWebhookAsync(((IGuildUser)cxt.User).Nickname ?? cxt.User.Username);
+
+            IWebhook webhook = await GetWebhook((ITextChannel)cxt.Channel, (IGuildUser)cxt.User);
             var webhookClient = new DiscordWebhookClient(webhook);
 
             await cxt.Channel.DeleteMessageAsync(base.Context.Message);
             await webhookClient.SendMessageAsync(emoji, avatarUrl: cxt.User.GetAvatarUrl());
 
-            await webhookClient.DeleteWebhookAsync();
+        }
+
+        private async Task<IWebhook> GetWebhook(ITextChannel channel, IGuildUser user)
+        {
+            EmojiWebhook found = _container.Query($"SELECT * FROM db WHERE db.UserId = {user.Id}").FirstOrDefault();
+
+            if (found == null)
+            {
+                var webhook = await channel.CreateWebhookAsync(user.Nickname ?? user.Username);
+
+                EmojiWebhook entry = new EmojiWebhook()
+                {
+                    UserId = user.Id,
+                    ChannelsAndWebhooks = new Dictionary<ulong, ulong>()
+                    {
+                        [channel.Id] = webhook.Id
+                    }
+                };
+                _container.Insert(entry);
+
+                return webhook;
+            }
+            else
+            {
+                if (found.ChannelsAndWebhooks.TryGetValue(channel.Id, out var value))
+                {
+                    return await channel.GetWebhookAsync(value);
+                }
+                else
+                {
+                    var webhook = await channel.CreateWebhookAsync(user.Nickname ?? user.Username);
+
+                    found.ChannelsAndWebhooks.Add(channel.Id, webhook.Id);
+                    _container.Upsert(found);
+
+                    return webhook;
+                }
+            }
         }
     }
 }
