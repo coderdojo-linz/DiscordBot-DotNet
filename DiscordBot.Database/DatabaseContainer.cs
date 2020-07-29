@@ -36,13 +36,16 @@ namespace DiscordBot.Database
             else
             {
                 _database = client.GetDatabase(configuration.Value.Name);
-                InitAsync().Wait();
             }
         }
-        private async Task InitAsync()
+
+        internal async Task InitAsync()
         {
-            string partitionKey = $"/{_props.PartitionKey?.Name ?? "partkey"}";
-            _container = await _database.CreateContainerIfNotExistsAsync(_name, partitionKey);
+            if (_database != null)
+            {
+                string partitionKey = $"/{_props.PartitionKey?.Name ?? "partkey"}";
+                _container = await _database.CreateContainerIfNotExistsAsync(_name, partitionKey);
+            }
         }
 
         /// <summary>

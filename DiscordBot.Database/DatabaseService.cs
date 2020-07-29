@@ -38,7 +38,9 @@ namespace DiscordBot.Database
 
         public DatabaseContainer<TContainer> GetContainer<TContainer>(string name = null) where TContainer : DatabaseObject
         {
-            return new DatabaseContainer<TContainer>(_configuration, name, Client, DatabaseHelpers.GetProperties<TContainer>());
+            var container = new DatabaseContainer<TContainer>(_configuration, name, Client, DatabaseHelpers.GetProperties<TContainer>());
+            container.InitAsync().Wait();
+            return container;
         }
     }
 }
