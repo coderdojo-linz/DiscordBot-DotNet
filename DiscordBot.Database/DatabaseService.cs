@@ -8,14 +8,12 @@ namespace DiscordBot.Database
 {
     public class DatabaseService : IDatabaseService
     {
-        private readonly IOptions<DatabaseSettings> _configuration;
-
         public DatabaseService(IOptions<DatabaseSettings> configuration, ILogger<DatabaseService> logger)
         {
-            _configuration = configuration;
+            Configuration = configuration;
             try
             {
-                Client = new CosmosClient(_configuration.Value.Endpoint, _configuration.Value.Key);
+                Client = new CosmosClient(Configuration.Value.Endpoint, Configuration.Value.Key);
                 logger.LogInformation("Erfolgreich mit der Datenbank verbunden!");
             }
             catch (Exception e)
@@ -25,6 +23,7 @@ namespace DiscordBot.Database
             }
         }
 
+        public IOptions<DatabaseSettings> Configuration { get; }
         public CosmosClient Client { get; }
 
         public Microsoft.Azure.Cosmos.Database GetDatabase()
@@ -33,14 +32,12 @@ namespace DiscordBot.Database
             {
                 return null;
             }
-            return Client.GetDatabase(_configuration.Value.Name);
+            return Client.GetDatabase(Configuration.Value.Name);
         }
 
-        public DatabaseContainer<TContainer> GetContainer<TContainer>(string name = null) where TContainer : DatabaseObject
+        public DatabaseContainer<TContainer> GetContainer<TContainer>() where TContainer : DatabaseObject
         {
-            var container = new DatabaseContainer<TContainer>(_configuration, name, Client, DatabaseHelpers.GetProperties<TContainer>());
-            container.InitAsync().Wait();
-            return container;
+            return new DatabaseContainer<TContainer>(this);
         }
     }
 }

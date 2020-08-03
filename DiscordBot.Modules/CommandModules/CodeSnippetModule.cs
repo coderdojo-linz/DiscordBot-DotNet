@@ -25,12 +25,12 @@ namespace DiscordBot.Modules.CommandModules
         (
             IConfiguration configuration,
             ILogger<FileExplorerModule> logger,
-            IDatabaseService databaseService
+            DatabaseContainer<SnippetInfo> container
         )
         {
             _configuration = configuration;
             _logger = logger;
-            _container = databaseService.GetContainer<SnippetInfo>("codesnippets");
+            _container = container;
         }
 
         [Command("add")]
@@ -47,7 +47,7 @@ namespace DiscordBot.Modules.CommandModules
 
             try
             {
-                AddEntryToDatabase(info);
+                await AddEntryToDatabase(info);
 
                 await ReplyAsync($"Der Code wurde unter dem Namen `{name}` gespeichert.");
             }
@@ -64,7 +64,7 @@ namespace DiscordBot.Modules.CommandModules
             SnippetInfo info;
             try
             {
-                info = GetCodeInfoForName(name);
+                info = await GetCodeInfoForName(name);
             }
             catch
             {
@@ -78,7 +78,7 @@ namespace DiscordBot.Modules.CommandModules
                 return;
             }
 
-            UpdateDb(name, newCode);
+            await UpdateDb(name, newCode);
             await ReplyAsync("Der Code wurde erfolgreich geändert.");
         }
 
@@ -89,7 +89,7 @@ namespace DiscordBot.Modules.CommandModules
             SnippetInfo info;
             try
             {
-                info = GetCodeInfoForName(name);
+                info = await GetCodeInfoForName(name);
             }
             catch
             {
@@ -103,7 +103,7 @@ namespace DiscordBot.Modules.CommandModules
                 return;
             }
 
-            RemoveFromDb(name);
+            await RemoveFromDb(name);
             await ReplyAsync("Der Code wurde erfolgreich gelöscht.");
         }
 
@@ -111,7 +111,7 @@ namespace DiscordBot.Modules.CommandModules
         [Alias("ls")]
         public async Task ListCodeAsync(string showInfoRaw = "")
         {
-            var codes = ReadDatabase();
+            var codes = await ReadDatabase();
             int count = codes.Length;
 
             if (count == 0)
@@ -146,7 +146,7 @@ namespace DiscordBot.Modules.CommandModules
         [Command("info")]
         public async Task ShowCodeInfoAsync([Remainder] string name)
         {
-            var info = GetCodeInfoForName(name);
+            var info = await GetCodeInfoForName(name);
             if (info == null)
             {
                 await ReplyAsync($"Es wurde kein Code unter dem Namen `{name}` gefunden!");
@@ -166,7 +166,7 @@ namespace DiscordBot.Modules.CommandModules
         [Command("show")]
         public async Task ShowCodeAsync([Remainder] string name)
         {
-            var code = GetCodeInfoForName(name);
+            var code = await GetCodeInfoForName(name);
             if (code == null)
             {
                 await ReplyAsync($"Es wurde kein Code unter dem Namen `{name}` gefunden!");
@@ -175,37 +175,18 @@ namespace DiscordBot.Modules.CommandModules
             await ReplyAsync($"```cs\n{code.Code}\n```");
         }
 
-        /// <summary>
-        /// 1. LoadDatabase
-        /// 2. Append Data
-        /// 3. Save Database
-        /// </summary>
-        /// <returns></returns>
-        private void AddEntryToDatabase(SnippetInfo info)
-        {
-            _container.Insert(info);
-        }
+        private Task AddEntryToDatabase(SnippetInfo info) => _container.Insert(info);
+        private Task<SnippetInfo[]> ReadDatabase() => _container.Query("SELECT * FROM db");
 
-        private SnippetInfo[] ReadDatabase()
-        {
-            return _container.Query("SELECT * FROM db");
-        }
+        private async Task<SnippetInfo> GetCodeInfoForName(string name) => (await _container.Query($"SELECT * FROM db WHERE db.Name = '{name}'")).FirstOrDefault();
 
-        private SnippetInfo GetCodeInfoForName(string name)
+        private async Task UpdateDb(string name, string code)
         {
-            return _container.Query($"SELECT * FROM db WHERE db.Name = '{name}'").FirstOrDefault();
-        }
-
-        private void UpdateDb(string name, string code)
-        {
-            var info = GetCodeInfoForName(name);
+            var info = await GetCodeInfoForName(name);
             info.Code = code;
-            _container.Upsert(info);
+            await _container.Upsert(info);
         }
 
-        private void RemoveFromDb(string name)
-        {
-            _container.Delete(GetCodeInfoForName(name));
-        }
+        private async Task RemoveFromDb(string name) => await _container.Delete(await GetCodeInfoForName(name));
     }
 }

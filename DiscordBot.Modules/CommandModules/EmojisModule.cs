@@ -13,9 +13,9 @@ namespace DiscordBot.Modules
     {
         private DatabaseContainer<EmojiWebhook> _container;
 
-        public EmojisModule(IDatabaseService db)
+        public EmojisModule(DatabaseContainer<EmojiWebhook> container)
         {
-            _container = db.GetContainer<EmojiWebhook>();
+            _container = container;
         }
 
         internal static Dictionary<string, string> Emojis { get; set; } = new Dictionary<string, string>()
@@ -68,7 +68,7 @@ namespace DiscordBot.Modules
 
         private async Task<IWebhook> GetWebhook(ITextChannel channel, IGuildUser user)
         {
-            EmojiWebhook found = _container.Query($"SELECT * FROM db WHERE db.UserId = {user.Id}").FirstOrDefault();
+            EmojiWebhook found = (await _container.Query($"SELECT * FROM db WHERE db.UserId = {user.Id}")).FirstOrDefault();
 
             if (found == null)
             {
@@ -82,7 +82,7 @@ namespace DiscordBot.Modules
                         [channel.Id] = webhook.Id
                     }
                 };
-                _container.Insert(entry);
+                await _container.Insert(entry);
 
                 return webhook;
             }
@@ -97,7 +97,7 @@ namespace DiscordBot.Modules
                     var webhook = await channel.CreateWebhookAsync(user.Nickname ?? user.Username);
 
                     found.ChannelsAndWebhooks.Add(channel.Id, webhook.Id);
-                    _container.Upsert(found);
+                    await _container.Upsert(found);
 
                     return webhook;
                 }

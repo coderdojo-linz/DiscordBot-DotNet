@@ -9,6 +9,7 @@ using DiscordBot.Modules.Services;
 using DiscordBot.Modules.Utils.ReactionBase;
 using DiscordBot.Services;
 using DiscordBot.Services.Base;
+using DiscordBot.Database;
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +18,6 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Net.Http;
-using DiscordBot.Database;
 
 namespace DiscordBot
 {
@@ -57,7 +57,8 @@ namespace DiscordBot
                 .AddSingleton<MinecraftService>()
                 .AddTransient<MapBoxStaticMapService>()
                 .AddScoped<ICoderDojoAppointmentReaderService, CoderDojoAppointmentReaderService>()
-                .AddSingleton<IDatabaseService, DatabaseService>();
+                .AddSingleton<IDatabaseService, DatabaseService>()
+                .AddScoped(typeof(DatabaseContainer<>));
 
             services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
             services.Configure<ImgurSettings>(hostContext.Configuration.GetSection("Imgur"));
