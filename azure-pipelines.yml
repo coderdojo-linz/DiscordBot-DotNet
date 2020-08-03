@@ -39,6 +39,7 @@ stages:
         JAWG_APIKEY: $(JAWG_APIKEY)
         MAPBOX_APIKEY: $(MAPBOX_APIKEY)
         STORAGE_KEY: $(STORAGE_KEY)
+        COSMOSDB_KEY: $(COSMOSDB_KEY)
       inputs:
         azureSubscription: 'CoderDojo Containers'
         scriptType: bash
@@ -55,6 +56,7 @@ stages:
                     Imgur__Client_Secret=$IMGUR_SECRET \
                     ApplicationInsights__InstrumentationKey=$AI_INSTRUMENTATION_KEY \
                     MapServices__Jawg__ApiKey=$JAWG_APIKEY  \
-                    MapServices__MapBox__ApiKey=$MAPBOX_APIKEY
+                    MapServices__MapBox__ApiKey=$MAPBOX_APIKEY  \
+                    Database__Endpoint=$COSMOSDB_ENDPOINT Database__Key=$COSMOSDB_KEY Database__Name=$COSMOSDB_NAME 
           az container restart  --resource-group Containers --name $(imageName)
           
