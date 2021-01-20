@@ -1,93 +1,107 @@
 ﻿using Discord;
-using Discord.Commands;
 using Discord.Webhook;
-
-
-using System.Text;
+using Discord.Commands;
+using DiscordBot.Database;
+using DiscordBot.Domain.DatabaseModels;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace DiscordBot.Modules
 {
-    [Group("emoji")]
-    [Alias("em")]
     public class EmojisModule : ModuleBase
     {
-        [Command("sans")]
-        public async Task Sans()
+        private DatabaseContainer<EmojiWebhook> _container;
+
+        public EmojisModule(DatabaseContainer<EmojiWebhook> container)
         {
-            await SendEmojiWithName("sans");
-        }
-        [Command("thonk")]
-        public async Task Thonk()
-        {
-            await SendEmojiWithName("thonk");
-        }
-        [Command("mindblowing")]
-        public async Task Mindblowing()
-        {
-            await SendEmojiWithName("mindblowing");
-        }
-        [Command("rotatethink")]
-        public async Task Rotatethink()
-        {
-            await SendEmojiWithName("rotatethink");
-        }
-        [Command("hyper")]
-        public async Task Hyper()
-        {
-            await SendEmojiWithName("hyper");
-        }
-        [Command("xd")]
-        public async Task Xd()
-        {
-            await SendEmojiWithName("xd");
-        }
-        [Command("rainbowcat")]
-        public async Task Rainbowcat()
-        {
-            await SendEmojiWithName("rainbowcat");
-        }
-        [Command("yes")]
-        public async Task Yes()
-        {
-            await SendEmojiWithName("yes");
-        }
-        [Command("no")]
-        public async Task No()
-        {
-            await SendEmojiWithName("no");
-        }
-        [Command("calculated")]
-        public async Task Calculated()
-        {
-            await SendEmojiWithName("calculated");
+            _container = container;
         }
 
-        private async Task SendEmojiWithName(string name)
+        internal static Dictionary<string, string> Emojis { get; set; } = new Dictionary<string, string>()
         {
-            string emoji = name switch
+            ["sans"] = "<a:sans:719488632104288286>",
+            ["thonk"] = "<:thonk:718853430969368637>",
+            ["mindblowing"] = "<:mindblowing:719492411369324584>",
+            ["rotatethink"] = "<a:rotatethonk:719491269885427752>",
+            ["hyper"] = "<a:hyper:719494595313926244>",
+            ["xd"] = "<:xd:719510255402352690>",
+            ["rainbowcat"] = "<a:catrainbow1:719513824511656037><a:catrainbow2:719513824553861121>\n<a:catrainbow3:719513824905920603><a:catrainbow4:719513825040400415>",
+            ["yes"] = "<a:yes:719496630902063149>",
+            ["no"] = "<a:no:719496639471157288>",
+            ["calculated"] = "<:calculated:719518217730654218>"
+        };
+
+        // If you change the emojis, don't forget to also change the description!!
+        [Description(@"
+            Verfügbare Emojis:
+            - sans (<a:sans:719488632104288286>)
+            - thonk (<:thonk:718853430969368637>)
+            - mindblowing (<:mindblowing:719492411369324584>)
+            - rotatethink (<a:rotatethonk:719491269885427752>)
+            - hyper (<a:hyper:719494595313926244>)
+            - xd (<:xd:719510255402352690>)
+            - rainbowcat (keine Vorschau)
+            - yes (<a:yes:719496630902063149>)
+            - no (<a:no:719496639471157288>)
+            - calculated (<:calculated:719518217730654218>)
+        ")]
+        [Command("emoji")]
+        [Alias("em")]
+        public async Task SendEmojiWithName(string name)
+        {
+            if (!Emojis.TryGetValue(name, out string emoji))
             {
-                "sans" => "<a:sans:719488632104288286>",
-                "thonk" => "<:thonk:718853430969368637>",
-                "mindblowing" => "<:mindblowing:719492411369324584>",
-                "rotatethink" => "<a:rotatethonk:719491269885427752>",
-                "hyper" => "<a:hyper:719494595313926244>",
-                "xd" => "<:xd:719510255402352690>",
-                "rainbowcat" => "<a:catrainbow1:719513824511656037><a:catrainbow2:719513824553861121>\n<a:catrainbow3:719513824905920603><a:catrainbow4:719513825040400415>",
-                "yes" => "<a:yes:719496630902063149>",
-                "no" => "<a:no:719496639471157288>",
-                "calculated" => "<:calculated:719518217730654218>",
-                _ => "unknown"
-            };
+                await ReplyAsync($"Das Emoji {name} wurde nicht gefunden!");
+                return;
+            }
 
             var cxt = base.Context;
-            var webhook = await ((ITextChannel)cxt.Channel).CreateWebhookAsync(((IGuildUser)cxt.User).Nickname ?? cxt.User.Username);
+
+            IWebhook webhook = await GetWebhook((ITextChannel)cxt.Channel, (IGuildUser)cxt.User);
             var webhookClient = new DiscordWebhookClient(webhook);
 
             await cxt.Channel.DeleteMessageAsync(base.Context.Message);
             await webhookClient.SendMessageAsync(emoji, avatarUrl: cxt.User.GetAvatarUrl());
 
-            await webhookClient.DeleteWebhookAsync();
+        }
+
+        private async Task<IWebhook> GetWebhook(ITextChannel channel, IGuildUser user)
+        {
+            EmojiWebhook found = (await _container.Query($"SELECT * FROM db WHERE db.UserId = {user.Id}")).FirstOrDefault();
+
+            if (found == null)
+            {
+                var webhook = await channel.CreateWebhookAsync(user.Nickname ?? user.Username);
+
+                EmojiWebhook entry = new EmojiWebhook()
+                {
+                    UserId = user.Id,
+                    ChannelsAndWebhooks = new Dictionary<ulong, ulong>()
+                    {
+                        [channel.Id] = webhook.Id
+                    }
+                };
+                await _container.Insert(entry);
+
+                return webhook;
+            }
+            else
+            {
+                if (found.ChannelsAndWebhooks.TryGetValue(channel.Id, out var value))
+                {
+                    return await channel.GetWebhookAsync(value);
+                }
+                else
+                {
+                    var webhook = await channel.CreateWebhookAsync(user.Nickname ?? user.Username);
+
+                    found.ChannelsAndWebhooks.Add(channel.Id, webhook.Id);
+                    await _container.Upsert(found);
+
+                    return webhook;
+                }
+            }
         }
     }
 }

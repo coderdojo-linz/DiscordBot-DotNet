@@ -1,4 +1,6 @@
-﻿using Microsoft.Azure.Cosmos;
+﻿using DiscordBot.Domain.Configuration;
+using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Options;
 
 namespace DiscordBot.Database
 {
@@ -8,6 +10,11 @@ namespace DiscordBot.Database
         /// Get a simple, connected Cosmos-Client.
         /// </summary>
         CosmosClient Client { get; }
+
+        /// <summary>
+        /// The configuration in the appsettings.json.
+        /// </summary>
+        IOptions<DatabaseSettings> Configuration { get; }
 
         /// <summary>
         /// Get the Database for All Object Types
@@ -20,6 +27,6 @@ namespace DiscordBot.Database
         /// </summary>
         /// <typeparam name="TContainer">The Type you want to store</typeparam>
         /// <returns></returns>
-        DatabaseContainer<TContainer> GetContainer<TContainer>(string name = null) where TContainer : DatabaseObject;
+        DatabaseContainer<TContainer> GetContainer<TContainer>() where TContainer : DatabaseObject;
     }
 }

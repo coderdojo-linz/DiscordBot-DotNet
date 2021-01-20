@@ -1,4 +1,4 @@
-﻿namespace DiscordBot.Domain
+﻿namespace DiscordBot.Domain.DatabaseModels
 {
     public class OptionEmojiPair
     {

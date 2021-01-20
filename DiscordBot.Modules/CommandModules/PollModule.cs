@@ -1,22 +1,18 @@
 ﻿using Discord;
 using Discord.Commands;
 
-using DiscordBot.Domain;
-using DiscordBot.Domain.Configuration;
 using DiscordBot.Database;
+using DiscordBot.Domain.Configuration;
+using DiscordBot.Domain.DatabaseModels;
 
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 using System;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-
-using Newtonsoft.Json;
 
 namespace DiscordBot.Modules.CommandModules
 {
@@ -30,13 +26,13 @@ namespace DiscordBot.Modules.CommandModules
         (
             IOptions<DiscordSettings> options, 
             ILogger<FileExplorerModule> logger,
-            IDatabaseService database
+            DatabaseContainer<PollInfo> container
         )
         {
             _logger = logger;
             string prefix = options.Value.CommandPrefix;
             _prefix = prefix;
-            _container = database.GetContainer<PollInfo>();
+            _container = container;
         }
 
         [Command("poll")]
@@ -107,7 +103,7 @@ namespace DiscordBot.Modules.CommandModules
             }
 
             //Save database
-            AddEntryToDatabase(pollInfo);
+            await AddEntryToDatabase(pollInfo);
         }
 
         /// <summary>
@@ -116,18 +112,9 @@ namespace DiscordBot.Modules.CommandModules
         /// 3. Save Database
         /// </summary>
         /// <returns></returns>
-        private void AddEntryToDatabase(PollInfo info)
-        {
-            _container.Insert(info);
-        }
-        private PollInfo GetPollInfoForMessage(ulong id)
-        {
-            return _container.Query($"SELECT * FROM db WHERE db.MessageId = {id}").FirstOrDefault();
-        }
-        private void UpdateDb(PollInfo info)
-        {
-            _container.Upsert(info);
-        }
+        private Task AddEntryToDatabase(PollInfo info) => _container.Insert(info);
+        private async Task<PollInfo> GetPollInfoForMessage(ulong id) => (await _container.Query($"SELECT * FROM db WHERE db.MessageId = {id}")).FirstOrDefault();
+        private Task UpdateDb(PollInfo info) => _container.Upsert(info);
 
         [Command("endpoll")]
         public async Task EndPollAsync(string idOrUrl, [Remainder] string message = "")
@@ -139,7 +126,7 @@ namespace DiscordBot.Modules.CommandModules
                 PollInfo info;
                 try
                 {
-                    info = GetPollInfoForMessage(id);
+                    info = await GetPollInfoForMessage(id);
                 }
                 catch
                 {
@@ -186,7 +173,7 @@ namespace DiscordBot.Modules.CommandModules
                 }
                 info.ResultText = message;
                 info.IsEnded = true;
-                UpdateDb(info);
+                await UpdateDb(info);
 
                 EmbedBuilder emb = new EmbedBuilder()
                     .WithColor(Color.DarkRed)
@@ -204,56 +191,6 @@ namespace DiscordBot.Modules.CommandModules
                 //await base.Context.Message.DeleteAsync();
                 //await err.DeleteAsync();
             }
-        }
-
-        private bool CheckPollMsg(IUserMessage msg)
-        {
-            //Console.WriteLine($"`{msg.Embeds.First().Fields.Count()}Desc");
-            if (msg.Content != "")
-            {
-                return false;
-            }
-
-            if (msg.Embeds.Count != 1)
-            {
-                return false;
-            }
-
-            var emb = msg.Embeds.First();
-
-            if (emb.Title == "")
-            {
-                return false;
-            }
-
-            if (emb.Footer.ToString() != $"{_prefix}poll")
-            {
-                return false;
-            }
-
-            if (emb.Timestamp == null)
-            {
-                return false;
-            }
-
-            if (emb.Description != null)
-            {
-                return false;
-            }
-
-            var fields = emb.Fields.Take(2).ToList();
-
-            if (fields.Count != 1)
-            {
-                return false;
-            }
-
-            if (fields[0].Value == "")
-            {
-                return false;
-            }
-
-            return true;
         }
     }
 }

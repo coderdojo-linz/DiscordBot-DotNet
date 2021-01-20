@@ -1,37 +1,36 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
-using DiscordBot.Domain.Configuration;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Extensions.Options;
 
 namespace DiscordBot.Database
 {
     public class DatabaseContainer<T> where T : DatabaseObject
     {
+        private readonly ObjectStoreProperties _props;
         private readonly string _name;
         private readonly Microsoft.Azure.Cosmos.Database _database;
-        private readonly ObjectStoreProperties _props;
         private Container _container;
-        public Container Container;
 
-        public DatabaseContainer(IOptions<DatabaseSettings> configuration, string name, CosmosClient client, ObjectStoreProperties props)
+        public DatabaseContainer(IDatabaseService databaseService)
         {
-            if (name != null && name != "")
-            {
-                _name = name;
-            }
+            _props = DatabaseHelpers.GetProperties<T>();
+            _name = _props.ContainerName;
+
+            if (databaseService.Client == null)
+                _database = null;
             else
-            {
-                _name = props.ContainerName;
-            }
-            _database = client.GetDatabase(configuration.Value.Name);
-            _props = props;
-            InitAsync().Wait();
+                _database = databaseService.Client.GetDatabase(databaseService.Configuration.Value.Name);
+
+            _container = null;
         }
         private async Task InitAsync()
         {
-            string partitionKey = $"/{_props.PartitionKey?.Name ?? "partkey"}";
-            _container = await _database.CreateContainerIfNotExistsAsync(_name, partitionKey);
+            if (_container == null)
+            {
+                string partitionKey = $"/{_props.PartitionKey?.Name ?? "partkey"}";
+                _container = await _database.CreateContainerIfNotExistsAsync(_name, partitionKey);
+            }
         }
 
         /// <summary>
@@ -39,22 +38,46 @@ namespace DiscordBot.Database
         /// </summary>
         /// <param name="query">The query to send</param>
         /// <returns>Array of type <typeparamref name="T"/></returns>
-        public T[] Query(string query) => _container.GetItemQueryIterator<T>(query).ReadNextAsync().Result.ToArray();
+        public async Task<T[]> Query(string query)
+        {
+            if (_database == null)
+            {
+                throw new Exception("Cannot use database. Have you provided the right configuration?");
+            }
+            await InitAsync();
+
+            return (await _container.GetItemQueryIterator<T>(query).ReadNextAsync()).ToArray();
+        }
         /// <summary>
         /// Lists all entries in the database.
         /// </summary>
         /// <returns>Array of type <typeparamref name="T"/> with all entries</returns>
-        public T[] ReadAll() => Query("select * from db");
+        public async Task<T[]> ReadAll()
+        {
+            if (_database == null)
+            {
+                throw new Exception("Cannot use database. Have you provided the right configuration?");
+            }
+            await InitAsync();
+
+            return await Query("select * from db");
+        }
 
         /// <summary>
         /// Inserts the provided <paramref name="item"/> into the database.
         /// </summary>
         /// <param name="item">The item to insert</param>
         /// <returns>The provided <paramref name="item"/></returns>
-        public T Insert(T item)
+        public async Task<T> Insert(T item)
         {
+            if (_database == null)
+            {
+                throw new Exception("Cannot use database. Have you provided the right configuration?");
+            }
+            await InitAsync();
+
             DatabaseHelpers.CalculateStorageKeys(_props, item);
-            _container.CreateItemAsync(item, DatabaseHelpers.CalculatePartitionKey(_props, item));
+            await _container.CreateItemAsync(item, DatabaseHelpers.CalculatePartitionKey(_props, item));
             return item;
         }
 
@@ -63,8 +86,14 @@ namespace DiscordBot.Database
         /// </summary>
         /// <param name="item">The item to update or insert</param>
         /// <returns>The provided <paramref name="item"/></returns>
-        public T Upsert(T item)
+        public async Task<T> Upsert(T item)
         {
+            if (_database == null)
+            {
+                throw new Exception("Cannot use database. Have you provided the right configuration?");
+            }
+            await InitAsync();
+
             DatabaseHelpers.CalculateStorageKeys(_props, item);
             PartitionKey partKey = DatabaseHelpers.CalculatePartitionKey(_props, item);
 
@@ -78,8 +107,14 @@ namespace DiscordBot.Database
         /// </summary>
         /// <param name="item">The item to delete</param>
         /// <returns>The provided <paramref name="item"/></returns>
-        public T Delete(T item)
+        public async Task<T> Delete(T item)
         {
+            if (_database == null)
+            {
+                throw new Exception("Cannot use database. Have you provided the right configuration?");
+            }
+            await InitAsync();
+
             DatabaseHelpers.CalculateStorageKeys(_props, item);
             PartitionKey partKey = DatabaseHelpers.CalculatePartitionKey(_props, item);
 
