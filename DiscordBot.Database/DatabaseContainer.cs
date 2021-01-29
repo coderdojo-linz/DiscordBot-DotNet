@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+
 using Microsoft.Azure.Cosmos;
+
 
 namespace DiscordBot.Database
 {
-    public class DatabaseContainer<T> where T : DatabaseObject
+    public class DatabaseContainer<T> : IAsyncInitializable
+        where T : DatabaseObject
     {
         private readonly ObjectStoreProperties _props;
         private readonly string _name;
@@ -20,11 +23,12 @@ namespace DiscordBot.Database
             if (databaseService.Client == null)
                 _database = null;
             else
-                _database = databaseService.Client.GetDatabase(databaseService.Configuration.Value.Name);
+                _database = databaseService.GetDatabase();
 
             _container = null;
         }
-        private async Task InitAsync()
+
+        public async Task InitializeAsync()
         {
             if (_container == null)
             {
@@ -44,10 +48,11 @@ namespace DiscordBot.Database
             {
                 throw new Exception("Cannot use database. Have you provided the right configuration?");
             }
-            await InitAsync();
+            await InitializeAsync();
 
             return (await _container.GetItemQueryIterator<T>(query).ReadNextAsync()).ToArray();
         }
+
         /// <summary>
         /// Lists all entries in the database.
         /// </summary>
@@ -58,7 +63,7 @@ namespace DiscordBot.Database
             {
                 throw new Exception("Cannot use database. Have you provided the right configuration?");
             }
-            await InitAsync();
+            await InitializeAsync();
 
             return await Query("select * from db");
         }
@@ -74,7 +79,7 @@ namespace DiscordBot.Database
             {
                 throw new Exception("Cannot use database. Have you provided the right configuration?");
             }
-            await InitAsync();
+            await InitializeAsync();
 
             DatabaseHelpers.CalculateStorageKeys(_props, item);
             await _container.CreateItemAsync(item, DatabaseHelpers.CalculatePartitionKey(_props, item));
@@ -92,12 +97,12 @@ namespace DiscordBot.Database
             {
                 throw new Exception("Cannot use database. Have you provided the right configuration?");
             }
-            await InitAsync();
+            await InitializeAsync();
 
             DatabaseHelpers.CalculateStorageKeys(_props, item);
             PartitionKey partKey = DatabaseHelpers.CalculatePartitionKey(_props, item);
 
-            _container.UpsertItemAsync(item, partKey).Wait();
+            await _container.UpsertItemAsync(item, partKey);
 
             return item;
         }
@@ -113,12 +118,12 @@ namespace DiscordBot.Database
             {
                 throw new Exception("Cannot use database. Have you provided the right configuration?");
             }
-            await InitAsync();
+            await InitializeAsync();
 
             DatabaseHelpers.CalculateStorageKeys(_props, item);
             PartitionKey partKey = DatabaseHelpers.CalculatePartitionKey(_props, item);
 
-            _container.DeleteItemAsync<T>(item.Id, partKey).Wait();
+            await _container.DeleteItemAsync<T>(item.Id, partKey);
 
             return item;
         }

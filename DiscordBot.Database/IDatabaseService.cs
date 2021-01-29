@@ -14,7 +14,7 @@ namespace DiscordBot.Database
         /// <summary>
         /// The configuration in the appsettings.json.
         /// </summary>
-        IOptions<DatabaseSettings> Configuration { get; }
+        DatabaseSettings Configuration { get; }
 
         /// <summary>
         /// Get the Database for All Object Types

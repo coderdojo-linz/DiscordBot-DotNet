@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using DiscordBot.Services;
 
 namespace DiscordBot
 {
@@ -20,23 +21,28 @@ namespace DiscordBot
         private readonly DiscordSettings discordSettings;
         private readonly DiscordSocketClient client;
         private readonly CommandHandlingService commandHandlingService;
+        private readonly AsyncInitializationService _initializationService;
 
         public BotService
         (
             ILogger<BotService> logger, 
             IOptions<DiscordSettings> discordSettings,
             DiscordSocketClient client, 
-            CommandHandlingService commandHandlingService
+            CommandHandlingService commandHandlingService,
+            AsyncInitializationService initializationService
         )
         {
             _logger = logger;
             this.discordSettings = discordSettings.Value;
             this.client = client;
             this.commandHandlingService = commandHandlingService;
+            _initializationService = initializationService;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
+            await _initializationService.InitializeAllAsync();
+            
             _logger.LogInformation("Mit Discord verbinden...");
             await client.LoginAsync(TokenType.Bot, discordSettings.Token);
             await client.StartAsync();

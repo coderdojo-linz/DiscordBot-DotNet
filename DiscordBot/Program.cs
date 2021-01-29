@@ -18,6 +18,8 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 using System.Net.Http;
+using DiscordBot.Domain.DatabaseModels;
+using DiscordBot.Extensions;
 
 namespace DiscordBot
 {
@@ -58,7 +60,13 @@ namespace DiscordBot
                 .AddTransient<MapBoxStaticMapService>()
                 .AddScoped<ICoderDojoAppointmentReaderService, CoderDojoAppointmentReaderService>()
                 .AddSingleton<IDatabaseService, DatabaseService>()
-                .AddScoped(typeof(DatabaseContainer<>));
+                .AddSingleton<IAsyncInitializable>(x => x.GetRequiredService<IDatabaseService>() as IAsyncInitializable)
+                .AddDatabaseContainer<PollInfo>()
+                .AddDatabaseContainer<EmojiWebhook>()
+                .AddDatabaseContainer<SnippetInfo>()
+                .AddScoped<AsyncInitializationService>()
+
+                /*.AddScoped(typeof(DatabaseContainer<>))*/;
 
             services.Configure<DiscordSettings>(hostContext.Configuration.GetSection("Discord"));
             services.Configure<ImgurSettings>(hostContext.Configuration.GetSection("Imgur"));

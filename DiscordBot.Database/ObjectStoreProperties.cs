@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+
 using DiscordBot.Database.Attributes;
 
 namespace DiscordBot.Database
@@ -18,11 +19,7 @@ namespace DiscordBot.Database
             var primaryKeys = new List<PropertyInfo>();
             PropertyInfo partitionKey = null;
 
-            string containerName =
-                t.GetCustomAttributes(
-                        typeof(ContainerNameAttribute), true)
-                    .Cast<ContainerNameAttribute>()
-                    .Select(x => x.Name).FirstOrDefault() ?? t.Name;
+            var containerName = t.GetCustomAttribute<ContainerNameAttribute>(inherit: true)?.Name ?? t.Name;
 
             foreach (var m in t.GetProperties())
             {
@@ -35,6 +32,7 @@ namespace DiscordBot.Database
                         case PrimaryKeyAttribute _:
                             primaryKeys.Add(m);
                             break;
+
                         case PartitionKeyAttribute _ when partitionKey != null:
                             throw new InvalidOperationException("Only one PartitionKey Attribute is allowed!");
                         case PartitionKeyAttribute _:
