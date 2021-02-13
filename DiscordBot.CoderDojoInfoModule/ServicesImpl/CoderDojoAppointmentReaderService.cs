@@ -17,7 +17,7 @@ namespace DiscordBot.Domain.CoderDojoInfoModule.ServicesImpl {
         }
         
         public async Task<List<CoderDojoAppointment>> ReadCurrentAppointments() {
-            var AppointmentUrl = Settings?.NextAppointmentsUrl ?? "https://participants-management-service.azurewebsites.net/api/events/?past=false";
+            var AppointmentUrl = Settings?.NextAppointmentsUrl ?? "https://cdw-planner.azurewebsites.net/api/events?past=false";
             var response = await WebClient.GetAsync(AppointmentUrl);
 
             var items = JsonConvert.DeserializeObject<List<CoderDojoAppointment> >(await response.Content.ReadAsStringAsync());
