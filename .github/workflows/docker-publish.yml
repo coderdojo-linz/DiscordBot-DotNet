@@ -87,7 +87,7 @@ jobs:
             docker run --rm -d \
             -e Discord__Token=${{secrets.DISCORD_TOKEN}} \
             -e Discord__CommandPrefix=- \
-            -e Database__Endpoint=$COSMOSDB_ENDPOINT  \
+            -e "Database__Endpoint=${{env.COSMOSDB_ENDPOINT}}" \
             -e Database__Key=${{secrets.COSMOSDB_KEY}}  \ 
             -e Database__Name=${{env.COSMOSDB_NAME}} \
             --name ${{env.IMAGE_NAME}} ${{env.IMAGE_ID}}
