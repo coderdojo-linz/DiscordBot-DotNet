@@ -87,7 +87,7 @@ jobs:
               -e ApplicationInsights__InstrumentationKey=$AI_INSTRUMENTATION_KEY \
               -e MapServices__Jawg__ApiKey=$JAWG_APIKEY  \
               -e MapServices__MapBox__ApiKey=$MAPBOX_APIKEY  \
-              -e Database__Endpoint=$(echo $COSMOSDB_ENDPOINT)  \
+              -e Database__Endpoint=$COSMOSDB_ENDPOINT  \
               -e Database__Key=${{secrets.COSMOSDB_KEY}}  \ 
-              -e Database__Name=$(echo $COSMOSDB_NAME)  \
-              --name $(echo $IMAGE_NAME) ${{env.IMAGE_ID}}
+              -e Database__Name=$COSMOSDB_NAME  \
+              --name $IMAGE_NAME ${{env.IMAGE_ID}}
