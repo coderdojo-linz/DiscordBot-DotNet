@@ -85,4 +85,6 @@ jobs:
  
 
             docker run --rm -d \
-            --name ${{env.IMAGE_NAME}} ${{env.IMAGE_ID}}
+            --name $(echo $IMAGE_NAME) ${{env.IMAGE_ID}}
+
+            echo done $(echo $IMAGE_NAME)
