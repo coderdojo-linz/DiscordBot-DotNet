@@ -78,6 +78,7 @@ jobs:
 
             docker pull ${{env.IMAGE_ID}}
             
+            docker stop $(echo $IMAGE_NAME)
             echo Remove old container
             docker rm -f $(echo $IMAGE_NAME)
 
