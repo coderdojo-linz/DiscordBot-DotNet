@@ -68,9 +68,9 @@ jobs:
           HOST: ${{ secrets.DOCKERDEPLOY_HOST }}
           USERNAME: ${{ secrets.DOCKERDEPLOY_HOST_USER }}
           KEY: ${{ secrets.DOCKERDEPLOY_PK }}
-          envs: IMAGE_NAME,COSMOSDB_ENDPOINT,COSMOSDB_NAME
+          envs: IMAGE_NAME,COSMOSDB_ENDPOINT,COSMOSDB_NAME,${{ secrets.DOCKERDEPLOY_HOST }}
           script: |
-            echo Host: ${{ secrets.DOCKERDEPLOY_HOST }} | 
+            echo Host: ${{ secrets.DOCKERDEPLOY_HOST }} | $DOCKERDEPLOY_HOST
             echo Pulling ${{env.IMAGE_ID}}
             echo IMAGE_NAME: $IMAGE_NAME
 
