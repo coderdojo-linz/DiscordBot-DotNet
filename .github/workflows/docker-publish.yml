@@ -89,6 +89,7 @@ jobs:
             -e Database__Name=${{env.COSMOSDB_NAME}} \
             -e Discord__Token=${{secrets.DISCORD_TOKEN}} \
             -e Database__Key=${{secrets.COSMOSDB_KEY}} \
+            -e "Discord__CommandPrefix=-" \
             --name $(echo $IMAGE_NAME) ${{env.IMAGE_ID}}
 
             echo done $(echo $IMAGE_NAME)
