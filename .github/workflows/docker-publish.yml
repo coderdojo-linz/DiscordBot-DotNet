@@ -84,9 +84,7 @@ jobs:
             echo Run a new container from a new image
  
 
-            docker run --rm -d \
-            -e Discord__Token=${{secrets.DISCORD_TOKEN}} \
-            -e Database__Key=${{secrets.COSMOSDB_KEY}}  \ 
+            docker run -d \
             -e Database__Name=${{env.COSMOSDB_NAME}} \
             --name $(echo $IMAGE_NAME) ${{env.IMAGE_ID}}
 
