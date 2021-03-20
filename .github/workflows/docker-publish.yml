@@ -90,7 +90,7 @@ jobs:
             -e Database__Name=$COSMOSDB_NAME \
             -e Discord__Token=${{secrets.DISCORD_TOKEN}} \
             -e Database__Key=${{secrets.COSMOSDB_KEY}} \
-            -e "Discord__CommandPrefix=-" \
+            -e "Discord__CommandPrefix=!" \
             -e ApplicationInsights__InstrumentationKey=${{secrets.AI_INSTRUMENTATION_KEY}} \
             -e MapServices__Jawg__ApiKey=${{secrets.JAWG_APIKEY}} \
             -e MapServices__MapBox__ApiKey=${{secrets.MAPBOX_APIKEY}} \
