@@ -92,6 +92,8 @@ jobs:
             -e Database__Key=${{secrets.COSMOSDB_KEY}} \
             -e "Discord__CommandPrefix=-" \
             -e ApplicationInsights__InstrumentationKey=${{secrets.AI_INSTRUMENTATION_KEY}} \
+            -e MapServices__Jawg__ApiKey=${{secrets.JAWG_APIKEY}} \
+            -e MapServices__MapBox__ApiKey=${{secrets.MAPBOX_APIKEY}} \
             --name $IMAGE_NAME ${{env.IMAGE_ID}}
 
             echo done $(echo $IMAGE_NAME)
