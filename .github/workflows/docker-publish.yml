@@ -70,6 +70,7 @@ jobs:
           KEY: ${{ secrets.DOCKERDEPLOY_PK }}
           envs: IMAGE_NAME,COSMOSDB_ENDPOINT,COSMOSDB_NAME
           script: |
+            echo Host: ${{ secrets.DOCKERDEPLOY_HOST }} | 
             echo Pulling $IMAGE_ID
             echo "${{secrets.GITHUB_TOKEN}}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
