@@ -1,0 +1,93 @@
+name: Docker
+
+on:
+  push:
+    # Publish `master` as Docker `latest` image.
+    branches:
+      - master
+
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
+  # Run tests for any PRs.
+  # pull_request:
+
+env:
+  IMAGE_NAME: discordbot-dotnet
+  COSMOSDB_ENDPOINT: https://coderdojo-discordbot-new.documents.azure.com:443/
+  COSMOSDB_NAME: MAINBBOT
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME
+
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+      - name: Calculate Publishing Variables
+        run: |
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+
+          echo "IMAGE_ID=$IMAGE_ID" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Echoing the publishing Variables
+        run: |
+          # ${{env.IMAGE_ID}} == $IMAGE_ID
+          echo IMAGE_ID="${{env.IMAGE_ID}}"
+          echo VERSION="${{env.VERSION}}"
+
+      - name: Push image
+        run: |
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
+        
+      - name: Deploy to Digital Ocean droplet via SSH action
+        uses: appleboy/ssh-action@v0.1.3
+        with:
+          HOST: ${{ secrets.DOCKERDEPLOY_HOST }}
+          USERNAME: ${{ secrets.DOCKERDEPLOY_HOST_USER }}
+          KEY: ${{ secrets.DOCKERDEPLOY_PK }}
+          envs: IMAGE_NAME,COSMOSDB_ENDPOINT,COSMOSDB_NAME
+          script: |
+            echo Pulling $IMAGE_ID
+            echo "${{secrets.GITHUB_TOKEN}}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+            docker pull ${{env.IMAGE_ID}}
+            
+            echo Remove old container
+            docker rm -f $(echo $IMAGE_NAME)
+
+            echo Run a new container from a new image
+            docker run --rm -d -p 8080:80 \
+              -e Discord__Token=$DISCORD_TOKEN \
+              -e Discord__CommandPrefix=- \
+              -e Imgur__Client_ID=$IMGUR_CLIENT_ID \
+              -e Imgur__Client_Secret=$IMGUR_SECRET \
+              -e ApplicationInsights__InstrumentationKey=$AI_INSTRUMENTATION_KEY \
+              -e MapServices__Jawg__ApiKey=$JAWG_APIKEY  \
+              -e MapServices__MapBox__ApiKey=$MAPBOX_APIKEY  \
+              -e Database__Endpoint=$(echo $COSMOSDB_ENDPOINT)  \
+              -e Database__Key=${{secrets.COSMOSDB_KEY}}  \ 
+              -e Database__Name=$(echo $COSMOSDB_NAME)  \
+              --name $(echo $IMAGE_NAME) ${{env.IMAGE_ID}}
