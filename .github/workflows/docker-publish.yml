@@ -90,6 +90,7 @@ jobs:
             -e Discord__Token=${{secrets.DISCORD_TOKEN}} \
             -e Database__Key=${{secrets.COSMOSDB_KEY}} \
             -e "Discord__CommandPrefix=-" \
+            -e ApplicationInsights__InstrumentationKey=${{secrets.AI_INSTRUMENTATION_KEY}} \
             --name $(echo $IMAGE_NAME) ${{env.IMAGE_ID}}
 
             echo done $(echo $IMAGE_NAME)
