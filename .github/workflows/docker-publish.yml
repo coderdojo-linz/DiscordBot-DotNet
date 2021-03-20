@@ -94,6 +94,8 @@ jobs:
             -e ApplicationInsights__InstrumentationKey=${{secrets.AI_INSTRUMENTATION_KEY}} \
             -e MapServices__Jawg__ApiKey=${{secrets.JAWG_APIKEY}} \
             -e MapServices__MapBox__ApiKey=${{secrets.MAPBOX_APIKEY}} \
+            -e Imgur__Client_ID=${{secrets.IMGUR_CLIENT_ID}} \
+            -e Imgur__Client_Secret=${{secrets.IMGUR_SECRET}} \
             --name $IMAGE_NAME ${{env.IMAGE_ID}}
 
             echo done $(echo $IMAGE_NAME)
