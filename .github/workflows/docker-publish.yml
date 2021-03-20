@@ -85,6 +85,7 @@ jobs:
  
 
             docker run -d \
+            -e "Database__Endpoint=${{env.COSMOSDB_ENDPOINT}}" \
             -e Database__Name=${{env.COSMOSDB_NAME}} \
             --name $(echo $IMAGE_NAME) ${{env.IMAGE_ID}}
 
