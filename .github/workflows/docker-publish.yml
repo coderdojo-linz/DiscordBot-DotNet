@@ -87,11 +87,11 @@ jobs:
 
             docker run -d \
             -e "Database__Endpoint=$COSMOSDB_ENDPOINT" \
-            -e Database__Name=${{env.COSMOSDB_NAME}} \
+            -e Database__Name=$COSMOSDB_NAME \
             -e Discord__Token=${{secrets.DISCORD_TOKEN}} \
             -e Database__Key=${{secrets.COSMOSDB_KEY}} \
             -e "Discord__CommandPrefix=-" \
             -e ApplicationInsights__InstrumentationKey=${{secrets.AI_INSTRUMENTATION_KEY}} \
-            --name $(echo $IMAGE_NAME) ${{env.IMAGE_ID}}
+            --name $IMAGE_NAME $IMAGE_ID
 
             echo done $(echo $IMAGE_NAME)
