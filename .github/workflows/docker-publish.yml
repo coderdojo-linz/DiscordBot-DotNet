@@ -71,7 +71,9 @@ jobs:
           envs: IMAGE_NAME,COSMOSDB_ENDPOINT,COSMOSDB_NAME
           script: |
             echo Host: ${{ secrets.DOCKERDEPLOY_HOST }} | 
-            echo Pulling $IMAGE_ID
+            echo Pulling ${{env.IMAGE_ID}}
+            echo IMAGE_NAME: $IMAGE_NAME
+
             echo "${{secrets.GITHUB_TOKEN}}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
             docker pull ${{env.IMAGE_ID}}
@@ -80,11 +82,13 @@ jobs:
             docker rm -f $(echo $IMAGE_NAME)
 
             echo Run a new container from a new image
+
+  
+
             docker run --rm -d \
-              -e Discord__Token=$DISCORD_TOKEN \
+              -e Discord__Token=${{secrets.DISCORD_TOKEN}}
               -e Discord__CommandPrefix=- \
-              -e ApplicationInsights__InstrumentationKey=$AI_INSTRUMENTATION_KEY \
               -e Database__Endpoint=$COSMOSDB_ENDPOINT  \
               -e Database__Key=${{secrets.COSMOSDB_KEY}}  \ 
-              -e Database__Name=$COSMOSDB_NAME  \
-              --name $IMAGE_NAME ${{env.IMAGE_ID}}
+              -e Database__Name=${{env.COSMOSDB_NAME}} \
+              --name ${{env.IMAGE_NAME}} ${{env.IMAGE_ID}}
