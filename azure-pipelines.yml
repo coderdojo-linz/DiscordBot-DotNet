@@ -1,6 +1,7 @@
 trigger:
-- master
-- build-automation
+#- master
+#- build-automation
+- disabled
 
 pool:
   vmImage: 'ubuntu-latest'
