@@ -26,8 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # - name: Build image
-      #   run: docker build . --file Dockerfile --tag $IMAGE_NAME
+      - name: Build image
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME
 
       - name: Log into registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
@@ -57,10 +57,10 @@ jobs:
           echo IMAGE_ID="${{env.IMAGE_ID}}"
           echo VERSION="${{env.VERSION}}"
 
-      # - name: Push image
-      #   run: |
-      #     docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
-      #     docker push $IMAGE_ID:$VERSION
+      - name: Push image
+        run: |
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
         
       - name: Deploy to Hetzner via SSH action
         uses: appleboy/ssh-action@v0.1.3

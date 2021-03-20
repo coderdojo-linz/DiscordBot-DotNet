@@ -56,7 +56,7 @@ namespace DiscordBot
 
             _ = Task.Run(async () =>
             {
-                await SendBotSpamMessage(client, "Bot wurde gestartet.");
+                await SendBotSpamMessage(client, "Bot wurde gestartet. Echt Jetzt!");
             });
 
             // Here we initialize the logic required to register our commands.
