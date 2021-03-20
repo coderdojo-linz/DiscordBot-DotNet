@@ -67,6 +67,7 @@ jobs:
         with:
           HOST: ${{ secrets.DOCKERDEPLOY_HOST }}
           USERNAME: ${{ secrets.DOCKERDEPLOY_HOST_USER }}
+          port: ${{ secrets.DOCKERDEPLOY_HOST_PORT }}
           KEY: ${{ secrets.DOCKERDEPLOY_PK }}
           envs: IMAGE_NAME,COSMOSDB_ENDPOINT,COSMOSDB_NAME,${{ secrets.DOCKERDEPLOY_HOST }}
           script: |
