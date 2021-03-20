@@ -92,6 +92,6 @@ jobs:
             -e Database__Key=${{secrets.COSMOSDB_KEY}} \
             -e "Discord__CommandPrefix=-" \
             -e ApplicationInsights__InstrumentationKey=${{secrets.AI_INSTRUMENTATION_KEY}} \
-            --name $IMAGE_NAME $IMAGE_ID
+            --name $(echo $IMAGE_NAME) ${{env.IMAGE_ID}}
 
             echo done $(echo $IMAGE_NAME)
