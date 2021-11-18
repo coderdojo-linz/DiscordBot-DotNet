@@ -7,6 +7,8 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
+using DiscordBot.Modules.Services;
+
 namespace DiscordBot.Modules.CommandModules
 {
     public class LinkShortenerModule : ModuleBase
@@ -14,7 +16,7 @@ namespace DiscordBot.Modules.CommandModules
         private readonly LinkShortenerService _linkShortenerService;
         private readonly LinkShortenerSettings _settings;
 
-        public WeatherModule(LinkShortenerService linkShortenerService, LinkShortenerSettings settings)
+        public LinkShortenerModule(LinkShortenerService linkShortenerService, LinkShortenerSettings settings)
         {
             _linkShortenerService = linkShortenerService;
             _settings = settings;
