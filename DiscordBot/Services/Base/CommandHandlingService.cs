@@ -209,7 +209,7 @@ namespace DiscordBot.Services.Base
                 _logger.LogError(executeResult.Exception, executeResult.Exception.Message);
             }
 
-            await context.Channel.SendMessageAsync($"Fehler beim ausführen: {result}");
+            await context.Channel.SendMessageAsync($"Failed executing the command: ````\n{result}````");
         }
     }
 }
