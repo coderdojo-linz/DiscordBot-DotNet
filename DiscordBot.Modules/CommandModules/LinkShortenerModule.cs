@@ -25,6 +25,21 @@ namespace DiscordBot.Modules.CommandModules
         [Command("update")]
         public async Task UpdateLinkAsync(string id, [Remainder]string link)
         {
+            var user = base.Context.User;
+            if (user is not IGuildUser gu)
+            {
+                await ReplyAsync("https://flukyfeed.com/wp-content/uploads/2020/07/wait-a-minute.jpg");
+                return;
+            }
+
+            if (!gu.GuildPermissions.Administrator)
+            {
+                await ReplyAsync("https://img-9gag-fun.9cache.com/photo/a1rL3vY_700bwp.webp");
+                return;
+            }
+
+            //base.Context.Guild.user
+           
             await Context.Channel.SendMessageAsync($"Updating {id} to {link}!");
             await _linkShortenerService.UpdateUrlAsync(id, _settings.AccessKey, link);
             await Context.Channel.SendMessageAsync($"Update complete!");
