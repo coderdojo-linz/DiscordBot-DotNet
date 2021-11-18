@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+
 using Newtonsoft.Json;
 
 namespace DiscordBot.Modules.Services
@@ -61,7 +63,7 @@ namespace DiscordBot.Modules.Services
                         throw new Exception($"The linkshortener service returned '{response.Message}'");
                     }
                 }
-                
+
                 throw new Exception($"The linkshortener service returned '{content}'");
             }
             catch (Exception e)
@@ -113,5 +115,29 @@ namespace DiscordBot.Modules.Services
 
         [JsonProperty("shortenedLink")]
         public string ShortLink { get; set; }
+    }
+
+    public class ShortenedLinkResponse<TResponse>
+    {
+        [JsonProperty("success")]
+        public bool Success { get; set; }
+
+        [JsonProperty("message")]
+        public string Message { get; set; }
+
+        [JsonProperty("data")]
+        public TResponse Data { get; set; }
+    }
+
+    public class JsonContent : StringContent
+    {
+        public JsonContent() : this(new object())
+        {
+        }
+
+        public JsonContent(object value) : base(JsonConvert.SerializeObject(value))
+        {
+            base.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;charset=UTF-8");
+        }
     }
 }
