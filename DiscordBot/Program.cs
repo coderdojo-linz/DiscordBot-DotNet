@@ -76,6 +76,17 @@ namespace DiscordBot
             services.Configure<CDAppointmentSettings>(hostContext.Configuration.GetSection("CoderDojoAppointments"));
             services.Configure<DatabaseSettings>(hostContext.Configuration.GetSection("Database"));
 
+
+            builder.Services.AddTransient<LinkShortenerService>();
+            var lsAccessKey = hostContext.Configuration.GetSection("Linkshortener:AccessKey");//Environment.GetEnvironmentVariable("LINKSHORTENER_ACCESSKEY", EnvironmentVariableTarget.Process);
+            builder.Services.AddSingleton(new LinkShortenerSettings(lsAccessKey));
+            builder.Services.AddHttpClient("linkshortener", c =>
+            {
+                c.BaseAddress = new Uri("https://meet.coderdojo.net/api/");
+                c.DefaultRequestHeaders.Add(HttpRequestHeader.ContentType.ToString(), "application/json;charset='utf-8'");
+                c.DefaultRequestHeaders.Add(HttpRequestHeader.Accept.ToString(), "application/json");
+            });
+
             services.AddApplicationInsightsTelemetryWorkerService();
 
             services.Configure<CommandServiceConfig>(hostContext.Configuration.GetSection("Discord:CommandService"));

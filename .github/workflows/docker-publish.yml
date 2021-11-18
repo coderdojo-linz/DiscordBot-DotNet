@@ -97,6 +97,7 @@ jobs:
             -e MapServices__MapBox__ApiKey=${{secrets.MAPBOX_APIKEY}} \
             -e Imgur__Client_ID=${{secrets.IMGUR_CLIENT_ID}} \
             -e Imgur__Client_Secret=${{secrets.IMGUR_SECRET}} \
+            -e Linkshortener__AccessKey=${{secrets.LINKSHORTENER_ACCESSKEY}} \
             --name $IMAGE_NAME ${{env.IMAGE_ID}}
 
             echo done $(echo $IMAGE_NAME)
