@@ -6,9 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-using CDWPlanner.Model;
-
-namespace CDWPlanner.Services
+namespace DiscordBot.Modules.Services
 {
     public class LinkShortenerService
     {
@@ -91,7 +89,7 @@ namespace CDWPlanner.Services
             throw new Exception($"The linkshortener service returned '{result}'");
         }
     }
-    
+
     public class LinkShortenerSettings
     {
         public string AccessKey { get; }
@@ -100,5 +98,20 @@ namespace CDWPlanner.Services
         {
             AccessKey = accessKey;
         }
+    }
+
+    public class ShortenedLink
+    {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("url")]
+        public string Url { get; set; }
+
+        [JsonProperty("accessKey")]
+        public string AccessKey { get; set; }
+
+        [JsonProperty("shortenedLink")]
+        public string ShortLink { get; set; }
     }
 }
