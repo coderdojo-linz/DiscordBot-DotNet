@@ -30,13 +30,13 @@ namespace DiscordBot.Modules.CommandModules
         }
 
         [Command("list", RunMode = RunMode.Async)]
-        public async Task List([Remainder] string searchterm)
+        public async Task List([Remainder] string searchterm = "")
         {
             var items = await _linkShortenerService.GetAllLinksAsync();
 
             if (!string.IsNullOrWhiteSpace(searchterm))
             {
-                items = items.Where(x => LikeOperator.LikeString(x.Id, searchterm, Microsoft.VisualBasic.CompareMethod.Text));
+                items = items.Where(x => x.Id.Contains(searchterm) || LikeOperator.LikeString(x.Id, searchterm, Microsoft.VisualBasic.CompareMethod.Text));
             }
 
             await PagedReplyAsync(items.Select(x => new EmbedFieldBuilder
