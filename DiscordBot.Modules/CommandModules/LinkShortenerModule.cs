@@ -36,7 +36,11 @@ namespace DiscordBot.Modules.CommandModules
 
             if (!string.IsNullOrWhiteSpace(searchterm))
             {
-                items = items.Where(x => x.Id.Contains(searchterm) || LikeOperator.LikeString(x.Id, searchterm, Microsoft.VisualBasic.CompareMethod.Text));
+                var liketerm = searchterm;
+                liketerm = !liketerm.StartsWith('*') ? '*' + liketerm : liketerm;
+                liketerm = !liketerm.EndsWith('*') ? liketerm + '*' : liketerm;
+
+                items = items.Where(x => x.Id.Contains(searchterm) || LikeOperator.LikeString(x.Id, liketerm, Microsoft.VisualBasic.CompareMethod.Text));
             }
 
             await PagedReplyAsync(items.Select(x => new EmbedFieldBuilder
