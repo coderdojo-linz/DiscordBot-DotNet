@@ -12,15 +12,15 @@ namespace DiscordBot.Modules.Utils
         {
             if (s is null || t is null)
             {
-                if (s is not null)
-                {
-                    return s.Length;
-                }
+                //if (s is not null)
+                //{
+                //    return s.Length;
+                //}
 
-                if (t is not null)
-                {
-                    return t.Length;
-                }
+                //if (t is not null)
+                //{
+                //    return t.Length;
+                //}
 
                 return int.MaxValue;
             }
