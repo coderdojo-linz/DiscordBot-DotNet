@@ -1,8 +1,12 @@
 ﻿using Discord;
 using Discord.Commands;
+
 using DiscordBot.Domain.Configuration;
+using DiscordBot.Modules.Utils;
 using DiscordBot.Modules.Utils.Extensions;
+
 using Microsoft.Extensions.Options;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,58 +29,124 @@ namespace DiscordBot.Modules.CommandModules
         }
 
         [Command("help")]
+        //[Alias("h")]
         [Summary("Zeigt die Hilfe an.")]
         public async Task Help(string path = "")
         {
-            EmbedBuilder output = new EmbedBuilder().WithColor(0x129AD4);
-            if (path == "")
-            {
-                output.Title = "Dojo Bot - Hilfe";
-                foreach (var mod in _commands.Modules.Where(m => m.Parent == null))
-                {
-                    AddHelp(mod, output);
-                }
+            var output = path == ""
+                ? GetDefaultOutput()
+                : await GetOutputForCommand(path);
 
-                output.Footer = new EmbedFooterBuilder
-                {
-                    Text = "Verwende 'help <module>' um Hilfe für ein Modul zu bekommen."
-                };
-            }
-            else
-            {
-                var mod = _commands.Modules.FirstOrDefault(m => string.Equals(m.Group, path, StringComparison.OrdinalIgnoreCase));
-                if (mod != null)
-                {
-                    var descAttr = (DescriptionAttribute)mod.Attributes.FirstOrDefault(a => a is DescriptionAttribute);
-                    string desc = "";
-                    if (descAttr != null)
-                        desc = descAttr.Text + "\n";
-                    output.Title = mod.FriendlyName();
-                    output.Description = $"{mod.Summary}\n{desc}\n" +
-                                         (!string.IsNullOrEmpty(mod.Remarks) ? $"({mod.Remarks})\n" : "") +
-                                         (mod.Aliases.Any() ? $"Prefix(e): {string.Join(", ", mod.Aliases.Select(x => $"`{x}`"))}\n" : "") +
-                                         (mod.Submodules.Any() ? $"Submodule: {mod.Submodules.Select(m => m)}\n" : "") + " ";
-                    AddCommands(mod, output);
-                }
-
-                var command = mod != null ? null : _commands.Modules
-                    .Where(x => string.IsNullOrEmpty(x.Group) && !x.IsSubmodule)
-                    .SelectMany(x => x.Commands)
-                    .FirstOrDefault(x => string.Equals(x.Name, path, StringComparison.InvariantCultureIgnoreCase));
-
-                if (command != null)
-                {
-                    AddCommand(command, output);
-                }
-
-                if (mod == null && command == null)
-                {
-                    await ReplyAsync("Kein Modul oder Befehl wurde mit diesem Namen gefunden.");
-                    return;
-                }
-            }
+            if (output == null) return;
 
             await ReplyAsync(embed: output.Build());
+        }
+
+        private async Task<EmbedBuilder> GetOutputForCommand(string path)
+        {
+            var output = new EmbedBuilder().WithColor(0x129AD4);
+
+            var (modules, commands) = FindModuleOrCommand(path);
+
+            if (!modules.Any() && !commands.Any())
+            {
+                (modules, commands) = FindModuleOrCommand(path, true);
+            }
+
+            if (modules.Any())
+            {
+                var module = modules.First();
+
+                var descAttr = (DescriptionAttribute)module.Attributes.FirstOrDefault(a => a is DescriptionAttribute);
+
+                var description = "";
+                if (descAttr != null)
+                    description = descAttr.Text + "\n";
+
+                output.Title = module.FriendlyName();
+                output.Description =
+                    $"{module.Summary}\n{description}\n" +
+                        (!string.IsNullOrEmpty(module.Remarks) ? $"({module.Remarks})\n" : "") +
+                        (module.Aliases.Any() ? $"Prefix(e): {string.Join(", ", module.Aliases.Select(x => $"`{x}`"))}\n" : "") +
+                        (module.Submodules.Any() ? $"Submodule: {module.Submodules.Select(m => m)}\n" : "") + " ";
+
+                AddCommands(module, output);
+            }
+
+            if (commands.Any())
+            {
+                AddCommand(commands.First(), output);
+            }
+
+            if (!modules.Any() && !commands.Any())
+            {
+                await ReplyAsync("Kein Modul oder Befehl wurde mit diesem Namen gefunden.");
+                return null;
+            }
+
+            return output;
+        }
+
+        private (IEnumerable<ModuleInfo> modules, IEnumerable<CommandInfo> commands) FindModuleOrCommand(string searchTerm, bool useLevenstein = false)
+        {
+            var modules = _commands.Modules;
+
+            var commands = _commands.Modules
+                .Where(x => string.IsNullOrEmpty(x.Group) && !x.IsSubmodule)
+                .SelectMany(x => x.Commands);
+
+            if (useLevenstein)
+            {
+                var moduleResults = modules
+                    .Select(m => (item: m, distance: ComputeDistance(searchTerm, m.Group, m.Aliases)))
+                    .OrderBy(x => x.Item2)
+                    .Select(x => x.item);
+
+                var commandResults = commands
+                    .Select(m => (item: m, distance: ComputeDistance(searchTerm, m.Name, m.Aliases)))
+                    .OrderBy(x => x.Item2)
+                    .Select(x => x.item);
+
+                return (moduleResults, commandResults);
+            }
+
+            var module = modules
+                .Where(x => Compare(searchTerm, x.Aliases.Append(x.Group)));
+
+            var command = commands
+                .Where(x => Compare(searchTerm, x.Aliases.Append(x.Name)));
+
+            return (module, command);
+
+            static bool Compare(string searchTerm, IEnumerable<string> values)
+            {
+                return values.Any(x => string.Equals(searchTerm, x, StringComparison.OrdinalIgnoreCase));
+            }
+
+            static int ComputeDistance(string searchTerm, string name, IReadOnlyList<string> aliases)
+            {
+                var smallestDistance = aliases.AsEnumerable().Append(name)
+                    .Select(x => StringComparisonEx.GetLevenshteinDistance(x, searchTerm))
+                    .Min();
+
+                return smallestDistance;
+            }
+        }
+
+        private EmbedBuilder GetDefaultOutput()
+        {
+            var output = new EmbedBuilder().WithColor(0x129AD4);
+            output.Title = "Dojo Bot - Hilfe";
+            foreach (var mod in _commands.Modules.Where(m => m.Parent == null))
+            {
+                AddHelp(mod, output);
+            }
+
+            output.Footer = new EmbedFooterBuilder
+            {
+                Text = "Verwende 'help <module>' um Hilfe für ein Modul zu bekommen."
+            };
+            return output;
         }
 
         public void AddHelp(ModuleInfo module, EmbedBuilder builder)
