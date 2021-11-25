@@ -118,7 +118,8 @@ namespace DiscordBot.Services.Base
         private void InitializePrefix()
         {
             _messagePrefix = _discordSettings.CurrentValue.CommandPrefix;
-            _discordSettings.OnChange(x => {
+            _discordSettings.OnChange(x =>
+            {
                 _messagePrefix = x.CommandPrefix;
             });
         }
@@ -207,9 +208,12 @@ namespace DiscordBot.Services.Base
             if (result is ExecuteResult executeResult && executeResult.Exception != null)
             {
                 _logger.LogError(executeResult.Exception, executeResult.Exception.Message);
+                await context.Channel.SendMessageAsync($"Failed executing the command: ```\n{executeResult.Exception}```");
             }
-
-            await context.Channel.SendMessageAsync($"Failed executing the command: ````\n{result}````");
+            else
+            {
+                await context.Channel.SendMessageAsync($"Failed executing the command: ```\n{result}```");
+            }
         }
     }
 }
