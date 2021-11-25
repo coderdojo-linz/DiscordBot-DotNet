@@ -21,6 +21,7 @@ using System.Net.Http;
 using DiscordBot.Domain.DatabaseModels;
 using DiscordBot.Extensions;
 using System.Net;
+using Discord.Addons.Interactive;
 
 namespace DiscordBot
 {
@@ -47,7 +48,7 @@ namespace DiscordBot
                 .AddHttpClient()
                 .AddTransient<HttpClient>(x => x.GetService<IHttpClientFactory>().CreateClient("default"))
                 .AddReactionModules()
-
+                .AddSingleton<InteractiveService>()
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton<CommandService, InjectableCommandService>()
                 .AddSingleton<CommandHandlingService>()
