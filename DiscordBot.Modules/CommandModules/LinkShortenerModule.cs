@@ -39,7 +39,7 @@ namespace DiscordBot.Modules.CommandModules
             {
                 pages.Add(new EmbedFieldBuilder()
                 {
-                    //Name = item.Id,
+                    Name = String.Empty,
                     Value = $"Id: `{item.Id}`\nShortLink: `{item.ShortenedLink}`\nOriginal link: `{item.Url}`"
                 });
 
