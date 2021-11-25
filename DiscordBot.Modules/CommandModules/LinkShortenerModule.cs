@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using DiscordBot.Modules.Services;
 using Discord.Addons.Interactive;
+using System.Collections.Generic;
 
 namespace DiscordBot.Modules.CommandModules
 {
@@ -26,10 +27,30 @@ namespace DiscordBot.Modules.CommandModules
             _settings = settings;
         }
 
-        [Command("paginator", RunMode = RunMode.Async)]
+        [Command("list", RunMode = RunMode.Async)]
         public async Task List()
         {
-            var pages = new[] { "Page 1", "Page 2", "Page 3", "aaaaaa", "Page 5" };
+          //  var embed = new EmbedBuilder();
+
+            var pages = new List<EmbedFieldBuilder>();
+
+            var results = await _linkShortenerService.GetAllLinksAsync();
+            foreach (var item in results)
+            {
+                pages.Add(new EmbedFieldBuilder()
+                {
+                    Name = item.Id,
+                    Value = $"ShortLink: `{item.ShortenedLink}`\nOriginal link: `{item.Url}`"
+                });
+
+                //embed.AddField(x =>
+                //{
+                //    x.Name = item.Id;
+                //    x.Value = $"ShortLink: {item.ShortenedLink}\nOriginal link: {item.Url}";
+                //});
+            }
+
+            //var pages = new[] { "Page 1", "Page 2", "Page 3", "aaaaaa", "Page 5" };
             await PagedReplyAsync(pages);
         }
 

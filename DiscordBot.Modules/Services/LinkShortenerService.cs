@@ -19,6 +19,13 @@ namespace DiscordBot.Modules.Services
             _client = factory.CreateClient("linkshortener");
         }
 
+        public async Task<List<ShortenLinkListItem>> GetAllLinksAsync()
+        {
+            var result = await _client.GetStringAsync("list");
+
+            return JsonConvert.DeserializeObject<List<ShortenLinkListItem>>(result); ;
+        }
+
         /// <summary>
         ///
         /// </summary>
@@ -100,6 +107,18 @@ namespace DiscordBot.Modules.Services
         {
             AccessKey = accessKey;
         }
+    }
+
+    public class ShortenLinkListItem
+    {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("url")]
+        public string Url { get; set; }
+
+        [JsonProperty("shortenedLink")]
+        public string ShortenedLink { get; set; }
     }
 
     public class ShortenedLink
