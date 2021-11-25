@@ -8,13 +8,14 @@ using System.IO;
 using System.Threading.Tasks;
 
 using DiscordBot.Modules.Services;
+using Discord.Addons.Interactive;
 
 namespace DiscordBot.Modules.CommandModules
 {
     [Group("linkShortener")]
     [Alias("short")]
     [Summary("Kürzt einen link auf ``meet.coderdojo.net``")]
-    public class LinkShortenerModule : ModuleBase
+    public class LinkShortenerModule : InteractiveBase
     {
         private readonly LinkShortenerService _linkShortenerService;
         private readonly LinkShortenerSettings _settings;
@@ -23,6 +24,13 @@ namespace DiscordBot.Modules.CommandModules
         {
             _linkShortenerService = linkShortenerService;
             _settings = settings;
+        }
+
+        [Command("paginator", RunMode = RunMode.Async)]
+        public async Task List()
+        {
+            var pages = new[] { "Page 1", "Page 2", "Page 3", "aaaaaa", "Page 5" };
+            await PagedReplyAsync(pages);
         }
 
         [Command("update")]

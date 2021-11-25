@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30114.105
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot", "DiscordBot\DiscordBot.csproj", "{A2058284-C973-44F8-B072-8714C1076F60}"
 EndProject
@@ -13,11 +13,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Misc", "Misc", "{A1D0BFCB-B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Playground", "Misc\Playground\Playground.csproj", "{15AE844A-87C2-4160-B33D-26A966B3B8EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "lib-rcon", "Includes\lib-rcon\lib-rcon.csproj", "{08D4F035-0488-4348-B8D5-3F38D7F757A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot.CoderDojoInfoModule", "DiscordBot.CoderDojoInfoModule\DiscordBot.CoderDojoInfoModule.csproj", "{C48DF2EF-B0E0-46A0-8257-228F84F4BB16}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBot.CoderDojoInfoModule", "DiscordBot.CoderDojoInfoModule\DiscordBot.CoderDojoInfoModule.csproj", "{C48DF2EF-B0E0-46A0-8257-228F84F4BB16}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordBot.Database", "DiscordBot.Database\DiscordBot.Database.csproj", "{52E6CB79-E5F5-4E63-A3E2-DD6D8C639076}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordBot.Database", "DiscordBot.Database\DiscordBot.Database.csproj", "{52E6CB79-E5F5-4E63-A3E2-DD6D8C639076}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Discord.Addons.Interactive", "Includes\Discord.Addons.Interactive\Discord.Addons.Interactive.csproj", "{93482580-58EC-44CD-B426-CC12CABB23C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,10 +41,6 @@ Global
 		{15AE844A-87C2-4160-B33D-26A966B3B8EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{15AE844A-87C2-4160-B33D-26A966B3B8EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{15AE844A-87C2-4160-B33D-26A966B3B8EA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{08D4F035-0488-4348-B8D5-3F38D7F757A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{08D4F035-0488-4348-B8D5-3F38D7F757A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{08D4F035-0488-4348-B8D5-3F38D7F757A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{08D4F035-0488-4348-B8D5-3F38D7F757A3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C48DF2EF-B0E0-46A0-8257-228F84F4BB16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C48DF2EF-B0E0-46A0-8257-228F84F4BB16}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C48DF2EF-B0E0-46A0-8257-228F84F4BB16}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -53,13 +49,17 @@ Global
 		{52E6CB79-E5F5-4E63-A3E2-DD6D8C639076}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{52E6CB79-E5F5-4E63-A3E2-DD6D8C639076}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{52E6CB79-E5F5-4E63-A3E2-DD6D8C639076}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93482580-58EC-44CD-B426-CC12CABB23C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93482580-58EC-44CD-B426-CC12CABB23C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93482580-58EC-44CD-B426-CC12CABB23C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93482580-58EC-44CD-B426-CC12CABB23C2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{15AE844A-87C2-4160-B33D-26A966B3B8EA} = {A1D0BFCB-B984-4BC8-B1E9-E9A36970E5B0}
-		{08D4F035-0488-4348-B8D5-3F38D7F757A3} = {A1D0BFCB-B984-4BC8-B1E9-E9A36970E5B0}
+		{93482580-58EC-44CD-B426-CC12CABB23C2} = {A1D0BFCB-B984-4BC8-B1E9-E9A36970E5B0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B9A1E29E-BFC1-4F4B-BCF6-5A5A199E072E}

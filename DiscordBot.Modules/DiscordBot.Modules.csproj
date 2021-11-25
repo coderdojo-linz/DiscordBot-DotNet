@@ -20,7 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DiscordBot.Database\DiscordBot.Database.csproj" />
     <ProjectReference Include="..\DiscordBot.Domain\DiscordBot.Domain.csproj" />
-    <ProjectReference Include="..\Includes\lib-rcon\lib-rcon.csproj" />
+    <ProjectReference Include="..\Includes\Discord.Addons.Interactive\Discord.Addons.Interactive.csproj" />
   </ItemGroup>
 
 </Project>
