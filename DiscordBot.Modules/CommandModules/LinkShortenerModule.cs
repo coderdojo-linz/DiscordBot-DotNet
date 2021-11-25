@@ -30,7 +30,7 @@ namespace DiscordBot.Modules.CommandModules
         [Command("list", RunMode = RunMode.Async)]
         public async Task List()
         {
-          //  var embed = new EmbedBuilder();
+            //  var embed = new EmbedBuilder();
 
             var pages = new List<EmbedFieldBuilder>();
 
@@ -39,8 +39,8 @@ namespace DiscordBot.Modules.CommandModules
             {
                 pages.Add(new EmbedFieldBuilder()
                 {
-                    Name = item.Id,
-                    Value = $"ShortLink: `{item.ShortenedLink}`\nOriginal link: `{item.Url}`"
+                    //Name = item.Id,
+                    Value = $"Id: `{item.Id}`\nShortLink: `{item.ShortenedLink}`\nOriginal link: `{item.Url}`"
                 });
 
                 //embed.AddField(x =>
