@@ -10,6 +10,21 @@ namespace DiscordBot.Modules.Utils
     {
         public static int GetLevenshteinDistance(string s, string t)
         {
+            if (s is null || t is null)
+            {
+                if (s is not null)
+                {
+                    return s.Length;
+                }
+
+                if (t is not null)
+                {
+                    return t.Length;
+                }
+
+                return int.MaxValue;
+            }
+
             int n = s.Length;
             int m = t.Length;
             int[,] d = new int[n + 1, m + 1];
