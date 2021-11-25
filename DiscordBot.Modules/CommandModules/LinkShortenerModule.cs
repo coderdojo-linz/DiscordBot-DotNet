@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using DiscordBot.Modules.Services;
 using Discord.Addons.Interactive;
 using System.Collections.Generic;
+using Microsoft.VisualBasic.CompilerServices;
+using System.Linq;
 
 namespace DiscordBot.Modules.CommandModules
 {
@@ -28,30 +30,20 @@ namespace DiscordBot.Modules.CommandModules
         }
 
         [Command("list", RunMode = RunMode.Async)]
-        public async Task List()
+        public async Task List([Remainder] string searchterm)
         {
-            //  var embed = new EmbedBuilder();
+            var items = await _linkShortenerService.GetAllLinksAsync();
 
-            var pages = new List<EmbedFieldBuilder>();
-
-            var results = await _linkShortenerService.GetAllLinksAsync();
-            foreach (var item in results)
+            if (!string.IsNullOrWhiteSpace(searchterm))
             {
-                pages.Add(new EmbedFieldBuilder()
-                {
-                    Name = item.Id,
-                    Value = $"Id: `{item.Id}`\nShortLink: `{item.ShortenedLink}`\nOriginal link: `{item.Url}`"
-                });
-
-                //embed.AddField(x =>
-                //{
-                //    x.Name = item.Id;
-                //    x.Value = $"ShortLink: {item.ShortenedLink}\nOriginal link: {item.Url}";
-                //});
+                items = items.Where(x => LikeOperator.LikeString(x.Id, searchterm, Microsoft.VisualBasic.CompareMethod.Text));
             }
 
-            //var pages = new[] { "Page 1", "Page 2", "Page 3", "aaaaaa", "Page 5" };
-            await PagedReplyAsync(pages);
+            await PagedReplyAsync(items.Select(x => new EmbedFieldBuilder
+            {
+                Name = x.Id,
+                Value = $"Id: `{x.Id}`\nShortLink: `{x.ShortenedLink}`\nOriginal link: `{x.Url}`"
+            }));
         }
 
         [Command("update")]

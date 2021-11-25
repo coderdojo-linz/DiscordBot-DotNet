@@ -19,7 +19,7 @@ namespace DiscordBot.Modules.Services
             _client = factory.CreateClient("linkshortener");
         }
 
-        public async Task<List<ShortenLinkListItem>> GetAllLinksAsync()
+        public async Task<IEnumerable<ShortenLinkListItem>> GetAllLinksAsync()
         {
             var result = await _client.GetStringAsync("list");
 
