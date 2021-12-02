@@ -93,7 +93,7 @@ namespace DiscordBot.Modules.CommandModules
 
             await Context.Channel.SendMessageAsync($"Creating {id} to {link}!");
             await _linkShortenerService.ShortenUrl(id, _settings.AccessKey, link);
-            await Context.Channel.SendMessageAsync($"Create complete! Ready at http://meet.coderdojo.net/{id}");
+            await Context.Channel.SendMessageAsync($"Create complete! Ready at https://meet.coderdojo.net/{id}");
         }
     }
 }

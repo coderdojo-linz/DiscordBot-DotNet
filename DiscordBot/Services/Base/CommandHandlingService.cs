@@ -127,7 +127,6 @@ namespace DiscordBot.Services.Base
         public async Task InitializeAsync()
         {
             // Register modules that are public and inherit ModuleBase<T>.
-
             foreach (var item in AppDomain.CurrentDomain.GetAssemblies().Append(Assembly.Load("DiscordBot.Modules")).Distinct())
             {
                 var modules = (await _commands.AddModulesAsync(item, _services)).ToList();
@@ -136,7 +135,7 @@ namespace DiscordBot.Services.Base
                     continue;
                 }
 
-                _logger.Log(LogLevel.Information, $"{modules.Count} Module wurden hunzugefügt. ({string.Join('|', modules.Select(m => m.Name))})");
+                _logger.Log(LogLevel.Information, $"{modules.Count} Modules were added. ({string.Join('|', modules.Select(m => m.Name))})");
             }
         }
 
